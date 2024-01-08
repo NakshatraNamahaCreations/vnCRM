@@ -96,7 +96,7 @@ function Enquirynewdetail(props) {
         if (response.status === 200) {
           makeApiCall(whatsappTemplate, enquiryData?.mobile);
           getenquiryfollowup();
-          // window.location.assign(`/enquirydetail/${EnquiryId}?${urlParams}`);
+          window.location.reload(`  `); 
         }
       });
     } catch (error) {

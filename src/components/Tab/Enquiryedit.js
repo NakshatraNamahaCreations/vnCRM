@@ -99,9 +99,9 @@ function Enquiryadd() {
       };
       await axios(config).then(function (response) {
         if (response.status === 200) {
-          console.log("success");
+          
           alert(" Added");
-          navigate(`/enquirydetail/${enquiryid}`);
+         window.location.reload("")
         }
       });
     } catch (error) {

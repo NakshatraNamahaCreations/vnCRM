@@ -289,6 +289,7 @@ function Dsrdetails() {
 
               city: data.city,
             },
+            EnquiryId:data?.customerData[0]?.EnquiryId,
             serviceId: data?._id,
             cardNo: data.cardNo,
             category: data.category,
@@ -359,6 +360,7 @@ function Dsrdetails() {
 
   };
 
+  console.log("data.customerData[0]?.EnquiryId",data?.customerData[0]?.EnquiryId)
   // 16-9
   const Update = async (e) => {
     e.preventDefault();
@@ -412,6 +414,7 @@ function Dsrdetails() {
 
               city: data.city,
             },
+            EnquiryId:data?.customerData[0]?.EnquiryId,
             jobCategory: jobCategory,
             complaintRef: data.complaintRef,
             priorityLevel: priorityLevel,
@@ -969,8 +972,9 @@ function Dsrdetails() {
 
   const [reasonforresh, setreasonforresh] = useState("");
 
+ 
   const recheduledate = async (id) => {
-    if (!reasonforresh) {
+    if (!reasonforresh ) {
       alert("Please enter a reason");
     } else {
       try {
@@ -980,7 +984,7 @@ function Dsrdetails() {
           baseURL: apiURL,
           headers: { "content-type": "application/json" },
           data: {
-            appoDate: appoDate,
+            appoDate: appoDate ? appoDate:data1,
             appoTime: appoTime,
             ResheduleUser: admin.displayname,
             ResheduleUsernumber: admin.contactno,
@@ -1036,7 +1040,7 @@ function Dsrdetails() {
     try {
       const config = {
         url:
-          dsrdata.length > 0
+         dsrdata[0]?._id
             ? `/changeappotime/${data._id}/${dsrdata[0]?._id}`
             : `/changeappotimewithoutdsr/${data._id}`,
 

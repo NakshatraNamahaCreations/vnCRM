@@ -32,7 +32,7 @@ function RunningProject() {
   const [payment, setPayment] = useState(""); //need
   const [type, setType] = useState(""); //need
 
-  console.log("treatmentdata", treatmentdata);
+
   //unique select option. removing duplicates--------
   const [catagories, setCatagories] = useState(new Set());
   const [techName, setTechName] = useState(new Set());
@@ -140,8 +140,8 @@ function RunningProject() {
   };
 
   const redirectURL = (data) => {
-    console.log(data);
-    navigate(`/painting/${data._id}`);
+  
+    navigate(`/painting/${data?._id}`);
   };
 
   useEffect(() => {
@@ -333,7 +333,13 @@ function RunningProject() {
   // Function to calculate the pending amount (assuming the total amount is constant)
   function calculatePendingPaymentAmount(paymentData, serviceCharge) {
     const totalAmount = calculateTotalPaymentAmount(paymentData);
-    const pendingAmount = totalAmount - parseFloat(serviceCharge);
+    const pendingAmount = parseFloat(serviceCharge) - totalAmount;
+    return pendingAmount.toFixed(2); // Format the pending amount with two decimal places
+  }
+
+  function calculatePendingPaymentAmount(paymentData, serviceCharge) {
+    const totalAmount = calculateTotalPaymentAmount(paymentData);
+    const pendingAmount = parseFloat(serviceCharge) - totalAmount;
     return pendingAmount.toFixed(2); // Format the pending amount with two decimal places
   }
 
@@ -560,14 +566,14 @@ function RunningProject() {
                     Worker
                   </th>
                   <th scope="col" className="table-head">
-                    Vendor Payment
+                    Vendor Amount
                   </th>
                   <th
                     scope="col"
                     className="table-head"
                     style={{ minWidth: "160px" }}
                   >
-                    Charges
+                    Vendor Payment
                   </th>
                   <th scope="col" className="table-head">
                     Quote Value
@@ -577,7 +583,7 @@ function RunningProject() {
                     className="table-head"
                     style={{ minWidth: "160px" }}
                   >
-                    Payment
+                    Customer  Payment
                   </th>
 
                   <th scope="col" className="table-head">
@@ -585,12 +591,12 @@ function RunningProject() {
                   </th>
 
                   <th scope="col" className="table-head">
-                    Material
+                    Work details
                   </th>
                   <th scope="col" className="table-head">
                     TYPE
                   </th>
-                  <th scope="col" className="table-head">
+                  <th scope="col" className="table-head" style={{width:"20%"}}>
                     Deep Clean Details
                   </th>
 
@@ -609,8 +615,10 @@ function RunningProject() {
                         item.dsrdata[0]?.jobComplete === "YES"
                           ? "#ffb9798f"
                           : item.dsrdata[0]?.deepcleaningstart === "start" // Corrected key here
-                          ? "#0080002e"
-                          : "white",
+                            ? "#0080002e"
+                            :item.dsrdata[0]?.startproject ==="start"?
+                            "skyblue":
+                            "white",
                       color: "black",
                     }}
                   >
@@ -618,7 +626,7 @@ function RunningProject() {
                     <td>{item.date}</td>
                     <td>{item.category}</td>
                     <td>{item.dsrdata[0]?.TechorPMorVendorName}</td>
-                    <td>{item.quotedata[0]?.salesExecutive}</td>
+                    <td>{item.enquiryFollowupData[0]?.technicianname}</td>
                     <td>{item.customerData[0]?.customerName}</td>
                     <td>{item.customerData[0]?.mainContact}</td>
                     <td>
@@ -689,8 +697,21 @@ function RunningProject() {
                                 Total:{" "}
                                 {calculateTotalvendorAmount(
                                   item.paymentData.filter(
-                                    (i) => i.serviceId === item._id
+                                    (i) => i.serviceId === item._id && i.paymentType === "Vendor"
                                   )
+                                )}
+                              </b>
+                            </p>
+                            <p className="text-right">
+                              <b>
+                                Balance:{" "}
+                                {calculatePendingPaymentAmount(
+                                  item.paymentData.filter(
+                                    (i) =>
+                                      i.paymentType === "Vendor" &&
+                                      i.serviceId === item._id
+                                  ),
+                                  item.dsrdata[0]?.workerAmount
                                 )}
                               </b>
                             </p>
@@ -700,7 +721,7 @@ function RunningProject() {
                         <p></p>
                       )}
                     </td>
-                    <td>{item.serviceCharge}</td>
+                    <td>{item.quotedata[0]?.total}</td>
                     <td>
                       {item.paymentData.some(
                         (i) =>
@@ -726,7 +747,7 @@ function RunningProject() {
                                 Total:{" "}
                                 {calculateTotalPaymentAmount(
                                   item.paymentData.filter(
-                                    (i) => i.serviceId === item._id
+                                    (i) => i.serviceId === item._id && i.paymentType === "Customer"
                                   )
                                 )}
                               </b>
@@ -740,7 +761,7 @@ function RunningProject() {
                                       i.paymentType === "Customer" &&
                                       i.serviceId === item._id
                                   ),
-                                  item.serviceCharge
+                                  item.quotedata[0]?.total
                                 )}
                               </b>
                             </p>
@@ -778,12 +799,18 @@ function RunningProject() {
                         {item.dsrdata[0]?.jobComplete === "YES"
                           ? "CLOSED BY PROJECT MANAGER"
                           : item.dsrdata[0]?.deepcleaningstart === "start"
-                          ? "BOOK FOR DEEP CLEANING"
-                          : "RUNNING PROJECTS"}
+                            ? "BOOK FOR DEEP CLEANING"
+                            : item.dsrdata[0]?.startproject=== "start"?
+                            "PROJECT STARTED"
+                            :
+                            "RUNNING PROJECTS"
+                           }
                       </div>
                     </td>
                     <td>
-                      <div>{item.dsrdata[0]?.deepcleaningnote}</div>
+
+                      <div>{item.dsrdata[0]?.deepcleaningdate}<br />
+                        {item.dsrdata[0]?.deepcleaningnote}</div>
                     </td>
 
                     <td>

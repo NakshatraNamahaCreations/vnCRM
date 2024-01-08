@@ -95,7 +95,7 @@ function Convertcustomer() {
               rowData: JSON.stringify(id),
             }).toString();
             const newTab = window.open(
-              `/customersearchdetails/${id?._id}?${queryString}`,
+              `/customersearchdetailsqote/${id?._id}?${queryString}`,
               "_blank"
             );
           }

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Header from "../components/layout/Header";
@@ -8,11 +9,11 @@ import { Button, Modal, Table } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import { Category } from "@material-ui/icons";
 
-function Customersearchdetails() {
+function Customersearchdetailsqote() {
   const admin = JSON.parse(sessionStorage.getItem("admin"));
   const navigate = useNavigate();
-  const { id } = useParams();
-
+  const { id ,enquiryid} = useParams();
+console.log("enquiryid",enquiryid)
   const apiURL = process.env.REACT_APP_API_URL;
   const [serviceCharge, setserviceCharge] = useState("");
   const [dateofService, setdateofService] = useState([]);
@@ -226,7 +227,6 @@ function Customersearchdetails() {
 
     dividedDates.push(date);
   }
-  
 
   const communityPercentage = (serviceCharge * oneCommunity.percentage) / 100; //this line
   const remainingAmt = oneCommunity.percentage
@@ -310,7 +310,7 @@ function Customersearchdetails() {
           data: {
             customerData: {
               _id: customerdata?._id,
-              EnquiryId: customerdata?.EnquiryId,
+              EnquiryId: enquiryid,
               customerName: customerdata?.customerName,
               category: customerdata?.category,
               mainContact: customerdata?.mainContact,
@@ -329,7 +329,7 @@ function Customersearchdetails() {
             serviceID: serviceId,
             slots: selectedSlot,
             selectedSlotText: selectedSlot,
-            EnquiryId: customerdata?.EnquiryId,
+            EnquiryId: enquiryid,
             serviceCharge: serviceCharge,
             dateofService: dateofService,
             deliveryAddress: !newAdd
@@ -1903,4 +1903,4 @@ function Customersearchdetails() {
   );
 }
 
-export default Customersearchdetails;
+export default Customersearchdetailsqote;

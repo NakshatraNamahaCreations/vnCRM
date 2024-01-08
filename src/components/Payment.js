@@ -124,17 +124,19 @@ function Payment() {
   useEffect(() => {
     getservicedata();
   }, []);
-  console.log("Payment Component", data);
+
+
+
   const getPaymentById = async () => {
     try {
-      const customerId = data[0]?.customerData[0]._id;
-      console.log("customerId", customerId);
+    
+     
       let res = await axios.get(
-        apiURL + `/getPaymentByCustomerId/${customerId}`
+        apiURL + `/getPaymentByCustomerId/${id}`
       );
       if (res.status === 200) {
-        console.log("paymentDetails", res);
-        setPaymentDetails(res.data?.payments.filter((i)=>i.serviceId === id));
+      
+        setPaymentDetails(res.data?.payments);
       }
     } catch (error) {
       console.log("error:", error);
@@ -166,7 +168,7 @@ function Payment() {
       <Header />
       {/* <Customersernav data={paymentData}   /> */}
       <ul className="nav-tab-ul">
-        <li>
+        {/* <li>
           <a
             onClick={() => customerAddURL()}
             className="hover-tabs"
@@ -183,7 +185,7 @@ function Payment() {
           >
             Treatment
           </a>
-        </li>
+        </li> */}
         <li>
           <a
             onClick={() => PaintingURL()}
@@ -202,11 +204,11 @@ function Payment() {
             Payment
           </a>
         </li>
-        <li>
+        {/* <li>
           <a onClick={() => WorkURL()} className="hover-tabs ">
             Work
           </a>
-        </li>
+        </li> */}
       </ul>
       <div
         style={{

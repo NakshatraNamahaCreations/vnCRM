@@ -366,7 +366,7 @@ function Enquirynew() {
                   >
                     <td>{startSerialNumber + index}</td>
                     <td>{item.category}</td>
-                    <td>{item.date}</td>
+                    <td>{item.date} < br/>{item.Time}</td>
 
                     <td>{item.name}</td>
                     <td>{item.mobile}</td>

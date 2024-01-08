@@ -14,17 +14,41 @@ function Painting() {
 
   const navigate = useNavigate();
 
+  const [aggrdata, setaggrdata] = useState([])
   useEffect(() => {
-    getservicedata();
-  }, []);
+    getenquiry();
+  }, [id]);
 
-  const getservicedata = async () => {
-    let res = await axios.get(apiURL + "/getrunningdata");
-    if (res.status === 200) {
-      const filteredData = res.data?.runningdata.filter((i) => i._id == id);
-      setdata(filteredData);
+
+  const getenquiry = async () => {
+    try {
+      let res = await axios.get(
+        `https://api.vijayhomeservicebengaluru.in/api/getfilteredrunningdataforpm/${id}`,
+      );
+      if (res.status === 200) {
+    
+console.log("res---",res.data?.addcall)
+      
+
+        setdata(res.data?.addcall);
+
+      }
+    } catch (error) {
+      console.error('Error fetching or filtering project data11:', error);
     }
   };
+
+  // useEffect(() => {
+  //   getservicedata();
+  // }, []);
+
+  // const getservicedata = async () => {
+  //   let res = await axios.get(apiURL + "/getrunningdata");
+  //   if (res.status === 200) {
+  //     const filteredData = res.data?.runningdata.filter((i) => i._id == id);
+  //     setdata(filteredData);
+  //   }
+  // };
 
   const PaintingURL = () => {
     navigate(`/painting/${id}`);
@@ -45,13 +69,13 @@ function Painting() {
 
   const getPaymentById = async () => {
     try {
-      const customerId = data[0]?.customer[0]?._id;
+      const customerId = data[0]?.serviceInfo[0]?.customerData[0]?._id;
 
       let res = await axios.get(
         apiURL + `/getPaymentByCustomerId/${customerId}`
       );
       if (res.status === 200) {
-        console.log("PaymentDetails", res);
+       
         setPaymentDetails(res.data?.payments.filter((i) => i.serviceId === id));
       }
     } catch (error) {
@@ -61,11 +85,11 @@ function Painting() {
 
   const getWorkById = async () => {
     try {
-      const customerId = data[0]?.customer[0]?._id;
+    
 
-      let res = await axios.get(apiURL + `/getWorkByCustomerId/${customerId}`);
+      let res = await axios.get(apiURL + `/getWorkByCustomerId/${id}`);
       if (res.status === 200) {
-        setWorkDetails(res.data?.works.filter((i) => i.serviceId === id));
+        setWorkDetails(res.data?.works);
       }
     } catch (error) {
       console.log("error:", error);
@@ -122,10 +146,10 @@ function Painting() {
   const getGST = GST();
   let totalRate = 0;
   return (
-    <div>
+    <div className="web">
       <Header />
       <ul className="nav-tab-ul">
-        <li>
+        {/* <li>
           <a
             onClick={() => customerAddURL()}
             className="hover-tabs"
@@ -142,7 +166,7 @@ function Painting() {
           >
             Treatment
           </a>
-        </li>
+        </li> */}
         <li>
           <a
             onClick={() => PaintingURL()}
@@ -161,11 +185,11 @@ function Painting() {
             Payment
           </a>
         </li>
-        <li>
+        {/* <li>
           <a onClick={() => WorkURL()} className="hover-tabs ">
             Work
           </a>
-        </li>
+        </li> */}
       </ul>
       <div
         style={{
@@ -179,13 +203,13 @@ function Painting() {
         <b>
           Customer Painting Details &gt;
           {/* &#8827;{" "}  */}{" "}
-          {data[0]?.customerData[0]?.customerName.charAt(0).toUpperCase() +
-            data[0]?.customerData[0]?.customerName.slice(1)}
+          {data[0]?.serviceInfo[0]?.customerData[0]?.customerName.charAt(0).toUpperCase() +
+        data[0]?.serviceInfo[0]?.customerData[0]?.customerName.slice(1)}
         </b>
       </div>
       <div className="row m-auto">
         <div className="col-md-12">
-          <div className="mt-2 p-3">
+          {/* <div className="mt-2 p-3">
             <h5>Enquiry Details</h5>
 
             <table class="table table-hover table-bordered mt-1">
@@ -337,7 +361,7 @@ function Painting() {
                 )}
               </tbody>
             </table>
-          </div>
+          </div> */}
           <div className="mt-2 ps-3 pe-3">
             <h5>Quote Details</h5>
 
@@ -385,7 +409,7 @@ function Painting() {
                     className="text-end"
                     style={{ backgroundColor: "#ededed" }}
                   >
-                    <b> {totalRate.toFixed(2)}</b>
+                    <b> {data[0]?.quotedata[0]?.SUM}</b>
                   </td>
                 </tr>
               </tbody>
@@ -462,34 +486,7 @@ function Painting() {
               </tbody>
             </table>
           </div>
-          <div className="mt-2 p-3">
-            <h5>Work Details</h5>
-
-            <table class="table table-hover table-bordered mt-1">
-              <thead>
-                <tr className="tr clr table-secondary">
-                  <th>#</th>
-                  <th>Date</th>
-                  <th>Milestone</th>
-                  <th>Work Details</th>
-                  <th>Material Use</th>
-                  <th>Remark</th>
-                </tr>
-              </thead>
-              <tbody>
-                {workDetails.map((work, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>{work?.workDate}</td>
-                    <td>{work?.workMileStone}</td>
-                    <td>{work?.workDetails}</td>
-                    <td>{work?.workMaterialUse}</td>
-                    <td>{work?.workRemark}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      
           <div className="mt-2 p-3">
             <h5>Customer Payment</h5>
 
@@ -504,7 +501,7 @@ function Painting() {
                 </tr>
               </thead>
               <tbody>
-                {customerPayments.map((payment, index) => (
+                {data[0]?.paymentData.filter((i)=>i.paymentType === "Customer").map((payment, index) => (
                   <tr key={index}>
                     <td>{index + 1}</td>
                     <td>{payment?.paymentDate}</td>
@@ -530,13 +527,90 @@ function Painting() {
                 </tr>
               </thead>
               <tbody>
-                {vendorPayments.map((payment, index) => (
+              {data[0]?.paymentData.filter((i)=>i.paymentType === "Vendor").map((payment, index) => (
                   <tr key={index}>
                     <td>{index + 1}</td>
                     <td>{payment?.paymentDate}</td>
                     <td>{payment?.amount}</td>
                     <td>{payment?.paymentMode}</td>
                     <td>{payment?.Comment}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-2 p-3">
+            <h5>Material details</h5>
+
+            <table class="table table-hover table-bordered mt-1">
+              <thead>
+                <tr className="tr clr table-secondary">
+                  <th>#</th>
+                  <th>Date</th>
+                  <th>Material</th>
+                  <th>Work Details</th>
+                  {/* <th>Material Use</th> */}
+                  <th>Remark</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data[0]?.materialdetails.map((work, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{work?.workDate}</td>
+                    <td>{work?.workMileStone}</td>
+                    <td>{work?.workDetails}</td>
+                    {/* <td>{work?.workMaterialUse}</td> */}
+                    <td>{work?.workRemark}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-2 p-3">
+            <h5>Work details</h5>
+
+            <table class="table table-hover table-bordered mt-1">
+              <thead>
+                <tr className="tr clr table-secondary">
+                  <th>#</th>
+                  <th>Date</th>
+                  <th>Materialdesc</th>
+                 
+                </tr>
+              </thead>
+              <tbody>
+                {data[0]?.materialdata.map((work, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{work?.materialdate}</td>
+                    <td>{work?.materialdesc}</td>
+                  
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-2 p-3">
+            <h5>Man Power</h5>
+
+            <table class="table table-hover table-bordered mt-1">
+              <thead>
+                <tr className="tr clr table-secondary">
+                  <th>#</th>
+                  <th>Date</th>
+                  <th>Description</th>
+                 
+                </tr>
+              </thead>
+              <tbody>
+                {data[0]?.manpowerdata?.map((work, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{work?.mandate}</td>
+                    <td>{work?.mandesc}</td>
+                  
                   </tr>
                 ))}
               </tbody>

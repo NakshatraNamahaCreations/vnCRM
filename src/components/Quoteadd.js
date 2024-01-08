@@ -49,7 +49,6 @@ function Quotelist() {
   };
   let i = 0;
 
-  console.log("enquiryflwdata in quoet list page", enquiryflwdata);
 
   useEffect(() => {
     const uniqueCategory = new Set(

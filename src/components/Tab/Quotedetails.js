@@ -1441,11 +1441,12 @@ function Quotedetails() {
     }
   };
   const getenquiryadd = async () => {
-    let res = await axios.get(apiURL + "/getallnewfollow");
+    let res = await axios.get(apiURL + `/getwithenqid/${EnquiryId}`);
     if ((res.status = 200)) {
       setenquirydata(
-        res.data?.enquiryadd.filter((item) => item.EnquiryId == EnquiryId)
+        res.data?.enquiryadd
       );
+      console.log("res.data?.enquiryadd",res.data?.enquiryadd)
     }
   };
 
@@ -1757,8 +1758,14 @@ function Quotedetails() {
 
         if (res.status === 200) {
           const customerData = res.data.customer;
-
-          navigate(`/customersearchdetails/${customerData?._id}`);
+          const queryString = new URLSearchParams({
+            rowData: JSON.stringify(customerData),
+          }).toString();
+          const newTab = window.open(
+            `/customersearchdetailsqote/${customerData?._id}/${enquirydata[0]?.EnquiryId}?${queryString}`,
+            "_blank"
+          );
+         
         } else {
           console.log("Phone number not available");
           navigate(`/convertcustomer/${enquirydata[0]?.EnquiryId}`);
@@ -1807,7 +1814,7 @@ function Quotedetails() {
 
   useEffect(() => {
     getAdvPayment();
-  }, [confirmedResponses]);
+  }, [enquirydata]);
 
   const getAdvPayment = async () => {
     try {
@@ -1997,28 +2004,31 @@ function Quotedetails() {
                     ""
                   )}
                 </div>
+                {advpaymentdata?.amount ?
                 <p>
                   <b>
                     Advance Payment :
-                    {advpaymentdata[0]?.amount ? advpaymentdata[0]?.amount : ""}
+                   { advpaymentdata?.amount }
                   </b>
-                </p>
+                </p>: ""}
+                {advpaymentdata?.paymentDate
+                      ?
                 <p>
                   <b>
                     Adv Payment Date :
-                    {advpaymentdata[0]?.paymentDate
-                      ? advpaymentdata[0]?.paymentDate
-                      : ""}
+                    {advpaymentdata?.paymentDate}
+                     
                   </b>
-                </p>
+                </p> : ""}
+                {advpaymentdata?.paymentMode?
                 <p>
                   <b>
                     Adv Payment mode :
-                    {advpaymentdata[0]?.paymentMode
-                      ? advpaymentdata[0]?.paymentMode
-                      : ""}
+                    
+                      {advpaymentdata?.paymentMode} 
+                     
                   </b>
-                </p>
+                </p> : ""}
 
                 <hr />
                 <div className="row">

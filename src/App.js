@@ -169,6 +169,7 @@ import Test from "./components/Test";
 import New from "./components/Tab/New";
 import Quotations from "./components/Tab/Quotations";
 import Today from "./components/Tab/Today";
+import Customersearchdetailsqote from "./components/Customersearchdetailsqote";
 
 function App() {
   return (
@@ -338,6 +339,10 @@ function App() {
           <Route
             path="/customersearchdetails/:id"
             element={<Customersearchdetails />}
+          />
+           <Route
+            path="/customersearchdetailsqote/:id/:enquiryid"
+            element={<Customersearchdetailsqote />}
           />
           <Route path="/treatmentdetails/:id" element={<Treatment />} />
 
