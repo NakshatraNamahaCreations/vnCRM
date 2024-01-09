@@ -23,6 +23,8 @@ function Dsrdetails() {
   const location = useLocation();
   const { data, data1, TTname } = location.state || {};
 
+
+
   const id = data?._id;
   const [dsrdata, setdsrdata] = useState([]);
   const [dsrloader, setdsrloader] = useState(true);
@@ -93,6 +95,7 @@ function Dsrdetails() {
         .TechorPMorVendorName
       : ""
   );
+
 
   useEffect(() => {
     gettechnician();
@@ -289,14 +292,14 @@ function Dsrdetails() {
 
               city: data.city,
             },
-            EnquiryId:data?.customerData[0]?.EnquiryId,
+            EnquiryId: data?.customerData[0]?.EnquiryId,
             serviceId: data?._id,
             cardNo: data.cardNo,
             category: data.category,
             bookingDate: moment().format("DD-MM-YYYY"),
             priorityLevel: priorityLevel,
             appoDate: data1,
-            appoTime: appoTime,
+            appoTime: selectedSlot ? selectedSlot : appoTime,
             customerFeedback: customerFeedback,
             techComment: techComment,
             workerName: workerName,
@@ -360,7 +363,7 @@ function Dsrdetails() {
 
   };
 
-  console.log("data.customerData[0]?.EnquiryId",data?.customerData[0]?.EnquiryId)
+  // console.log("data.customerData[0]?.EnquiryId",data?.customerData[0]?.EnquiryId)
   // 16-9
   const Update = async (e) => {
     e.preventDefault();
@@ -414,12 +417,12 @@ function Dsrdetails() {
 
               city: data.city,
             },
-            EnquiryId:data?.customerData[0]?.EnquiryId,
+            EnquiryId: data?.customerData[0]?.EnquiryId,
             jobCategory: jobCategory,
             complaintRef: data.complaintRef,
             priorityLevel: priorityLevel,
             appoDate: data1,
-            appoTime: appoTime,
+            appoTime: selectedSlot ? selectedSlot : appoTime,
             customerFeedback: customerFeedback,
             jobType: jobType,
             techComment: techComment,
@@ -579,7 +582,7 @@ function Dsrdetails() {
   const renderEndDate = updatedEndTime || "0000-00-00 00:00:00";
 
   let i = 1;
-
+console.log("id",id)
   useEffect(() => {
     getwhatsapptemplate();
   }, []);
@@ -972,9 +975,9 @@ function Dsrdetails() {
 
   const [reasonforresh, setreasonforresh] = useState("");
 
- 
+
   const recheduledate = async (id) => {
-    if (!reasonforresh ) {
+    if (!reasonforresh) {
       alert("Please enter a reason");
     } else {
       try {
@@ -984,7 +987,7 @@ function Dsrdetails() {
           baseURL: apiURL,
           headers: { "content-type": "application/json" },
           data: {
-            appoDate: appoDate ? appoDate:data1,
+            appoDate: appoDate ? appoDate : data1,
             appoTime: appoTime,
             ResheduleUser: admin.displayname,
             ResheduleUsernumber: admin.contactno,
@@ -1040,7 +1043,7 @@ function Dsrdetails() {
     try {
       const config = {
         url:
-         dsrdata[0]?._id
+          dsrdata[0]?._id
             ? `/changeappotime/${data._id}/${dsrdata[0]?._id}`
             : `/changeappotimewithoutdsr/${data._id}`,
 
@@ -1057,7 +1060,7 @@ function Dsrdetails() {
         if (response.status === 200) {
           alert("Successfully Added");
 
-          window.location.reload(``);
+          // window.location.reload(``);
         }
       });
     } catch (error) {
@@ -1065,7 +1068,37 @@ function Dsrdetails() {
       alert("something went wrong");
     }
   };
+  const editservicecity = async (e) => {
+    e.preventDefault();
+    try {
+      const config = {
+        url:
+          dsrdata[0]?._id
+            ? `/changeappotime/${data._id}/${dsrdata[0]?._id}`
+            : `/changeappotimewithoutdsr/${data._id}`,
 
+        method: "post",
+        baseURL: apiURL,
+        headers: { "content-type": "application/json" },
+        data: {
+          selectedSlotText: selectedSlot,
+
+          city: newcity,
+        },
+      };
+      await axios(config).then(function (response) {
+        if (response.status === 200) {
+
+
+          window.location.assign(`/dsrcallist/${data1}/${data.category}`);
+
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      alert("something went wrong");
+    }
+  };
   const today = new Date().toISOString().split("T")[0];
   return (
     <div className="web">
@@ -1225,14 +1258,32 @@ function Dsrdetails() {
                     <></>
                   )}
                 </div>
-                <div className="col-md-4">
-                  <button
-                    onClick={editservicedetails}
-                    style={{ width: "150px" }}
-                  >
-                    Update Appo/City
-                  </button>
-                </div>
+                {dsrdata[0]?.jobComplete === "NO" ||
+                  dsrdata[0]?.jobComplete === undefined ||
+                  dsrdata[0]?.jobComplete === null ?
+                  <div className="col-md-4">
+                    <button
+                      onClick={editservicedetails}
+                      style={{ width: "150px" }}
+                    >
+                      Update Time
+                    </button>
+                  </div> : (
+                    <></>
+                  )}
+                {dsrdata[0]?.jobComplete === "NO" ||
+                  dsrdata[0]?.jobComplete === undefined ||
+                  dsrdata[0]?.jobComplete === null ?
+                  <div className="col-md-4">
+                    <button
+                      onClick={editservicecity}
+                      style={{ width: "150px" }}
+                    >
+                      Update City
+                    </button>
+                  </div> : (
+                    <></>
+                  )}
               </div>
               <h5 className="mt-3">Customer Information</h5>
               <hr />
@@ -1789,31 +1840,53 @@ function Dsrdetails() {
           <div className="row pt-3  m-auto justify-content-center mt-4">
             <>
               {dsrdata[0]?.jobComplete === "YES" ? (
-                <div>
-                  <h4 style={{ color: "GREEN", textAlign: "center" }}>
-                    SERVICE COMPLETED
-                  </h4>
-                  <div className="row pt-3">
-                    <div className="row">
-                      <div className="col-6 ">
-                        <div className="d-flex">
-                          <div className="col-4">COMPLETED Person</div>
-                          <div className="col-1">:</div>
-                          <div className="group pt-1 col-7">
-                            <p style={{ marginBottom: 0 }}>
-                              {dsrdata[0]?.backofficerExe}
-                            </p>
-                            <p>{dsrdata[0]?.backofficerno}</p>
+                <>
+                  <div>
+                    <h4 style={{ color: "GREEN", textAlign: "center" }}>
+                      SERVICE COMPLETED
+                    </h4>
+                    <div className="row pt-3">
+                      <div className="row">
+                        <div className="col-6 ">
+                          <div className="d-flex">
+                            <div className="col-4">COMPLETED Person</div>
+                            <div className="col-1">:</div>
+                            <div className="group pt-1 col-7">
+                              <p style={{ marginBottom: 0 }}>
+                                {dsrdata[0]?.backofficerExe}
+                              </p>
+                              <p>{dsrdata[0]?.backofficerno}</p>
+                            </div>
                           </div>
-                        </div>
 
-                        <div>
-                          <p>{formattedDateTime1}</p>
+                          <div>
+                            <p>{formattedDateTime1}</p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                  <div className="col-md-2">
+                    {!data ? (
+                      <button className="vhs-button">Invoice</button>
+                    ) : (
+                      <Link
+                        to={`/dsrquote/${id}`}
+                        state={{ data: data, data1: data1 }}
+                      >
+                        <button className="vhs-button">Invoice</button>
+                      </Link>
+                    )}
+                  </div>
+                  {/* <div className="col-md-2">
+                  <button className="vhs-button">Quotation</button>
+                </div> */}
+                  <div className="col-md-2">
+                    <button className="vhs-button" onClick={GoToInvoice}>
+                      Bill Whatsapp
+                    </button>{" "}
+                  </div>
+                </>
               ) : (
                 <div style={{ display: "flex" }}>
                   {dsrloader ? (
@@ -1856,9 +1929,9 @@ function Dsrdetails() {
                       </Link>
                     )}
                   </div>
-                  <div className="col-md-2">
+                  {/* <div className="col-md-2">
                     <button className="vhs-button">Quotation</button>
-                  </div>
+                  </div> */}
                   <div className="col-md-2">
                     <button className="vhs-button" onClick={GoToInvoice}>
                       Bill Whatsapp

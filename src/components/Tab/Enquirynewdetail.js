@@ -96,7 +96,7 @@ function Enquirynewdetail(props) {
         if (response.status === 200) {
           makeApiCall(whatsappTemplate, enquiryData?.mobile);
           getenquiryfollowup();
-          window.location.reload(`  `); 
+          // window.location.reload(`  `); 
         }
       });
     } catch (error) {
@@ -138,7 +138,7 @@ function Enquirynewdetail(props) {
             alert(" Added");
             makeApiCall(whatsappTemplate, enquiryData?.mobile);
 
-            window.location.assign(`/enquirydetail/${EnquiryId}?${urlParams}`);
+            // window.location.assign(`/enquirydetail/${EnquiryId}?${urlParams}`);
           }
         });
       } catch (error) {
@@ -368,6 +368,7 @@ function Enquirynewdetail(props) {
 
       if (response.status === 200) {
         // window.location.assign(`/enquirydetail/${EnquiryId}?${urlParams}`);
+        window.location.reload(`  `); 
       } else {
         console.error("API call unsuccessful. Status code:", response.status);
       }

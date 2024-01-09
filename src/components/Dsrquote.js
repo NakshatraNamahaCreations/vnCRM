@@ -13,7 +13,7 @@ function Dsrquote() {
   const [bankdata, setbankdata] = useState([]);
   const [treatmentdata, settreatmentdata] = useState([]);
   const location = useLocation();
-  const { data, data1, id } = location.state || null;
+  const { data, data1 } = location.state || null;
 
   const apiURL = process.env.REACT_APP_API_URL;
   const imgURL = process.env.REACT_APP_IMAGE_API_URL;
@@ -23,7 +23,7 @@ function Dsrquote() {
 
   useEffect(() => {
     gettermsgroup();
-  }, []);
+  }, [data]);
 
   const gettermsgroup = async () => {
     let res = await axios.get(apiURL + "/master/gettermgroup");
@@ -79,38 +79,40 @@ function Dsrquote() {
   };
 
   const formattedDate = date.toLocaleString("en-US", options);
-  console.log(formattedDate);
 
+  const decimalValue = parseInt(data?._id, 16);
+
+  // Get the last 5 digits
+  const last5Digits = decimalValue % 100000;
   return (
-    <div className="row">
+    <div >
       {/* <Header />s */}
 
       <div className="row justify-content-center mt-3">
-        <div className="col-md-11">
+        <div className="col-md-12">
           <div
             className="card shadow  bg-white rounded"
             style={{ border: "none" }}
           >
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <div>
-                {headerimgdata.map((item) => (
-                  <img
-                    src={imgURL + "/quotationheaderimg/" + item.headerimg}
-                    height="120px"
-                  />
-                ))}
+              <div style={{ marginLeft: "10px", display: "flex" }}>
+                <img
+                  src="/images/vhs.png"
+                  style={{ width: "100PX", height: "100px" }}
+                />
+                <h6 className="nameinvoice">VIJAY HOME SERVICES</h6>
               </div>
               <div className="p-1">
                 <h2>GST INVOICE</h2>
                 <p>Original For Recipient</p>
                 <p>
-                  <b>Invoice# , Date :</b> {formattedDate}
+                  <b>Invoice No: VHS-{last5Digits}  <br />Date :</b> {formattedDate}
                 </p>
               </div>
             </div>
 
-            <div className="row  mt-2">
-              <div className="col-md-6 b-col">
+            <div className=" col-12 mt-2 " style={{ display: "flex", gap: "10px" }}>
+              <div className="col-6 b-col">
                 <div className="" style={{ fontWeight: "bold" }}>
                   BILLED BY
                 </div>
@@ -118,30 +120,29 @@ function Dsrquote() {
                   Vijay Home Services
                 </div>
                 <p>
-                  #21, 4th Cross. Baddi Krishnappa Layout, Near Gangama Temple
-                  Road, Mahadevpura Outer Ring Road, Bangalore - 560048
+                  #1/1, 2nd Floor, Shamraj building MN Krishnarao Road Mahadevapura Outer Ring Road, Banglore 560048
                 </p>
+                <p>GSTN : 29EIXPK0545M1ZE</p>
               </div>
-              <div className="col-md-6 b-col" style={{ marginLeft: "9px" }}>
+              <div className="col-6 b-col" >
                 <div className="" style={{ fontWeight: "bold" }}>
                   BILLED TO
                 </div>
 
                 <h5>{data?.customerData[0]?.customerName}</h5>
                 <p className="mb-0">
-                  {data?.customerData[0]?.lnf}
-                  {data?.customerData[0]?.rbhf}
-                  {data?.customerData[0]?.mainArea}
-                  {data?.customerData[0]?.pinCode}
+                  {data?.deliveryAddress?.platNo},
+                  {data?.deliveryAddress?.address}
+                  {data?.deliveryAddress?.landmark}
                 </p>
                 <p className="mb-0">{data?.customerData[0]?.mainContact}</p>
-                <b> GSTIN</b>
+
               </div>
             </div>
 
             <div className="row m-auto mt-2 w-100">
               <div className="col-md-12">
-                <table class="table table-bordered border-danger">
+                <table class="">
                   <thead>
                     <tr className="hclr">
                       <th className="text-center">S.No</th>
@@ -149,143 +150,152 @@ function Dsrquote() {
                       <th className="text-center">Description</th>
                       <th className="text-center">Contract</th>
                       <th className="text-center">Service Date</th>
-                      <th className="text-center">Amount Paid Date</th>
+                      {/* <th className="text-center">Amount Paid Date</th> */}
 
                       <th className="text-center">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td scope="row" className="text-center">
+                      <td scope="row" className="text-center " style={{ border: "1px solid grey" }}>
                         {i++}
                       </td>
-                      <td scope="row" className="text-center">
+                      <td scope="row" className="text-center" style={{ border: "1px solid grey" }}>
                         {data.category}
                       </td>
-                      <td scope="row" className="text-center">
+                      <td scope="row" className="text-center " style={{ border: "1px solid grey" }}>
                         {data.desc}
                       </td>
 
-                      <td className="text-center">{data?.contractType}</td>
+                      <td className="text-center" style={{ border: "1px solid grey" }}>{data?.contractType}</td>
                       {data?.contractType === "AMC" ? (
-                        <td>
-                          {data.dividedDates.map((item) => (
-                            <div>
-                              <p className="text-center">
-                                {new Date(item).toLocaleDateString()}
-                              </p>
-                            </div>
-                          ))}
+                        <td className="text-center" style={{ border: "1px solid grey" }}>
+
+                          <div>
+                            <p className="text-center">
+                              {data1}
+                            </p>
+                          </div>
+
                         </td>
                       ) : (
-                        <td>{data?.dateofService}</td>
+                        <td className="text-center" style={{ border: "1px solid grey" }}>{data?.dateofService}</td>
                       )}
 
-                      {data?.contractType === "AMC" ? (
-                        <td>
+                      {/* {data?.contractType === "AMC" ? (
+                        <td className="text-center" style={{ border: "1px solid grey" }}>
                           {data.dividedamtDates.map((item) => (
                             <div>
                               <p className="text-end">
-                                {new Date(item).toLocaleDateString()}
+                                {new Date(item.date).toLocaleDateString()}
                               </p>
                             </div>
                           ))}
                         </td>
                       ) : (
-                        <td>{data?.dateofService}</td>
-                      )}
+                        <td className="text-center" style={{ border: "1px solid grey" }}>{data?.dateofService}</td>
+                      )} */}
 
                       {data?.contractType === "AMC" ? (
-                        <td>
-                          {data.dividedamtCharges.map((item) => (
+                        <td className="text-center" style={{ border: "1px solid grey" }}>
+                          {data?.dividedamtCharges?.map((item) => (
                             <div>
-                              <p className="text-end">{item}</p>
+                              <p className="text-end">{((item?.charge) / 105 * 100).toFixed(2)}</p>
                             </div>
                           ))}
                         </td>
                       ) : (
-                        <td>{data?.serviceCharge}</td>
+                        <td className="text-center" style={{ border: "1px solid grey" }}>{((data.GrandTotal / 105) * 100).toFixed(2)}</td>
                       )}
                     </tr>
                   </tbody>
                 </table>
-                <div className="float-end px-1">
-                  <h5>Total : {data.serviceCharge}</h5>
-                </div>
 
-                {/* <div className="row m-auto mt-3 hclr">Terms & Condition</div> */}
+
+
               </div>
             </div>
-            <div className="text-end px-2" style={{ fontWeight: "bold" }}>
-              Amount In Words :{" "}
-              <span style={{ fontWeight: 400 }}>
-                {numberToWords.toWords(data.serviceCharge) + " Only"}
-              </span>
-            </div>
 
-            <div className="mx-5">
-              <div>
-                <div className="" style={{ fontWeight: "bold" }}>
-                  BANK DETAILS
-                </div>
-              </div>
 
-              {bankdata.map((item) => (
+            <div className="row">
+
+
+              <div className="col-sm-6 mt-4" style={{ paddingLeft: "25px" }}>
                 <div>
-                  <div className="pt-2" style={{ fontWeight: "bold" }}>
-                    Account Name :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.accname}
-                    </span>
-                  </div>
-
                   <div className="" style={{ fontWeight: "bold" }}>
-                    Account Number :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.accno}
-                    </span>
-                  </div>
-
-                  <div className="" style={{ fontWeight: "bold" }}>
-                    IFSC :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.ifsccode}
-                    </span>
-                  </div>
-
-                  <div className="" style={{ fontWeight: "bold" }}>
-                    BANK NAME :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.bankname}
-                    </span>
-                  </div>
-                  <div className="" style={{ fontWeight: "bold" }}>
-                    Branch Name :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.branch}
-                    </span>
-                  </div>
-
-                  <div className="mt-3" style={{ fontWeight: "bold" }}>
-                    Gpay / Phonepe Details
-                  </div>
-
-                  <div className="pb-3" style={{ fontWeight: "bold" }}>
-                    Mobile No. :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.upinumber}
-                    </span>
+                    BANK DETAILS
                   </div>
                 </div>
-              ))}
+
+                {bankdata.map((item) => (
+                  <div>
+                    <div className="pt-2" style={{ fontWeight: "bold" }}>
+                      Account Name :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.accname}
+                      </span>
+                    </div>
+
+                    <div className="" style={{ fontWeight: "bold" }}>
+                      Account Number :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.accno}
+                      </span>
+                    </div>
+
+                    <div className="" style={{ fontWeight: "bold" }}>
+                      IFSC :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.ifsccode}
+                      </span>
+                    </div>
+
+                    <div className="" style={{ fontWeight: "bold" }}>
+                      BANK NAME :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.bankname}
+                      </span>
+                    </div>
+                    <div className="" style={{ fontWeight: "bold" }}>
+                      Branch Name :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.branch}
+                      </span>
+                    </div>
+
+                    <div className="mt-3" style={{ fontWeight: "bold" }}>
+                      Gpay / Phonepe Details
+                    </div>
+
+                    <div className="pb-3" style={{ fontWeight: "bold" }}>
+                      Mobile No. :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.upinumber}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="col-sm-6">
+
+<div className="row mt-4">
+
+
+                <div className="" style={{textAlign:"end",paddingRight:"50px"}}>
+                  <h6> GST(5%):{(data.GrandTotal - (data.GrandTotal / 105) * 100).toFixed(2)}</h6>
+
+                  <h5 >Total : {data.GrandTotal}</h5>   </div>
+                <div  style={{textAlign:"end",paddingRight:"50px"}}>
+                  <h5> Amount In Words :{" "}
+                    <span style={{ fontWeight: 400 }}>
+                      {numberToWords.toWords(data.serviceCharge) + " Only"}
+                    </span></h5>
+                </div>
+                </div>
+              </div>
             </div>
 
-            {/* <div className="p-3">
-              <h3>Terms & Conditions</h3>
-              {section2data.map((e) => (
-                <>{e.content}</>
-              ))}
-            </div> */}
 
             {tcdata.map((item) => (
               <div>
@@ -322,32 +332,17 @@ function Dsrquote() {
               </div>
             ))}
           </div>
-          {/* <div
-            className=" shadow  "
-            style={{ border: "none" }}
-          >
-           
-
-            <div className="row m-auto">
-              <div className="mt-3 text-center" style={{ color: "#a9042e" }}>
-                website : www.vijayhomeservices | mail :
-                support@vijayhomeservices.com
+          <div>
+            {footerimgdata.map((item) => (
+              <div className="col-md-12">
+                <img
+                  src={"https://api.vijayhomeservicebengaluru.in/quotationfooterimg/" + item.footerimg}
+                  height="auto"
+                  width="100%"
+                />
               </div>
-
-              <div className="mt-2 text-center" style={{ color: "black" }}>
-                BANGALORE - HYDERABAD - CHENNAI - PUNE - MUMBAI - AHMEDABAD -
-                VADODARA - SURAT - LUCKNOW - NCR - INDIA - GURGAON - FARIDABAD -
-                GHAZIABAD - BHUVANESHWAR - KOCHI
-              </div>
-
-              <div
-                className="mt-2 text-center pb-2"
-                style={{ color: "#a9042e" }}
-              >
-                Customer Care : +91 845 374 8478
-              </div>
-            </div>
-          </div> */}
+            ))}
+          </div>
         </div>
       </div>
     </div>

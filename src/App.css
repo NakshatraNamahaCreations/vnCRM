@@ -94,6 +94,9 @@ body {
   background-color: white !important;
   border-radius: 27px;
 }
+.text-center{
+  
+}
 .header-text {
   color: white;
   padding: 7px;
@@ -195,6 +198,14 @@ table {
 }
 .flex{
   display: flex !important;
+}
+.nameinvoice{
+  font-size: 40px;
+  font-style: inherit;
+  font-weight: 800;
+  color: darkred;
+  /* margin-top: 23px; */
+  margin-left: 25px;
 }
 .nav-pills .nav-link.active,
 .nav-pills .show > .nav-link {
@@ -462,11 +473,11 @@ a {
   font-weight: bold;
 }
 .b-col {
-  background-color: #80808014;
-  margin: 10px;
+  background-color: #ebb0b059;
+  /* margin: 5px; */
   border-radius: 8px;
   padding: 8px 19px;
-  width: 48% !important;
+  width: 90% ;
 }
 .q-row0 {
   background-color: #050570b3;

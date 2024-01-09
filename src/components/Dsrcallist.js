@@ -13,7 +13,7 @@ function Dsrcallist() {
   // console
   const currentdate = new Date()
   const formattedDate = moment(currentdate).format("YYYY-MM-DD")
-  console.log("currentdate", moment(currentdate).format("YYYY-MM-DD"));
+
 
   const comparedate = formattedDate === date;
 
@@ -26,7 +26,7 @@ function Dsrcallist() {
     }
   }
   const yokesh = name()
-  console.log("yokesh", yokesh);
+
   const [treatmentData, settreatmentData] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [dsrdata1, setdsrdata1] = useState([]);
@@ -290,6 +290,8 @@ function Dsrcallist() {
           return item?.dsrdata[0]?.startJobTime; // Filter for "Service Started"
         case "SCOMpleted":
           return item?.dsrdata[0]?.endJobTime; // Filter for "Service Completed"
+          case "DELAY":
+            return item?.dsrdata[0]?.endJobTime; // Filter for "Service delay"
         case "ASSIGNTECH":
           return (
             item?.dsrdata[0]?.jobComplete !== "YES" &&
@@ -352,7 +354,13 @@ function Dsrcallist() {
 
 
 
-
+  // const openNewTab = () => {
+  //   const url = `/dsrdetails?data=${encodeURIComponent(selectedData)}&data1=${encodeURIComponent(date)}&TTname=${encodeURIComponent(passfunction(selectedData))}`;
+  //   const newTab = window.open(url, '_blank');
+  //   if (newTab) {
+  //     newTab.focus();
+  //   }
+  // };
 
 
   return (
@@ -405,6 +413,7 @@ function Dsrcallist() {
           <div
             className="ps-1 pe-1"
             style={{ backgroundColor: "#2196f3", cursor: "pointer" }}
+            onClick={() => handleLegendItemClick("DELAY")}
           >
             SERIVCE DELAYED
           </div>
@@ -615,16 +624,16 @@ function Dsrcallist() {
                     style={{
                       backgroundColor:
                         SERVICECOMPLETEDBYOP(selectedData) === "YES"
-                          ? "rgb(182, 96, 255)"
+                          ? "#b660ff87"
                           : SERVICECOMPLETED(selectedData)
-                            ? "#4caf50"
+                            ? "#4caf50ba"
                             : SERVICECANCLE(selectedData) === "CANCEL"
-                              ? "#f44336"
+                              ? "#f38981"
 
                               : SERVICEdelay(selectedData)
-                                ? "#2196f3"
+                                ? "#21e0f38c"
                                 : SERVICESTARTED(selectedData)
-                                  ? "#ffeb3b"
+                                  ? "#ffeb3b70"
                                   : passfunction(selectedData)
                                     ? "darkgrey"
                                     : "",

@@ -4,7 +4,7 @@ import axios from "axios";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
 import { da } from "date-fns/locale";
-import numberToWords from "number-to-words";
+import { toWords } from "number-to-words";
 
 function DSR_Invoice() {
   const [tcdata, settcdata] = useState([]);
@@ -17,27 +17,23 @@ function DSR_Invoice() {
   const apiURL = process.env.REACT_APP_API_URL;
   const imgURL = process.env.REACT_APP_IMAGE_API_URL;
 
-  // const [section2data, setsection2data] = useState([]);
-  const [termsAndCondition, setTemsAndCondition] = useState([]);
-  // useEffect(() => {
-  //   gettermsgroup();
-  // }, []);
+  useEffect(() => {
+    gettermsgroup();
+  }, [getURLDATA]);
 
-  // const gettermsgroup = async () => {
-  //   let res = await axios.get(apiURL + "/master/gettermgroup");
-  //   if ((res.status ===200)) {
-  //     setTemsAndCondition(res.data?.termsgroup);
-  //     const invoicType = res.data?.termsgroup.filter(
-  //       (i) => i.type === "INVOICE"
-  //     );
-  //     const filterByCategory = invoicType.filter(
-  //       (item) => item.category === data.category
-  //     );
-  //     settcdata(filterByCategory);
-  //   }
-  // };
-
-  // console.log("termsAndCondition", termsAndCondition);
+  const gettermsgroup = async () => {
+    let res = await axios.get(apiURL + "/master/gettermgroup");
+    if (res.status === 200) {
+      // setTemsAndCondition(res.data?.termsgroup);
+      const invoicType = res.data?.termsgroup.filter(
+        (i) => i.type === "INVOICE"
+      );
+      const filterByCategory = invoicType.filter(
+        (item) => item.category === treatmentData?.category
+      );
+      settcdata(filterByCategory);
+    }
+  };
   let i = 1;
 
   useEffect(() => {
@@ -71,11 +67,11 @@ function DSR_Invoice() {
 
   const getServiceData = async () => {
     try {
-      let res = await axios.get(apiURL + "/getrunningdata");
+      let res = await axios.get(apiURL + `/mybookings1/${getURLDATA}`);
       if (res.status === 200) {
-        const data = res.data?.runningdata;
-        const filteredService = data.find((item) => item._id === getURLDATA);
-        settreatmentData(filteredService);
+
+
+        settreatmentData(res.data?.runningdata);
       } else {
         settreatmentData([]);
       }
@@ -84,45 +80,66 @@ function DSR_Invoice() {
     }
   };
 
-  // console.log(
-  //   "filteredService",
-  //  const  treatmentData?.customerData?.flat().map((ele) => ele.approach)
-  // );
-
   useEffect(() => {
     getServiceData();
-  }, []);
+  }, [getURLDATA]);
+
+
+  const date = new Date(treatmentData?.creatAt);
+
+  const options = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+
+  const formattedDate = date.toLocaleString("en-US", options);
+
+  const decimalValue = parseInt(treatmentData?._id, 16);
+
+  // Get the last 5 digits
+  const last5Digits = decimalValue % 100000;
+
+  const convertingAmount = (Number(treatmentData?.GrandTotal));
+
+  
+let netTotalInWords = "";
+
+  if (typeof convertingAmount === "number" && isFinite(convertingAmount)) {
+    netTotalInWords = toWords(convertingAmount).replace(/,/g, ""); // Remove commas
+  }
+
+
 
   return (
-    <div className="row">
+    <div >
       {/* <Header />s */}
 
       <div className="row justify-content-center mt-3">
-        <div className="col-md-11">
+        <div className="col-md-12">
           <div
             className="card shadow  bg-white rounded"
             style={{ border: "none" }}
           >
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <div>
-                {headerimgdata.map((item) => (
-                  <img
-                    src={imgURL + "/quotationheaderimg/" + item.headerimg}
-                    height="120px"
-                  />
-                ))}
+              <div style={{ marginLeft: "10px", display: "flex" }}>
+                <img
+                  src="/images/vhs.png"
+                  style={{ width: "100PX", height: "100px" }}
+                />
+                <h6 className="nameinvoice">VIJAY HOME SERVICES</h6>
               </div>
               <div className="p-1">
                 <h2>GST INVOICE</h2>
                 <p>Original For Recipient</p>
                 <p>
-                  <b>Invoice# , Date :</b> {moment().format("L")}
+                  <b>Invoice No: VHS-{last5Digits}  <br />Date :</b> {formattedDate}
                 </p>
               </div>
             </div>
 
-            <div className="row  mt-2">
-              <div className="col-md-6 b-col">
+            <div className=" col-12 mt-2 " style={{ display: "flex", gap: "10px" }}>
+              <div className="col-6 b-col">
                 <div className="" style={{ fontWeight: "bold" }}>
                   BILLED BY
                 </div>
@@ -130,37 +147,39 @@ function DSR_Invoice() {
                   Vijay Home Services
                 </div>
                 <p>
-                  #21, 4th Cross. Baddi Krishnappa Layout, Near Gangama Temple
-                  Road, Mahadevpura Outer Ring Road, Bangalore - 560048
+                  #1/1, 2nd Floor, Shamraj building MN Krishnarao Road Mahadevapura Outer Ring Road, Banglore 560048
                 </p>
+                <p>GSTN : 29EIXPK0545M1ZE</p>
               </div>
-              <div className="col-md-6 b-col" style={{ marginLeft: "9px" }}>
+              <div className="col-6 b-col" >
                 <div className="" style={{ fontWeight: "bold" }}>
                   BILLED TO
                 </div>
 
-                <h5> {treatmentData?.customerData?.customerName} </h5>
+                <h5>
+                  {treatmentData.customerData && Array.isArray(treatmentData.customerData) && treatmentData.customerData.length !== 0
+                    ? treatmentData.customerData[0].customerName
+                    : ""}
+                </h5>
 
-                {treatmentData?.customerData?.flat().map((ele) => {
-                  return (
-                    <p className="mb-0">
-                      {ele.lnf} {ele.rbhf} {ele.mainArea} - {ele.pinCode}
-                    </p>
-                  );
-                })}
-                {/* {treatmentData?.customerData?.rbhf}
-                  {treatmentData?.customerData?.mainArea}
-                  {treatmentData?.customerData?.pinCode} */}
-                {treatmentData?.customerData?.flat().map((ele) => {
-                  return <p className="mb-0">{ele.mainContact}</p>;
-                })}
-                <b> GSTIN</b>
+                <p className="mb-0">
+                  {treatmentData?.deliveryAddress?.platNo},
+                  {treatmentData?.deliveryAddress?.address}
+                  {treatmentData?.deliveryAddress?.landmark}
+                </p>
+                <p className="mb-0">
+                  {/* {treatmentData.customerData[0].mainContact} */}
+                  {treatmentData.customerData && Array.isArray(treatmentData.customerData) && treatmentData.customerData.length !== 0
+                    ? treatmentData.customerData[0].mainContact
+                    : ""}
+                </p>
+
               </div>
             </div>
 
             <div className="row m-auto mt-2 w-100">
               <div className="col-md-12">
-                <table class="table table-bordered border-danger">
+                <table class="">
                   <thead>
                     <tr className="hclr">
                       <th className="text-center">S.No</th>
@@ -168,145 +187,141 @@ function DSR_Invoice() {
                       <th className="text-center">Description</th>
                       <th className="text-center">Contract</th>
                       <th className="text-center">Service Date</th>
-                      <th className="text-center">Amount Paid Date</th>
+                      {/* <th className="text-center">Amount Paid Date</th> */}
 
                       <th className="text-center">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td scope="row" className="text-center">
+                      <td scope="row" className="text-center " style={{ border: "1px solid grey" }}>
                         {i++}
                       </td>
-                      <td scope="row" className="text-center">
+                      <td scope="row" className="text-center" style={{ border: "1px solid grey" }}>
                         {treatmentData.category}
                       </td>
-                      <td scope="row" className="text-center">
+                      <td scope="row" className="text-center " style={{ border: "1px solid grey" }}>
                         {treatmentData.desc}
                       </td>
 
-                      <td className="text-center">
-                        {treatmentData?.contractType}
-                      </td>
+                      <td className="text-center" style={{ border: "1px solid grey" }}>{treatmentData?.contractType}</td>
                       {treatmentData?.contractType === "AMC" ? (
-                        <td>
-                          {treatmentData.dividedDates.map((item) => (
-                            <div>
-                              <p className="text-center">
-                                {new Date(item).toLocaleDateString()}
-                              </p>
-                            </div>
-                          ))}
+                        <td className="text-center" style={{ border: "1px solid grey" }}>
+
+                          <div>
+                            <p className="text-center">
+                              {/* {data1} */}
+                            </p>
+                          </div>
+
                         </td>
                       ) : (
-                        <td> {treatmentData?.dateofService} </td>
+                        <td className="text-center" style={{ border: "1px solid grey" }}>{treatmentData?.dateofService}</td>
                       )}
 
-                      {treatmentData?.contractType === "AMC" ? (
-                        <td>
-                          {treatmentData.dividedamtDates.map((item) => (
-                            <div>
-                              <p className="text-end">
-                                {new Date(item).toLocaleDateString()}
-                              </p>
-                            </div>
-                          ))}
-                        </td>
-                      ) : (
-                        <td>{treatmentData?.dateofService}</td>
-                      )}
 
                       {treatmentData?.contractType === "AMC" ? (
-                        <td>
-                          {treatmentData.dividedamtCharges.map((item) => (
+                        <td className="text-center" style={{ border: "1px solid grey" }}>
+                          {treatmentData?.dividedamtCharges?.map((item) => (
                             <div>
-                              <p className="text-end"> {item} </p>
+                              <p className="text-end">{((item?.charge) / 105 * 100).toFixed(2)}</p>
                             </div>
                           ))}
                         </td>
                       ) : (
-                        <td>{treatmentData?.serviceCharge} </td>
+                        <td className="text-center" style={{ border: "1px solid grey" }}>{((treatmentData?.GrandTotal / 105) * 100).toFixed(2)}</td>
                       )}
                     </tr>
                   </tbody>
                 </table>
-                <div className="float-end px-1">
-                  <h5>Total : {treatmentData.serviceCharge} </h5>
-                </div>
+
+
+
               </div>
             </div>
-            <div className="text-end px-2" style={{ fontWeight: "bold" }}>
-              Amount In Words :{" "}
-              <span style={{ fontWeight: 400 }}>
-                {/* {numberToWords.toWords(treatmentData.serviceCharge) + " Only"} */}
-              </span>
-            </div>
 
-            <div className="mx-5">
-              <div>
-                <div className="" style={{ fontWeight: "bold" }}>
-                  BANK DETAILS
-                </div>
-              </div>
 
-              {bankdata.map((item) => (
+            <div className="row">
+
+
+              <div className="col-sm-6 mt-4" style={{ paddingLeft: "25px" }}>
                 <div>
-                  <div className="pt-2" style={{ fontWeight: "bold" }}>
-                    Account Name :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.accname}
-                    </span>
-                  </div>
-
                   <div className="" style={{ fontWeight: "bold" }}>
-                    Account Number :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.accno}
-                    </span>
-                  </div>
-
-                  <div className="" style={{ fontWeight: "bold" }}>
-                    IFSC :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.ifsccode}
-                    </span>
-                  </div>
-
-                  <div className="" style={{ fontWeight: "bold" }}>
-                    BANK NAME :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.bankname}
-                    </span>
-                  </div>
-                  <div className="" style={{ fontWeight: "bold" }}>
-                    Branch Name :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.branch}
-                    </span>
-                  </div>
-
-                  <div className="mt-3" style={{ fontWeight: "bold" }}>
-                    Gpay / Phonepe Details
-                  </div>
-
-                  <div className="pb-3" style={{ fontWeight: "bold" }}>
-                    Mobile No. :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.upinumber}
-                    </span>
+                    BANK DETAILS
                   </div>
                 </div>
-              ))}
+
+                {bankdata?.map((item) => (
+                  <div>
+                    <div className="pt-2" style={{ fontWeight: "bold" }}>
+                      Account Name :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.accname}
+                      </span>
+                    </div>
+
+                    <div className="" style={{ fontWeight: "bold" }}>
+                      Account Number :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.accno}
+                      </span>
+                    </div>
+
+                    <div className="" style={{ fontWeight: "bold" }}>
+                      IFSC :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.ifsccode}
+                      </span>
+                    </div>
+
+                    <div className="" style={{ fontWeight: "bold" }}>
+                      BANK NAME :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.bankname}
+                      </span>
+                    </div>
+                    <div className="" style={{ fontWeight: "bold" }}>
+                      Branch Name :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.branch}
+                      </span>
+                    </div>
+
+                    <div className="mt-3" style={{ fontWeight: "bold" }}>
+                      Gpay / Phonepe Details
+                    </div>
+
+                    <div className="pb-3" style={{ fontWeight: "bold" }}>
+                      Mobile No. :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item?.upinumber}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="col-sm-6">
+
+                <div className="row mt-4">
+
+
+                  <div className="" style={{ textAlign: "end", paddingRight: "50px" }}>
+                    <h6> GST(5%):{(treatmentData?.GrandTotal - (treatmentData?.GrandTotal / 105) * 100).toFixed(2)}</h6>
+
+                    <h5 >Total : {treatmentData?.GrandTotal}</h5>   </div>
+                  <div style={{ textAlign: "end", paddingRight: "50px" }}>
+                    <h5> Amount In Words :{" "}
+                      <span style={{ fontWeight: 400 }}>
+                     {netTotalInWords}
+                      </span></h5>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* <div className="p-3">
-              <h3>Terms & Conditions</h3>
-              {section2data.map((e) => (
-                <>{e.content}</>
-              ))}
-            </div> */}
 
-            {tcdata.map((item) => (
+            {tcdata?.map((item) => (
               <div>
                 <div
                   className="row m-auto mt-3"
@@ -334,9 +349,21 @@ function DSR_Invoice() {
                           </div>
                         </div>
                       </td>
+                      {/* <td className="">{item.content}</td> */}
                     </tr>
                   </tbody>
                 </table>
+              </div>
+            ))}
+          </div>
+          <div>
+            {footerimgdata?.map((item) => (
+              <div className="col-md-12">
+                <img
+                  src={"https://api.vijayhomeservicebengaluru.in/quotationfooterimg/" + item.footerimg}
+                  height="auto"
+                  width="100%"
+                />
               </div>
             ))}
           </div>
@@ -347,3 +374,4 @@ function DSR_Invoice() {
 }
 
 export default DSR_Invoice;
+

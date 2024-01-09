@@ -47,15 +47,21 @@ function Quotationterm() {
   };
 
   useEffect(() => {
-    gettermsgroup();
-  }, []);
+    const gettermsgroup = async () => {
+      try {
+        const response = await axios.get(apiURL + "/master/gettermgroup");
+        if (response.status === 200) {
+          settcdata(response.data?.termsgroup);
+          console.log("res.data?.termsgroup", response.data?.termsgroup);
+        }
+      } catch (error) {
+        console.error("Error fetching termsgroup:", error);
+        // Handle the error as needed
+      }
+    };
 
-  const gettermsgroup = async () => {
-    let res = await axios.get(apiURL + "/master/gettermgroup");
-    if ((res.status = 200)) {
-      settcdata(res.data?.termsgroup);
-    }
-  };
+    gettermsgroup();
+  }, [data, /* Add any other dependencies here */]);
   const gettermsgroup2 = async () => {
     let res = await axios.get(apiURL + "/master/gettermgroup2");
     if ((res.status = 200)) {
@@ -64,11 +70,7 @@ function Quotationterm() {
   };
 
   useEffect(() => {
-    if (
-      data.length > 0 &&
-      data[0].treatmentdetails &&
-      Array.isArray(data[0].treatmentdetails)
-    ) {
+   
       const uniqueCategories = [
         ...new Set(data[0].treatmentdetails.map((item) => item.category)),
       ];
@@ -81,10 +83,8 @@ function Quotationterm() {
 
       setfiltcdata(filteredTcdata);
       setsec2data(filteredsec2data);
-    } else {
-      console.log("Invalid or missing treatment details in the data.");
-    }
-  }, [data]);
+   
+  }, [data,tcdata]);
 
   let i = 1;
 
@@ -161,7 +161,7 @@ function Quotationterm() {
           >
             {headerimgdata.map((item) => (
               <img
-                src={imgURL + "/quotationheaderimg/" + item.headerimg}
+                src={"https://api.vijayhomeservicebengaluru.in/quotationheaderimg/" + item.headerimg}
                 height="200px"
               />
             ))}
@@ -216,7 +216,7 @@ function Quotationterm() {
                 <div className="" style={{ fontWeight: "bold" }}>
                   Contact :{" "}
                   <span style={{ color: "black", fontWeight: 400 }}>
-                    {data[0]?.contact1}
+                    {data[0]?.quotedata[0]?.exenumber}
                   </span>
                 </div>
               </div>
@@ -287,76 +287,139 @@ function Quotationterm() {
                     </tbody>
                   </table>
                 </div>
-                <div
-                  className="row  "
-                  style={{ justifyContent: "flex-end", marginTop: "10px" }}
-                >
-                  <div style={{ display: "flex", justifyContent: "end" }}>
-                    <div className="col-0.5">
-                      <h5 style={{ textAlign: "right" }}> Gst(5%) </h5>
+               
+                <div className="row">
+                  <div className="col-sm-6">
+                    <div>
+                      <div className="" style={{ fontWeight: "bold" }}>
+                        BANK DETAILS
+                      </div>
                     </div>
-                    <div className="col-0.5">
-                      <h5 style={{ textAlign: "right" }}> : </h5>
+
+                    {bankdata.map((item) => (
+                      <div>
+                        <div className="pt-2" style={{ fontWeight: "bold" }}>
+                          Account Name :{" "}
+                          <span style={{ color: "black", fontWeight: 400 }}>
+                            {item.accname}
+                          </span>
+                        </div>
+
+                        <div className="" style={{ fontWeight: "bold" }}>
+                          Account Number :{" "}
+                          <span style={{ color: "black", fontWeight: 400 }}>
+                            {item.accno}
+                          </span>
+                        </div>
+
+                        <div className="" style={{ fontWeight: "bold" }}>
+                          IFSC :{" "}
+                          <span style={{ color: "black", fontWeight: 400 }}>
+                            {item.ifsccode}
+                          </span>
+                        </div>
+
+                        <div className="" style={{ fontWeight: "bold" }}>
+                          BANK NAME :{" "}
+                          <span style={{ color: "black", fontWeight: 400 }}>
+                            {item.bankname}
+                          </span>
+                        </div>
+                        <div className="" style={{ fontWeight: "bold" }}>
+                          Branch Name :{" "}
+                          <span style={{ color: "black", fontWeight: 400 }}>
+                            {item.branch}
+                          </span>
+                        </div>
+
+                        <div className="mt-3" style={{ fontWeight: "bold" }}>
+                          Gpay / Phonepe Details
+                        </div>
+
+                        <div className="pb-3" style={{ fontWeight: "bold" }}>
+                          Mobile No. :{" "}
+                          <span style={{ color: "black", fontWeight: 400 }}>
+                            {item.upinumber}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="col-sm-6">
+
+
+                    <div
+                      className="row  "
+                      style={{ justifyContent: "flex-end", marginTop: "10px" }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "end" }}>
+                        <div className="col-4">
+                          <h6 style={{ textAlign: "right" }}>Gst(5%) :</h6>
+                        </div>
+                       
+                        <div className="col-4" style={{ textAlign: "right" }}>
+                          {data[0]?.quotedata[0]?.GST == true ? (
+                            <h6>{(total * 0.05).toFixed(2)}</h6>
+                          ) : (
+                            <>0</>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className="col-1" style={{ textAlign: "right" }}>
-                      {data[0]?.quotedata[0]?.GST == true ? (
-                        <h5>{(total * 0.05).toFixed(2)}</h5>
+                    <div className="row " style={{ justifyContent: "flex-end" }}>
+                      <div className="col-4">
+                        <h6 style={{ textAlign: "right" }}>Adjustment :</h6>
+                      </div>
+                
+                      <div className="col-4" style={{ textAlign: "right" }}>
+                        {data[0]?.quotedata[0]?.adjustments ? (
+                          <h6>{data[0]?.quotedata[0]?.adjustments}</h6>
+                        ) : (
+                          <>0</>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="row " style={{ justifyContent: "flex-end" }}>
+                      <div style={{ display: "flex", justifyContent: "end" }}>
+                        <div className="col-4">
+                          <h6 style={{ textAlign: "right", fontWeight: "bold",fontSize:"20px" }}>
+                            {" "}
+                            Total :
+                          </h6>
+                        </div>
+                        <div className="col-4" style={{ textAlign: "right" }}>
+                          <h6 style={{fontSize:"20px"}}>
+                            <b>{data[0]?.quotedata[0]?.netTotal}</b>
+                          </h6>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                    className="text-center"
+                    style={{
+                      fontWeight: "bold",
+                      paddingTop: "23px",
+                      float: "inline-end",
+                    }}
+                  >
+                    In Words :{" "}
+                    <span style={{ fontWeight: 400 }}>
+                      {netTotalInWords !== "" ? (
+                        <>
+                          {" "}
+                          {netTotalInWords.charAt(0).toUpperCase() +
+                            netTotalInWords.slice(1)}
+                        </>
                       ) : (
-                        <>0</>
+                        <>{data[0]?.quotedata[0]?.netTotal}</>
                       )}
-                    </div>
+                    </span>
                   </div>
-                </div>
-                <div className="row " style={{ justifyContent: "flex-end" }}>
-                  <div className="col-2">
-                    <h5 style={{ textAlign: "right" }}> Adjustment :</h5>
                   </div>
-                  <div className="col-1" style={{ textAlign: "right" }}>
-                    {data[0]?.quotedata[0]?.adjustments ? (
-                      <h5>{data[0]?.quotedata[0]?.adjustments}</h5>
-                    ) : (
-                      <>0</>
-                    )}
-                  </div>
+                 
                 </div>
-
-                <div className="row " style={{ justifyContent: "flex-end" }}>
-                  <div style={{ display: "flex", justifyContent: "end" }}>
-                    <div className="col-2">
-                      <h5 style={{ textAlign: "right", fontWeight: "bold" }}>
-                        {" "}
-                        Total :
-                      </h5>
-                    </div>
-                    <div className="col-1" style={{ textAlign: "right" }}>
-                      <h5>
-                        <b>{data[0]?.quotedata[0]?.netTotal}</b>
-                      </h5>
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  className="text-center"
-                  style={{
-                    fontWeight: "bold",
-                    paddingTop: "23px",
-                    float: "inline-end",
-                  }}
-                >
-                  In Words :{" "}
-                  <span style={{ fontWeight: 400 }}>
-                    {netTotalInWords !== "" ? (
-                      <>
-                        {" "}
-                        {netTotalInWords.charAt(0).toUpperCase() +
-                          netTotalInWords.slice(1)}
-                      </>
-                    ) : (
-                      <>{data[0]?.quotedata[0]?.netTotal}</>
-                    )}
-                  </span>
-                </div>
+              
               </div>
             </div>
             {filtcdata.map((item) => (
@@ -421,69 +484,14 @@ function Quotationterm() {
                 </div>
               ))}
             </div>
-            <div className="mx-5">
-              <div>
-                <div className="" style={{ fontWeight: "bold" }}>
-                  BANK DETAILS
-                </div>
-              </div>
-
-              {bankdata.map((item) => (
-                <div>
-                  <div className="pt-2" style={{ fontWeight: "bold" }}>
-                    Account Name :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.accname}
-                    </span>
-                  </div>
-
-                  <div className="" style={{ fontWeight: "bold" }}>
-                    Account Number :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.accno}
-                    </span>
-                  </div>
-
-                  <div className="" style={{ fontWeight: "bold" }}>
-                    IFSC :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.ifsccode}
-                    </span>
-                  </div>
-
-                  <div className="" style={{ fontWeight: "bold" }}>
-                    BANK NAME :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.bankname}
-                    </span>
-                  </div>
-                  <div className="" style={{ fontWeight: "bold" }}>
-                    Branch Name :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.branch}
-                    </span>
-                  </div>
-
-                  <div className="mt-3" style={{ fontWeight: "bold" }}>
-                    Gpay / Phonepe Details
-                  </div>
-
-                  <div className="pb-3" style={{ fontWeight: "bold" }}>
-                    Mobile No. :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.upinumber}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+           
           </div>
         </div>
         <div>
           {footerimgdata.map((item) => (
             <div className="col-md-12">
               <img
-                src={imgURL + "/quotationfooterimg/" + item.footerimg}
+                src={"https://api.vijayhomeservicebengaluru.in/quotationfooterimg/" + item.footerimg}
                 height="auto"
                 width="100%"
               />
