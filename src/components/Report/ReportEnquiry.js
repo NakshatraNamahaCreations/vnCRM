@@ -49,12 +49,14 @@ function Report_Enquiry() {
   const getresponse = async () => {
     let res = await axios.get(apiURL + "/getresponse");
     if ((res.status = 200)) {
-      console.log(res.data.response);
+   
       setreponsedata(res.data?.response);
       
     }
   };
 
+
+// const fff = reference.filter((item) =>item.)
 
   // get user=============
   const getuser = async () => {
@@ -95,7 +97,7 @@ function Report_Enquiry() {
 
   const filterData = async () => {
     try {
-      const res = await axios.post(`${apiURL}/searchenquiry`, {
+      const res = await axios.post(`${apiURL}/searchenquiry1`, {
         category,
         fromdate,
         todate,
@@ -110,6 +112,7 @@ function Report_Enquiry() {
 
       if (res.status === 200) {
         setFilteredData(res.data?.enquiryadd);
+
       } else {
         // Set filterdata to an empty array in case of an error
         setFilteredData([]);
@@ -188,10 +191,10 @@ function Report_Enquiry() {
       name: "Executive",
       selector: (row) => (row.executive ? row.executive : "-"),
     },
-    // {
-    //   name: "Status",
-    //   selector: (row) => (row.response ? row.response : "-"),
-    // },
+    {
+      name: "Status",
+      selector: (row) => (row.enquiryFollow[0]?.response ? row.enquiryFollow[0]?.response : "-"),
+    },
     // {
     //   name: "Value",
     //   selector: (row) => (row.value ? row.value : "-"),
@@ -516,7 +519,7 @@ const handleClear =()=>{
         <DataTable
           columns={columns}
           data={filteredData}
-          pagination
+          // pagination
           fixedHeader
           selectableRowsHighlight
           subHeaderAlign="left"

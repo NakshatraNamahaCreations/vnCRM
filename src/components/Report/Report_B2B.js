@@ -41,7 +41,7 @@ function Report_B2B() {
       const res = await axios.get(apiURL + "/getB2B");
       if (res.status === 200) {
         const data = res.data?.B2B;
-        console.log("B2b", data);
+
         setb2bdata(data);
         setFilteredData(data); // Initialize filteredData with the fetched data
       }

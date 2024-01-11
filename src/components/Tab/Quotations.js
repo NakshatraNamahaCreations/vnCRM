@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from "react";
 import Header from "../layout/Header";
 import axios from "axios";
@@ -72,7 +70,7 @@ function Quotationterm() {
   useEffect(() => {
    
       const uniqueCategories = [
-        ...new Set(data[0].treatmentdetails.map((item) => item.category)),
+        ...new Set(data[0]?.treatmentdetails?.map((item) => item?.category)),
       ];
       const filteredTcdata = tcdata.filter((item) =>
         uniqueCategories.includes(item.category)

@@ -4,142 +4,88 @@ import axios from "axios";
 import DataTable from "react-data-table-component";
 import { Card } from "react-bootstrap";
 import * as XLSX from "xlsx";
+import moment from "moment";
 
 function Report_DSR() {
   const apiURL = process.env.REACT_APP_API_URL;
+  const admin = JSON.parse(sessionStorage.getItem("admin"));
   const [dsrData, setDsrData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [paymentMode, setPaymentMode] = useState("");
-  const [fromData, setFromData] = useState("");
-  const [toData, setToData] = useState("");
-  const [backOffice, setBackOffice] = useState("");
-  const [technicianName, setTechnicianName] = useState("");
+  const [fromdate, setFromData] = useState("");
+  const [todate, setToData] = useState(moment().format("MM-DD-YYYY"));
+  const [BackofficeExecutive, setBackOffice] = useState("");
+  const [TechorPMorVendorName, setTechnicianName] = useState("");
   const [jobComplete, setJobComplete] = useState("");
-  const [reference, setReference] = useState("");
+  const [type, settype] = useState("");
   const [service, setService] = useState("");
   const [jobStatus, setJobStatus] = useState("");
   const [city, setCity] = useState("");
-  const [jobCatagory, setJobCatagory] = useState("");
+  const [category, setJobCatagory] = useState("");
   const [searchInput, setSearchInput] = useState(""); // New state for search input
   const [showMessage, setShowMessage] = useState(false);
   const [buttonClicked, setButtonClicked] = useState(false);
   const [closeWindow, setCloseWindow] = useState(true);
+  const [referencedata, setreferecedata] = useState([]);
 
-  // removing duplicate value from the select option
-  const [duplicateCity, setduplicateCity] = useState(new Set());
-  const [duplicateCategories, setduplicateCategories] = useState(new Set());
-  const [duplicatePaymentMode, setduplicatePaymentMode] = useState(new Set());
-  const [duplicateReference, setduplicateReference] = useState(new Set());
-  const [duplicateJobComplete, setduplicateJobComplete] = useState(new Set());
-  const [duplicateService, setduplicateService] = useState(new Set());
-  const [duplicateBackofficeExe, setduplicateBackofficeExe] = useState(
-    new Set()
-  );
-  const [duplicateTechnicianName, setduplicateTechnicianName] = useState(
-    new Set()
-  );
+  
+useEffect(() => {
+  
+  getreferencetype();
+ 
+}, [])
 
-  useEffect(() => {
-    const uniqueCities = new Set(
-      dsrData?.map((item) => item.customer[0]?.city).filter(Boolean)
-    );
-    const uniquePaymentMode = new Set(
-      dsrData?.map((item) => item.contractType).filter(Boolean)
-    );
-    const uniqueCatagories = new Set(
-      dsrData?.map((item) => item.category).filter(Boolean)
-    );
-    const uniqueReference = new Set(
-      dsrData?.map((item) => item.category).filter(Boolean) //check reference
-    );
-    const uniqueJobComplete = new Set(
-      dsrData?.map((item) => item.jobComplete).filter(Boolean) //check jobComplete
-    );
-    const uniqueService = new Set(
-      dsrData?.map((item) => item.backofficerExe).filter(Boolean) //check Services
-    );
-    const uniqueBackOfficeExe = new Set(
-      dsrData?.map((item) => item.customer[0]?.serviceExecute).filter(Boolean) //check BackofficeExe
-    );
-    const uniqueTechnicianName = new Set(
-      dsrData?.map((item) => item.techName).filter(Boolean) //check BackofficeExe
-    );
-    setduplicateCity(uniqueCities);
-    setduplicatePaymentMode(uniquePaymentMode);
-    setduplicateCategories(uniqueCatagories);
-    setduplicateReference(uniqueReference);
-    setduplicateJobComplete(uniqueJobComplete);
-    setduplicateService(uniqueService);
-    setduplicateBackofficeExe(uniqueBackOfficeExe);
-    setduplicateTechnicianName(uniqueTechnicianName);
-  }, [dsrData]);
-
-  const getDsrDetails = async () => {
-    try {
-      const res = await axios.post(apiURL + "/filterdsrdata", {
-        category:jobCatagory,
-        startDate: fromData,
-        endDate: toData,
-        city,
-      });
-      if (res.status === 200) {
-
-        setDsrData(res.data.data);
-        setFilteredData(res.data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching DSR details:", error);
+  
+  const getreferencetype = async () => {
+    let res = await axios.get(apiURL + "/master/getreferencetype");
+    if ((res.status = 200)) {
+      setreferecedata(res.data?.masterreference);
     }
   };
 
-  useEffect(() => {
-    getDsrDetails();
-  }, []);
+  const filterData = async () => {
+    try {
+      const res = await axios.post(`${apiURL}/dsrreportfilter`, {
+       
+        fromdate,
+        todate,
+        jobComplete,
+        city,
+        service,
+        BackofficeExecutive,
+        TechorPMorVendorName,
+        category,
+        type
+
+
+      });
+
+      if (res.status === 200) {
+        console.log("res.data?.dsrdata",res.data?.dsrdata)
+        setFilteredData(res.data?.dsrdata);
+
+      } else {
+        // Set filterdata to an empty array in case of an error
+        setFilteredData([]);
+      }
+    } catch (error) {
+      setFilteredData([]);
+    }
+  };
+
+  // useEffect(() => {
+  //   filterData()
+  // }, []);
 
   const handleSearch = () => {
-    setFilteredData(dsrData);
+    // setFilteredData(dsrData);
     setSearchInput("");
     setShowMessage(true);
-    getDsrDetails()
+    filterData()
+    
     
 
-    const filteredResults = dsrData.filter((item) => {
-      const itemClassification =
-        item.servicedetails?.[0]?.contractType
-          ?.toLowerCase()
-          .includes(paymentMode.toLowerCase()) ?? true;
 
-      const itemBackOffice =
-        item.backofficerExe?.toLowerCase().includes(backOffice.toLowerCase()) ??
-        true;
-
-      const itemTechnicianName =
-        item.techName?.toLowerCase().includes(technicianName.toLowerCase()) ??
-        true;
-
-      const itemJobComplete =
-        item.jobComplete?.toLowerCase().includes(jobComplete.toLowerCase()) ??
-        true;
-
-      const itemJobCatagory =
-        item.category?.toLowerCase().includes(jobCatagory.toLowerCase()) ??
-        true;
-
-      const itemCity =
-        item.customer?.[0]?.city?.toLowerCase().includes(city.toLowerCase()) ??
-        true;
-
-      return (
-        itemClassification &&
-        itemBackOffice &&
-        itemTechnicianName &&
-        itemJobComplete &&
-        itemJobCatagory &&
-        itemCity
-      );
-    });
-
-    setFilteredData(filteredResults);
     setShowMessage(false);
   };
 
@@ -149,16 +95,37 @@ function Report_DSR() {
     setButtonClicked(true);
   };
 
-  // useEffect(() => {
-  //   filterData();
-  // }, [
-  //   paymentMode,
-  //   backOffice,
-  //   technicianName,
-  //   jobComplete,
-  //   city,
-  //   jobCatagory,
-  // ]);
+  const [DuplicateTech, setDuplicateTech] = useState(new Set());
+  
+  const [DuplicateUser, setDuplicateUser] = useState(new Set());
+  
+  const [DuplicateServuce, setDuplicateServuce] = useState(new Set());
+  useEffect(() => {
+    const uniqueTech = new Set(
+      filteredData
+        .map((item) => item.addcalldata[0]?.TechorPMorVendorName)
+        .filter(Boolean)
+    );
+
+    const uniqueUser = new Set(
+      filteredData.map((item) => item.BackofficeExecutive).filter(Boolean)
+    );
+
+    const uniqueservice = new Set(
+      filteredData
+        .map((item) => item.service)
+        .filter(Boolean)
+    );
+
+   
+
+   
+    setDuplicateTech(uniqueTech);
+    setDuplicateUser(uniqueUser);
+    setDuplicateServuce(uniqueservice);
+  }, [filteredData]);
+ 
+
 
   const exportData = () => {
     const fileName = "dsr_data.xlsx";
@@ -173,13 +140,10 @@ function Report_DSR() {
       name: "Sl  No",
       selector: (row, index) => index + 1,
     },
+    
     {
-      name: "Card No",
-      selector: (row) => (row.cardNo ? row.cardNo : "-"),
-    },
-    {
-      name: "Cr.Date",
-      selector: (row) => (row.createdAt ? row.createdAt : "-"),
+      name: "Book Date",
+      selector: (row) => (row.date ? row.date : "-"),
     },
     {
       name: "Classification",
@@ -188,21 +152,21 @@ function Report_DSR() {
     {
       name: "Customer Name",
       selector: (row) =>
-        row.customer[0]?.customerName ? row.customer[0]?.customerName : "-",
+        row.customerData[0]?.customerName ? row.customerData[0]?.customerName : "-",
     },
     {
       name: "Contact",
       selector: (row) =>
-        row.customer[0]?.mainContact ? row.customer[0]?.mainContact : "-",
+        row.customerData[0]?.mainContact ? row.customerData[0]?.mainContact : "-",
     },
     {
       name: "City",
-      selector: (row) => (row.customer[0]?.city ? row.customer[0]?.city : "-"),
+      selector: (row) => (row.city ? row.city : "-"),
     },
     {
       name: "Reference",
       selector: (row) =>
-        row.enquiryData[0]?.reference1 ? row.enquiryData[0]?.reference1 : "-",
+        row?.type ? row?.type : "-",
     },
     {
       name: "Job Category",
@@ -212,44 +176,41 @@ function Report_DSR() {
       name: "Technician",
       selector: (row) => (row.techName ? row.techName : "-"),
     },
-    {
-      name: "Repair Remark",
-      selector: (row) => "-",
-    },
+   
     {
       name: "Amount",
-      selector: (row) => (row.amount ? row.amount : "-"),
+      selector: (row) => (row.GrandTotal ? row.GrandTotal : "-"),
     },
     {
       name: "Complete",
-      selector: (row) => (row.jobComplete ? row.jobComplete : "_"),
+      selector: (row) => (row?.addcalldata[0]?.jobComplete ? row?.addcalldata[0]?.jobComplete : "_"),
     },
     {
       name: "BackOffice Exe",
-      selector: (row) => (row.backofficerExe ? row.backofficerExe : "-"),
+      selector: (row) => (row.BackofficeExecutive ? row.BackofficeExecutive : "-"),
     },
   ];
 
-  const conditionalRowStyles = [
-    {
-      when: (row) => row.customer[0]?.color === "ORANGE",
-      style: {
-        backgroundColor: "orange",
-      },
-    },
-    {
-      when: (row) => row.customer[0]?.color === "RED",
-      style: {
-        backgroundColor: "red",
-      },
-    },
-    {
-      when: (row) => row.customer[0]?.color === "GREEN Company",
-      style: {
-        backgroundColor: "green",
-      },
-    },
-  ];
+  // const conditionalRowStyles = [
+  //   {
+  //     when: (row) => row.customer[0]?.color === "ORANGE",
+  //     style: {
+  //       backgroundColor: "orange",
+  //     },
+  //   },
+  //   {
+  //     when: (row) => row.customer[0]?.color === "RED",
+  //     style: {
+  //       backgroundColor: "red",
+  //     },
+  //   },
+  //   {
+  //     when: (row) => row.customer[0]?.color === "GREEN Company",
+  //     style: {
+  //       backgroundColor: "green",
+  //     },
+  //   },
+  // ];
   return (
     <div style={{ backgroundColor: "#f9f6f6" }} className="web">
       <div>
@@ -283,26 +244,31 @@ function Report_DSR() {
                       <input
                         className="report-select"
                         type="date"
-                        onClick={(e) => setFromData(e.target.value)}
+                        onChange={(e) => setFromData(e.target.value)}
                       />
                     </div>
                   </div>
                   <br />
+
                   <div className="row">
-                    <div className="col-md-4">Payment mode </div>
+                    <div className="col-md-4">Category</div>
                     <div className="col-md-1 ms-4">:</div>
                     <div className="col-md-5 ms-4">
                       <select
                         className="report-select"
-                        onClick={(e) => setPaymentMode(e.target.value)}
+                        onChange={(e) => setJobCatagory(e.target.value)}
+                        // style={{ width: "70%" }}
                       >
                         <option>Select</option>
-                        {[...duplicatePaymentMode].map((contractType) => (
-                          <option value={contractType}>{contractType}</option>
+                        {admin?.category.map((category, index) => (
+                          <option key={index} value={category.name}>
+                            {category.name}
+                          </option>
                         ))}
                       </select>
                     </div>
                   </div>
+                
                   <br />
                   <div className="row">
                     <div className="col-md-4">Technician Name </div>
@@ -313,7 +279,7 @@ function Report_DSR() {
                         onClick={(e) => setTechnicianName(e.target.value)}
                       >
                         <option>Select</option>
-                        {[...duplicateTechnicianName].map((techName) => (
+                        {[...DuplicateTech].map((techName) => (
                           <option key={techName}>{techName}</option>
                         ))}
                       </select>
@@ -326,10 +292,10 @@ function Report_DSR() {
                     <div className="col-md-5 ms-4">
                       <select
                         className="report-select"
-                        onClick={(e) => setBackOffice(e.target.value)}
+                        onChange={(e) => setBackOffice(e.target.value)}
                       >
                         <option>Select</option>
-                        {[...duplicateBackofficeExe].map((serviceExecute) => (
+                        {[...DuplicateUser].map((serviceExecute) => (
                           <option value={serviceExecute}>
                             {serviceExecute}
                           </option>
@@ -344,33 +310,36 @@ function Report_DSR() {
                     <div className="col-md-5 ms-4">
                       <select
                         className="report-select"
-                        onClick={(e) => setService(e.target.value)}
+                        onChange={(e) => setService(e.target.value)}
                       >
                         <option>Select</option>
-                        {dsrData.map((item) => (
-                          <option>{item.backofficerExe}</option>
+                        {[...DuplicateServuce].map((service) => (
+                          <option value={service}>
+                            {service}
+                          </option>
                         ))}
                       </select>
                     </div>
                   </div>
                   <br />
                   <div className="row">
-                    <div className="col-md-4">Job Status </div>
+                    <div className="col-md-4">Payment mode </div>
                     <div className="col-md-1 ms-4">:</div>
                     <div className="col-md-5 ms-4">
                       <select
                         className="report-select"
-                        onClick={(e) => setJobStatus(e.target.value)}
+                        onChange={(e) => setPaymentMode(e.target.value)}
                       >
-                        <option vallue="">Select</option>
-                        <option value="Open">Open</option>
-                        <option value="Close">Close</option>
+                        <option>Select</option>
+                        {/* {[...duplicatePaymentMode].map((contractType) => (
+                          <option value={contractType}>{contractType}</option>
+                        ))} */}
                       </select>
                     </div>
-                  </div>{" "}
+                  </div>
                   <br />
                 </div>
-                {/* next Row=================================== */}
+
                 <div className="col-md-5">
                   <br />
                   <div className="row"></div>
@@ -382,7 +351,8 @@ function Report_DSR() {
                         className="report-select"
                         type="date"
                         // style={{ width: "70%" }}
-                        onClick={(e) => setToData(e.target.value)}
+                        value={moment().format("MM-DD-YYYY")}
+                        onChange={(e) => setToData(e.target.value)}
                       />
                     </div>
                   </div>
@@ -394,12 +364,13 @@ function Report_DSR() {
                       <select
                         className="report-select"
                         // style={{ width: "70%" }}
-                        onClick={(e) => setJobComplete(e.target.value)}
+                        onChange={(e) => setJobComplete(e.target.value)}
                       >
                         <option>All</option>
-                        {[...duplicateJobComplete].map((jobComplete) => (
-                          <option value={jobComplete}>{jobComplete}</option>
-                        ))}
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+                        <option value="CANCEL">CANCEL</option>
+                       
                       </select>
                     </div>
                   </div>
@@ -410,32 +381,21 @@ function Report_DSR() {
                     <div className="col-md-5 ms-4">
                       <select
                         className="report-select"
-                        onClick={(e) => setCity(e.target.value)}
+                        onChange={(e) => setCity(e.target.value)}
                       >
                         <option>Select</option>
-                        {[...duplicateCity].map((city) => (
-                          <option value={city}>{city}</option>
+                        {admin?.city.map((item) => (
+                          <option value={item.name}>{item.name}</option>
                         ))}
                       </select>
                     </div>
                   </div>
                   <br />
-                  <div className="row">
-                    <div className="col-md-4">Category</div>
-                    <div className="col-md-1 ms-4">:</div>
-                    <div className="col-md-5 ms-4">
-                      <select
-                        className="report-select"
-                        onClick={(e) => setJobCatagory(e.target.value)}
-                        // style={{ width: "70%" }}
-                      >
-                        <option>Select</option>
-                        {[...duplicateCategories].map((category) => (
-                          <option value={category}>{category}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
+                 
+
+
+
+
                   <br />
                   <div className="row">
                     <div className="col-md-4">Reference</div>
@@ -443,12 +403,17 @@ function Report_DSR() {
                     <div className="col-md-5 ms-4">
                       <select
                         className="report-select"
-                        onClick={(e) => setReference(e.target.value)}
+                        onChange={(e) => settype(e.target.value)}
                         // style={{ width: "70%" }}
                       >
                         <option>Select</option>
-                        {[...duplicateReference].map((category) => (
-                          <option value={category}>{category}</option>
+                        <option value="userapp">userapp</option>
+                        <option value="website">website</option>
+                        <option value="justdail">justdail</option>
+                        {referencedata.map((i) => (
+                          <option key={i.referencetype} value={i.referencetype}>
+                            {i.referencetype}
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -464,7 +429,7 @@ function Report_DSR() {
                       backgroundColor: "#a9042e",
                       borderRadius: "5px",
                     }}
-                    // onClick={() => {
+                    // onChange={() => {
                     //   filterData();
                     //   setButtonClicked(true);
                     // }}
@@ -557,12 +522,12 @@ function Report_DSR() {
         <DataTable
           columns={columns}
           data={filteredData}
-          pagination
+          // pagination
           fixedHeader
           selectableRowsHighlight
           subHeaderAlign="left"
           highlightOnHover
-          conditionalRowStyles={conditionalRowStyles}
+          // conditionalRowStyles={conditionalRowStyles}
         />
       </div>
     </div>

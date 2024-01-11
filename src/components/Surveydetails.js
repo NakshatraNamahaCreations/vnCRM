@@ -74,37 +74,35 @@ function Createquote() {
     }
   };
 
-  useEffect(() => {
-    const getServicebyCategory = async () => {
-      try {
-        let res = await axios.post(apiURL + `/userapp/getservicebycategory/`, {
-          category: data?.enquirydata[0]?.category,
-        });
-        if (res.status === 200) {
-          // console.log("service details by category", res.data);
-          setServiceDetails(res.data?.serviceData);
-          if (res.data?.serviceData.length > 0) {
-            setServiceId(res.data.serviceData[0]._id);
-          } else {
-            setServiceSlots([]);
-          }
-        }
-      } catch (error) {
-        console.log("Error", error);
-      }
-    };
+  // useEffect(() => {
+  //   const getServicebyCategory = async () => {
+  //     try {
+  //       let res = await axios.post(apiURL + `/userapp/getservicebycategory/`, {
+  //         category: data?.enquirydata[0]?.category,
+  //       });
+  //       if (res.status === 200) {
+  //         // console.log("service details by category", res.data);
+  //         setServiceDetails(res.data?.serviceData);
+  //         if (res.data?.serviceData.length > 0) {
+  //           setServiceId(res.data.serviceData[0]._id);
+  //         } else {
+  //           setServiceSlots([]);
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.log("Error", error);
+  //     }
+  //   };
 
-    getServicebyCategory();
-  }, [data?.category]);
+  //   getServicebyCategory();
+  // }, [data?.category]);
 
   useEffect(() => {
     const getSlotsByService = async () => {
       try {
-        let res = await axios.post(apiURL + `/userapp/getslotsbyservice/`, {
-          serviceId: serviceId,
-        });
+        let res = await axios.post(apiURL + `/userapp/getslots/`);
         if (res.status === 200) {
-          setServiceSlots(res.data?.success.store_slots);
+          setServiceSlots(res.data?.slots);
         }
       } catch (error) {
         console.log("Error", error);
@@ -134,21 +132,22 @@ function Createquote() {
 
   useEffect(() => {
     getallslots();
-  }, []);
+  }, [data]);
 
-  const [slotdata, setslotdata] = useState([]);
+
 
   const getallslots = async () => {
-    let res = await axios.get(apiURL + "/getwhatsapptemplate");
+    let res = await axios.get(apiURL + "/userapp/getslots");
     if (res.status === 200) {
-      setslotdata(res.data?.slots);
+      // console.log("res.data?.slots",res.data?.slots)
+      setServiceSlots(res.data?.slots);
     }
   };
 
   let getTemplateDatails = whatsappdata.find(
     (item) => item.templatename === "Survey assign"
   );
-  console.log("appoDate !== data?.nxtfoll", appoDate !== data?.nxtfoll)
+
 
   const Save = async (e) => {
     e.preventDefault();
@@ -482,12 +481,7 @@ function Createquote() {
                         ) : (
                           <option>--select--</option>
                         )}
-                        {serviceSlots
-                          ?.filter(
-                            (slot) =>
-                              slot.slotCity === data?.enquirydata[0]?.city // Filter based on city match
-                          )
-                          .map((slot, index) => (
+                        {serviceSlots?.map((slot, index) => (
                             <option key={index} value={`${slot.startTime}`}>
                               {`${slot.startTime} `}
                             </option>

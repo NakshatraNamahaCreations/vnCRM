@@ -170,6 +170,7 @@ import New from "./components/Tab/New";
 import Quotations from "./components/Tab/Quotations";
 import Today from "./components/Tab/Today";
 import Customersearchdetailsqote from "./components/Customersearchdetailsqote";
+import Pmaterial from "./components/Tab/Pmaterial";
 
 function App() {
   return (
@@ -349,6 +350,7 @@ function App() {
           <Route path="/painting/:id" element={<Painting />} />
           <Route path="/customeredit" element={<Customeredit />} />
 
+          <Route path="/pmaterial" element={<Pmaterial />} />
           <Route path="/work/:id" element={<Work />} />
 
           <Route path="/payment/:id" element={<Payment />} />

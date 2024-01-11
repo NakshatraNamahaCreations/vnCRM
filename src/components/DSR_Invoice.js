@@ -110,7 +110,6 @@ let netTotalInWords = "";
   }
 
 
-
   return (
     <div >
       {/* <Header />s */}

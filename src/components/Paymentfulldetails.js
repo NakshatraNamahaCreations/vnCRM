@@ -111,15 +111,15 @@ function Payment() {
 
   const getPaymentById = async () => {
     try {
-      const customerId = data?.customerData[0]._id;
+
 
       let res = await axios.get(
-        apiURL + `/getPaymentByCustomerId/${customerId}`
+        apiURL + `/getPaymentByCustomerId/${data._id }`
       );
       if (res.status === 200) {
-        
+        console.log("payments",res.data?.payments)
         setPaymentDetails(
-          res.data?.payments.filter((i) => i.serviceId === data._id  )
+          res.data?.payments
         );
       }
     } catch (error) {
@@ -128,7 +128,7 @@ function Payment() {
   };
   useEffect(() => {
     getPaymentById();
-  }, [data2]);
+  }, [data]);
 
   useEffect(() => {
     // Filter payments by paymentType

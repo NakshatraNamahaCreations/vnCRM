@@ -208,10 +208,11 @@ function Paymentfilterlist() {
     return totalAmount.toFixed(2); // Format the total amount with two decimal places
   }
 
-  function calculatePendingPaymentAmount(paymentData, serviceCharge) {
+  function calculatePendingPaymentAmount(paymentData, serviceCharge,GT,contractType) {
     const totalAmount = calculateTotalPaymentAmount(paymentData);
 
-    const pendingAmount = totalAmount - parseFloat(serviceCharge[0]?.charge);
+    const check=contractType==="AMC"?serviceCharge[0]?.charge:GT
+    const pendingAmount = totalAmount - parseFloat(check);
 
     return pendingAmount.toFixed(2); // Format the pending amount with two decimal places
   }
@@ -671,7 +672,7 @@ function Paymentfilterlist() {
                               i.serviceId === selectedData._id &&
                               i.serviceDate === date
                           ),
-                          selectedData.dividedamtCharges
+                          selectedData.dividedamtCharges,selectedData?.GrandTotal,selectedData?.contractType
                         ) == 0 ? (
                           <p style={{ color: "green" }}>PAYMENT COLLECTED</p>
                         ) : (
@@ -778,7 +779,7 @@ function Paymentfilterlist() {
                                   // &&
                                   // i.serviceDate === date
                                 ),
-                                selectedData.dividedamtCharges
+                                selectedData.dividedamtCharges,selectedData?.GrandTotal,selectedData?.contractType
                               )}
                             </b>
                           </p>
