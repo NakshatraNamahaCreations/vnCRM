@@ -109,6 +109,7 @@ let netTotalInWords = "";
     netTotalInWords = toWords(convertingAmount).replace(/,/g, ""); // Remove commas
   }
 
+console.log("convertingAmount",netTotalInWords)
 
   return (
     <div >

@@ -72,7 +72,14 @@ function Customeredit() {
       };
       await axios(config).then(function (response) {
         if (response.status === 200) {
-          navigate(`/customersearchdetails/${data.cardNo}`);
+          const id = response.data.user;
+          const queryString = new URLSearchParams({
+            rowData: JSON.stringify(id),
+          }).toString();
+          const newTab = window.open(
+            `/customersearchdetails/${id?._id}?${queryString}`,
+            "_blank"
+          );
         }
       });
     } catch (error) {

@@ -37,6 +37,10 @@ function Convertcustomer() {
   const [category, setcategory] = useState("");
 
   useEffect(() => {
+    setlnf(enquiryData ? enquiryData.address : '');
+  }, [enquiryData]);
+  
+  useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const enquiryDataString = urlParams.get("enquiryData");
     const enquiryData = JSON.parse(enquiryDataString);
@@ -44,6 +48,7 @@ function Convertcustomer() {
     setenquiryData(enquiryData);
   }, [id]);
 
+  console.log("lnf",lnf,enquiryData?.address)
   const addcustomer = async (e) => {
     e.preventDefault();
 
@@ -95,7 +100,7 @@ function Convertcustomer() {
               rowData: JSON.stringify(id),
             }).toString();
             const newTab = window.open(
-              `/customersearchdetailsqote/${id?._id}?${queryString}`,
+              `/customersearchdetailsqote/${id?._id}/${id?.EnquiryId}?${queryString}`,
               "_blank"
             );
           }
@@ -294,7 +299,7 @@ function Convertcustomer() {
                         className="col-md-12 vhs-input-value"
                         onChange={(e) => setcity(e.target.value)}
                       >
-                        {/* <option>{enquiryData?.city}</option> */}
+                        <option>--Select city--</option>
                         {admin?.city.map((item) => (
                           <option value={item.name}>{item.name}</option>
                         ))}
