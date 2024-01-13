@@ -30,13 +30,11 @@ function Quotationterm() {
 
   const getQuotePage = async () => {
     try {
-      let res = await axios.get(apiURL + `/getenquiryquote`);
+      let res = await axios.get(apiURL + `/getenquiryquote/${EnquiryId}`);
       if (res.status === 200) {
         // Change from = to === for comparison
-        setdata(res.data?.enquiryadd.filter((i) => i.EnquiryId == EnquiryId));
-        console.log(
-          res.data?.enquiryadd.filter((i) => i.EnquiryId == EnquiryId)
-        );
+        setdata(res.data?.enquiryadd);
+       
       }
     } catch (error) {
       console.error("Error fetching data:", error);

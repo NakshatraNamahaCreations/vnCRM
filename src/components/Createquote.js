@@ -167,11 +167,11 @@ function Createquote() {
   };
 
   const getquotepage = async () => {
-    let res = await axios.get(apiURL + "/getenquiryquote");
+    let res = await axios.get(apiURL + `/getenquiryquote/${EnquiryId}`);
     if (res.status === 200) {
       // console.log("getenquiryquote--", res);
       setquotepagedata(
-        res.data?.enquiryadd.filter((item) => item.EnquiryId == EnquiryId)
+        res.data?.enquiryadd
       );
     }
   };
