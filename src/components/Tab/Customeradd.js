@@ -28,7 +28,7 @@ function Customeradd() {
   const apiURL = process.env.REACT_APP_API_URL;
   const [referecetypedata, setreferecetypedata] = useState([]);
 
-  const [latestCardNo, setLatestCardNo] = useState(0);
+  const [latestCardNo, setLatestCardNo] = useState([]);
 
   const handleInputChange = (e) => {
     // Remove any non-numeric characters
@@ -109,7 +109,14 @@ function Customeradd() {
   useEffect(() => {
     getcustomertype();
     getreferencetype();
+    getcustomerlastdata()
   }, []);
+  const getcustomerlastdata = async () => {
+    let res = await axios.get(apiURL + "/getlastcustomer");
+    if (res.status === 200) {
+      setLatestCardNo(res.data?.customers);
+    }
+  };
 
   const getcustomertype = async () => {
     let res = await axios.get(apiURL + "/master/getcustomertype");
@@ -142,7 +149,7 @@ function Customeradd() {
                   <div className="col-md-4 pt-2">
                     <div className="vhs-sub-heading">Card No :</div>
                     <div className="group pt-1 vhs-non-editable">
-                      {latestCardNo ? latestCardNo + 1 : 1}{" "}
+                      {latestCardNo ? latestCardNo[0]?.cardNo + 1 : 1}{" "}
                     </div>
                   </div>
                   <div className="col-md-4 pt-2">

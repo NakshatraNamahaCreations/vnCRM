@@ -22,7 +22,7 @@ function Convertcustomer() {
   const [cnap, setcnap] = useState("");
   const [lnf, setlnf] = useState(enquiryData?.address);
   const [mainarea, setarea] = useState("");
-  const [city, setcity] = useState(enquiryData?.city);
+  const [city, setcity] = useState("");
   const [pincode, setpincode] = useState("");
   const [customertype, setcustomertype] = useState("");
 
@@ -48,11 +48,11 @@ function Convertcustomer() {
     setenquiryData(enquiryData);
   }, [id]);
 
-  console.log("lnf",lnf,enquiryData?.address)
+
   const addcustomer = async (e) => {
     e.preventDefault();
 
-    if (!contactperson || !rbhf || !cnap || !lnf || !customertype || !city ) {
+    if (!contactperson || !rbhf || !cnap  || !customertype || !city ) {
       alert("fill all necessary fileds");
     } else {
       try {
@@ -81,7 +81,7 @@ function Convertcustomer() {
               landmark: cnap,
               platNo: rbhf,
               saveAs: mainarea,
-              address: lnf,
+              address: lnf ?lnf :enquiryData?.address,
             },
             mainArea: mainarea,
             city: city ? city : enquiryData?.city,
@@ -118,12 +118,22 @@ function Convertcustomer() {
   useEffect(() => {
     getcustomertype();
     getreferencetype();
+    getcustomerlastdata();
   }, []);
 
   const getcustomertype = async () => {
     let res = await axios.get(apiURL + "/master/getcustomertype");
     if (res.status === 200) {
       setcustomertypedata(res.data?.mastercustomertype);
+    }
+  };
+  const [customerlastdata, setcustomerlastdata] = useState([])
+
+
+  const getcustomerlastdata = async () => {
+    let res = await axios.get(apiURL + "/getlastcustomer");
+    if (res.status === 200) {
+      setcustomerlastdata(res.data?.customers);
     }
   };
 
@@ -151,7 +161,7 @@ function Convertcustomer() {
                   <div className="col-md-4 pt-2">
                     <div className="vhs-input-label">Card No: </div>
                     <div className="group pt-1 vhs-non-editable">
-                      {customerdata ? customerdata + 1 : 1}
+                      {customerdata ? customerlastdata[0]?.cardNo + 1 : 1}
                     </div>
                   </div>
                   <div className="col-md-4 pt-2">

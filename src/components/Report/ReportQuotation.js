@@ -8,14 +8,15 @@ import { parse, isBefore, isAfter, isSameDay } from "date-fns";
 import moment from "moment";
 
 function Report_Quotation() {
+  const admin = JSON.parse(sessionStorage.getItem("admin"));
   const apiURL = process.env.REACT_APP_API_URL;
   const [quotationData, setQuotationData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [service, setService] = useState("");
   const [city, setCity] = useState("");
   const [saleExecutive, setSalesExcuitive] = useState("");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState(moment().format("YYYY-MM-DD"));
+  const [fromdate, setfromdate] = useState(moment().format("YYYY-MM-DD"));
+  const [todate, setToDate] = useState(moment().format("YYYY-MM-DD"));
   const [category, setCategory] = useState("");
   const [backOfExcuitive, setBackOfExcuitive] = useState("");
   const [staus, setStatus] = useState("");
@@ -23,243 +24,268 @@ function Report_Quotation() {
   const [buttonClicked, setButtonClicked] = useState(false);
   const [closeWindow, setCloseWindow] = useState(true);
   const [searchValue, setSearchValue] = useState("");
-  // removing duplicate value from the select option
-  const [duplicateCity, setduplicateCity] = useState(new Set());
-  const [duplicateService, setduplicateService] = useState(new Set());
-  const [duplicateBackOffice, setduplicateBackOffice] = useState(new Set());
-  const [duplicateCategory, setduplicateCategory] = useState(new Set());
-  const [duplicateSaleExecutive, setduplicateSaleExecutive] = useState(
-    new Set()
-  );
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchCatagory, setSearchCatagory] = useState("");
+  const [searchDateTime, setSearchDateTime] = useState("");
+  const [searchName, setSearchName] = useState("");
+  const [searchContact, setSearchContact] = useState("");
+  const [searchAddress, setSearchAddress] = useState("");
+  const [searchReference, setSearchReference] = useState("");
+  const [searchServices, setsearchServices] = useState("");
+  const [searchenquirydate, setsearchenquirydate] = useState("");
+  const [searchCity, setSearchCity] = useState("");
+  const [searchTotal, setsearchTotal] = useState("");
+  const [searchExecutive, setsearchExecutive] = useState("");
+  const [searchStaff, setSearchStaff] = useState("");
+  const [bookedBy, setbookedBy] = useState("");
+  const [searchDesc, setSearchDesc] = useState("");
+  const [searchNxtfoll, setSearchNxtfoll] = useState("");
+  const [Type, setType] = useState("");
 
-  useEffect(() => {
-    const uniqueCities = new Set(
-      quotationData?.map((item) => item.enquirydata[0]?.city).filter(Boolean)
-    );
-    const uniqueService = new Set(
-      quotationData
-        ?.map((item) => item.enquirydata[0]?.intrestedfor)
-        .filter(Boolean)
-    );
-    const uniqueBackoffice = new Set(
-      quotationData
-        ?.map((item) => item.enquirydata[0]?.executive) //backoffice
-        .filter(Boolean)
-    );
-    const uniqueCatagories = new Set(
-      quotationData
-        ?.map((item) => item.enquirydata[0]?.category)
-        .filter(Boolean)
-    );
-    const uniqueSalesExecutive = new Set( //sales Executive or booked by
-      quotationData?.map((item) => item.Bookedby).filter(Boolean)
-    );
-    setduplicateCity(uniqueCities);
-    setduplicateService(uniqueService);
-    setduplicateBackOffice(uniqueBackoffice);
-    setduplicateCategory(uniqueCatagories);
-    setduplicateSaleExecutive(uniqueSalesExecutive);
-  }, [quotationData]);
 
-  const getQuotationDetails = async () => {
+
+  const filterData = async () => {
     try {
-      const res = await axios.get(apiURL + "/getallquote");
+      const res = await axios.post(`${apiURL}/QUOTEFilterdata`, {
+        category,
+        fromdate,
+        todate,
+
+
+      });
+
       if (res.status === 200) {
-        const data = res.data.quote;
-        console.log("QuotationData", data);
-        setQuotationData(data);
-        setFilteredData(data);
+        setSearchResults(res.data?.enquiryadd)
+        setFilteredData(res.data?.enquiryadd);
+
+      } else {
+        // Set filterdata to an empty array in case of an error
+        setFilteredData([]);
       }
     } catch (error) {
-      console.error("Error fetching DSR details:", error);
+      setFilteredData([]);
     }
   };
 
-  useEffect(() => {
-    getQuotationDetails();
-  }, []);
-
-  const handleSearch = () => {
-    setFilteredData(quotationData);
-    setSearchValue("");
-    setShowMessage(true);
-
-    const filteredResults = quotationData.filter((item) => {
-      const enquiryDate = parse(item.date, "MM/dd/yyyy", new Date());
-
-      const fromDateObj = fromDate
-        ? parse(fromDate, "yyyy-MM-dd", new Date())
-        : null;
-      const toDateObj = toDate ? parse(toDate, "yyyy-MM-dd", new Date()) : null;
-
-      const itemCity =
-        city.toLowerCase() === "all" ||
-        item.enquirydata[0]?.city.toLowerCase().includes(city.toLowerCase());
-
-      const itemFromDate =
-        !fromDate ||
-        isAfter(enquiryDate, fromDateObj) ||
-        isSameDay(enquiryDate, fromDateObj);
-      const itemToDate =
-        !toDate ||
-        isBefore(enquiryDate, toDateObj) ||
-        isSameDay(enquiryDate, toDateObj);
-
-      const itemServices =
-        item.enquirydata?.[0]?.intrestedfor
-          ?.toLowerCase()
-          .includes(service.toLowerCase()) ?? true;
-
-      const itemExcuitive = //Sales Executive or booked by
-        item.Bookedby?.toLowerCase().includes(saleExecutive.toLowerCase()) ??
-        true;
-
-      const itemCategory =
-        item.enquirydata[0]?.category
-          ?.toLowerCase()
-          .includes(category.toLowerCase()) ?? true;
-
-      const itemBackOfficeExe = //back office excutive
-        item.enquirydata[0]?.executive
-          ?.toLowerCase()
-          .includes(backOfExcuitive.toLowerCase()) ?? true;
-
-      const isFiltered =
-        itemFromDate &&
-        itemToDate &&
-        itemServices &&
-        itemCity &&
-        itemExcuitive &&
-        itemCategory &&
-        itemBackOfficeExe;
-
-      console.log("Final Filter Result:", isFiltered);
-
-      return isFiltered;
-    });
-    setFilteredData(filteredResults);
-    setSearchValue(
-      service ||
-        city ||
-        saleExecutive ||
-        fromDate ||
-        toDate ||
-        category ||
-        backOfExcuitive
-    );
-    setShowMessage(false);
-  };
 
   const handleSearchClick = () => {
-    handleSearch();
+    filterData();
     setButtonClicked(true);
-    setFromDate(""); // Add this line
-    setToDate(""); // Add this line
   };
 
+
   const exportData = () => {
-    const fileName = "dsr_data.xlsx";
-    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const fileName = "Quotation_Report.xlsx";
+    const filteredData1 = searchResults?.map(item => ({
+      Quotedatetime: `${item.date},${item.time}`,
+      category: item?.enquirydata[0]?.category,
+      customerName: item?.enquirydata[0]?.name,
+      mobile: item.enquirydata[0]?.mobile,
+      city: item?.enquirydata[0]?.city,
+
+      address: item.enquirydata[0]?.address,
+      reference1: item?.enquirydata[0]?.reference1,
+
+      QuoteAmt: item?.netTotal,
+      intrestedfor: item.enquirydata[0]?.intrestedfor,
+      Comment: item?.Comment,
+      desc: item?.quotefollowup[0]?.desc,
+      Bookedby: item?.Bookedby,
+      SalesExecutive: item?.enquirydata[0]?.executive,
+      status: item?.quotefollowup[0]?.response === "Confirmed"
+        ? "CONFIRMED"
+        : item?.type === "QUOTE SHARED"
+          ? "QUOTE SHARED"
+          : "NOT SHARED"
+
+
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(filteredData1);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Category Data");
     XLSX.writeFile(workbook, fileName);
   };
 
-  const columns = [
-    {
-      name: "Sl  No",
-      selector: (row, index) => index + 1,
-    },
-    {
-      name: "	En.Date",
-      selector: (row) =>
-        row.enquirydata[0]?.enquirydate ? row.enquirydata[0]?.enquirydate : "-",
-    },
-    {
-      name: "Q Dt-Tm",
-      selector: (row) => (
-        <>
-          {row.date ? row.date : "-"} <br />
-          {row.time ? row.time : "-"}
-        </>
-      ),
-    },
-    {
-      name: "Name",
-      selector: (row, index) =>
-        row.enquirydata[0]?.name ? row.enquirydata[0]?.name : "-",
-    },
-    {
-      name: "Contact No",
-      selector: (row) =>
-        row.enquirydata[0]?.mobile ? row.enquirydata[0]?.mobile : "-",
-    },
-    {
-      name: "Address",
-      selector: (row) =>
-        row.enquirydata[0]?.address ? row.enquirydata[0]?.address : "-",
-    },
-    {
-      name: "City",
-      selector: (row) =>
-        row.enquirydata[0]?.city ? row.enquirydata[0]?.city : "-",
-    },
-    {
-      name: "Service",
-      selector: (row) =>
-        row.enquirydata[0]?.intrestedfor
-          ? row.enquirydata[0]?.intrestedfor
-          : "-",
-    },
-    {
-      name: "Q Amt	",
-      selector: (row) =>
-        row.enquirydata[0]?.city ? row.enquirydata[0]?.city : "-",
-    },
-    {
-      name: "Sales Executive",
-      selector: (row) =>
-        row?.enquirydata[0]?.executive ? row?.enquirydata[0]?.executive : "-",
-    },
-    {
-      name: "Booked By",
-      selector: (row) => (row.Bookedby ? row.Bookedby : "-"),
-    },
-    {
-      name: "Last F/W Dt",
-      selector: (row) => (row.appoDate ? row.appoDate : "-"),
-    },
-    {
-      name: "Nxt F/W Dt",
-      selector: (row) =>
-        row.quotefollowup[0]?.nxtfoll ? row.quotefollowup[0]?.nxtfoll : "-",
-    },
-    {
-      name: "Description",
-      selector: (row) =>
-        row.enquirydata[0]?.comment ? row.enquirydata[0]?.comment : "-",
-    },
-    {
-      name: "TYPE",
-      selector: (row) => "-",
-    },
-  ];
 
-  const handleExecutiveChange = (e) => {
-    const selectedExecutive = e.target.value;
-    console.log(selectedExecutive); // Check the selected executive value
-    setBackOfExcuitive(selectedExecutive);
+  useEffect(() => {
+    const filterResults = () => {
+      let results = filteredData;
+      if (searchCatagory) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.category &&
+            item.enquirydata[0]?.category
+              .toLowerCase()
+              .includes(searchCatagory.toLowerCase())
+        );
+      }
+      if (searchDateTime) {
+        results = results.filter(
+          (item) =>
+            item.date &&
+            item.date.toLowerCase().includes(searchDateTime.toLowerCase())
+        );
+      }
+      if (Type) {
+        results = results.filter((item) => {
+          switch (Type) {
+            case "NOT SHARED":
+              return !(item.quotefollowup[0]?.response === "Confirmed" || item.type === "QUOTE SHARED");
+            case "QUOTE SHARED":
+              return item.type === "QUOTE SHARED";
+            case "CONFIRMED":
+              return item.quotefollowup[0]?.response === "Confirmed";
+            default:
+              return true;
+          }
+        });
+      }
+
+
+      if (searchName) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.name &&
+            item.enquirydata[0]?.name
+              .toLowerCase()
+              .includes(searchName.toLowerCase())
+        );
+      }
+      if (searchContact) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.mobile &&
+            item.enquirydata[0]?.mobile
+              .toLowerCase()
+              .includes(searchContact.toLowerCase())
+        );
+      }
+      if (searchAddress) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.address &&
+            item.enquirydata[0]?.address
+              .toLowerCase()
+              .includes(searchAddress.toLowerCase())
+        );
+      }
+
+      if (searchServices) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.intrestedfor &&
+            item.enquirydata[0]?.intrestedfor
+              .toLowerCase()
+              .includes(searchServices.toLowerCase())
+        );
+      } //
+      if (searchCity) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.city &&
+            item.enquirydata[0]?.city
+              .toLowerCase()
+              .includes(searchCity.toLowerCase())
+        );
+      }
+      if (searchTotal) {
+        results = results.filter(
+          (item) =>
+            item.netTotal &&
+            item.netTotal.toLowerCase().includes(searchTotal.toLowerCase())
+        );
+      }
+      if (searchExecutive) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.executive &&
+            item.enquirydata[0]?.executive
+              .toLowerCase()
+              .includes(searchExecutive.toLowerCase())
+        );
+      }
+      if (searchStaff) {
+        results = results.filter(
+          (item) =>
+            item.staffname &&
+            item.staffname.toLowerCase().includes(searchStaff.toLowerCase())
+        );
+      }
+      if (bookedBy) {
+        results = results.filter(
+          (item) =>
+            item.Bookedby &&
+            item.Bookedby.toLowerCase().includes(bookedBy.toLowerCase())
+        );
+      }
+      if (searchDesc) {
+        results = results.filter(
+          (item) =>
+            item.quotefollowup[0]?.desc &&
+            item.quotefollowup[0]
+              ?.desctoLowerCase()
+              .includes(searchDesc.toLowerCase())
+        );
+      }
+      if (searchNxtfoll) {
+        results = results.filter(
+          (item) =>
+            item.nxtfoll &&
+            item.nxtfoll.toLowerCase().includes(searchNxtfoll.toLowerCase())
+        );
+      }
+      // results = results.map((item) => ({
+      //   ...item,
+      //   category: getUniqueCategories()[item.category],
+      // }));
+      setSearchResults(results);
+    };
+    filterResults();
+  }, [
+    searchCatagory,
+    searchName,
+    searchDateTime,
+    searchContact,
+    searchAddress,
+    searchReference,
+    searchCity,
+    searchServices,
+    searchExecutive,
+    searchStaff,
+    bookedBy,
+    searchDesc,
+    searchNxtfoll,
+    Type
+  ]);
+  const calculateBackgroundColor = (item) => {
+    const response = item?.quotefollowup[0]?.response;
+    const qshared = item?.type;
+
+    const dateDifference = Date.now() - new Date(item?.updatedAt).getTime();
+    const isDateOld = dateDifference > 30 * 60 * 60 * 1000; // 30 hours in milliseconds
+    const daysDifference = Math.floor(dateDifference / (24 * 60 * 60 * 1000));
+
+    return response === "Confirmed" || response === ""
+      ? "#ffb9798f" :
+      qshared === "QUOTE SHARED" ? "rgba(0, 128, 0, 0.18)"
+        : isDateOld
+          ? daysDifference > 10
+            ? "pink"
+            : "#ff00004a"
+          : "white";
   };
 
-  const handleSalesExecutiveChange = (e) => {
-    const saleExecutive = e.target.value;
-    console.log(saleExecutive); // Check the selected reference value
-    setSalesExcuitive(saleExecutive);
-  };
-  const handleServiceChange = (e) => {
-    const selectedService = e.target.value;
-    console.log(selectedService); // Check the selected service value
-    setService(selectedService);
+  const [userdata, setuserdata] = useState([]);
+  const getuser = async () => {
+    try {
+      let res = await axios.get(apiURL + "/master/getuser");
+      if (res.status === 200) {
+        setuserdata(res.data?.masteruser);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      // Handle the error, e.g., set an error state
+    }
   };
 
   return (
@@ -294,13 +320,14 @@ function Report_Quotation() {
                     <div className="col-md-5 ms-4">
                       <input
                         className="report-select"
-                        onChange={(e) => setFromDate(e.target.value)}
+                        onChange={(e) => setfromdate(e.target.value)}
+                        value={fromdate}
                         type="date"
                       />
                     </div>
                   </div>
                   <br />
-                  <div className="row">
+                  {/* <div className="row">
                     <div className="col-md-4">City </div>
                     <div className="col-md-1 ms-4">:</div>
                     <div className="col-md-5 ms-4">
@@ -309,8 +336,8 @@ function Report_Quotation() {
                         onChange={(e) => setCity(e.target.value)}
                       >
                         <option>Select</option>
-                        {[...duplicateCity].map((city) => (
-                          <option key={city}>{city}</option>
+                        {admin?.city.map((item) => (
+                          <option value={item.name}>{item.name}</option>
                         ))}
                       </select>
                     </div>
@@ -342,14 +369,17 @@ function Report_Quotation() {
                         onClick={handleExecutiveChange}
                       >
                         <option>Select</option>
-                        {[...duplicateBackOffice].map((BackOffice) => (
-                          <option key={BackOffice}>{BackOffice}</option>
-                        ))}
+                        {userdata
+                          .sort((a, b) => a.displayname.localeCompare(b.displayname))
+                          .map((i) => (
+                            <option key={i.displayname}>{i.displayname}</option>
+                          ))}
+
                       </select>
                     </div>
                   </div>
                   <br />
-                  <br />
+                  <br /> */}
 
                   <br />
                 </div>
@@ -364,11 +394,12 @@ function Report_Quotation() {
                         className="report-select"
                         onChange={(e) => setToDate(e.target.value)}
                         type="date"
+                        value={todate}
                       />
                     </div>
                   </div>
                   <br />
-                  <div className="row">
+                  {/* <div className="row">
                     <div className="col-md-4 ">Category </div>
                     <div className="col-md-1 ms-4">:</div>
                     <div className="col-md-5 ms-4">
@@ -377,8 +408,10 @@ function Report_Quotation() {
                         onChange={(e) => setCategory(e.target.value)}
                       >
                         <option>All</option>
-                        {[...duplicateCategory].map((category) => (
-                          <option key={category}>{category}</option>
+                      {admin?.category.map((category, index) => (
+                          <option key={index} value={category.name}>
+                            {category.name}
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -415,7 +448,7 @@ function Report_Quotation() {
                         <option value="Cancelled">cancelled</option>
                       </select>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
                 <p style={{ justifyContent: "center", display: "flex" }}>
                   <button
@@ -444,7 +477,7 @@ function Report_Quotation() {
                     <i
                       class="fa-solid fa-download"
                       title="Download"
-                      // style={{ color: "white", fontSize: "27px" }}
+                    // style={{ color: "white", fontSize: "27px" }}
                     ></i>{" "}
                     Export
                   </button>
@@ -514,15 +547,208 @@ function Report_Quotation() {
           </Card>
         </div>{" "}
         <br />
-        <DataTable
-          columns={columns}
-          data={filteredData}
-          pagination
-          fixedHeader
-          selectableRowsHighlight
-          subHeaderAlign="left"
-          highlightOnHover
-        />
+        <div className="row m-auto">
+          <div className="col-md-12">
+            {/* Pagination */}
+
+
+            <table className="my-table">
+              <thead>
+                <tr className="bg ">
+                  <th scope="col" className="bor">
+
+                  </th>
+                  <th scope="col" className="bor">
+                    {" "}
+                    <select
+                      className="vhs-table-input"
+                      value={searchCatagory}
+                      onChange={(e) => setSearchCatagory(e.target.value)}
+                    >
+                      <option value="">Select</option>
+                      {admin?.category.map((category, index) => (
+                        <option key={index} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>{" "}
+                  </th>
+                  <th scope="col" className="bor"></th>
+                  <th scope="col" className="bor">
+                    {/* {" "}
+                  <input
+                    className="vhs-table-input"
+                    value={searchDateTime}
+                    onChange={(e) => setSearchDateTime(e.target.value)}
+                  />{" "} */}
+                  </th>
+                  <th scope="col" className="bor">
+                    {" "}
+                    <input
+                      className="vhs-table-input"
+                      value={searchName}
+                      onChange={(e) => setSearchName(e.target.value)}
+                    />{" "}
+                  </th>
+                  <th scope="col" className="bor">
+                    {" "}
+                    <input
+                      className="vhs-table-input"
+                      value={searchContact}
+                      onChange={(e) => setSearchContact(e.target.value)}
+                    />{" "}
+                  </th>
+                  <th scope="col" className="bor">
+                    {" "}
+                    {/* <input
+                    className="vhs-table-input"
+                    value={searchAddress}
+                    onChange={(e) => setSearchAddress(e.target.value)}
+                  />{" "} */}
+                  </th>
+                  <th scope="col" className="bor">
+                    {" "}
+                    <select
+                      className="vhs-table-input"
+                      value={searchCity}
+                      onChange={(e) => setSearchCity(e.target.value)}
+                    >
+                      <option value="">Select </option>
+
+                      {admin?.city.map((item) => (
+                        <option value={item.name}>{item.name}</option>
+                      ))}
+                    </select>{" "}
+                  </th>
+
+                  <th scope="col" className="bor">
+                    <input
+                      className="vhs-table-input"
+                      value={searchServices}
+                      onChange={(e) => setsearchServices(e.target.value)}
+                    />{" "}
+                  </th>
+
+                  <th scope="col" className="bor">
+                    {" "}
+                    {/* <input
+                    className="vhs-table-input"
+                    value={searchTotal}
+                    onChange={(e) => setsearchTotal(e.target.value)}
+                  /> */}
+                  </th>
+
+                  <th scope="col" className="bor">
+                    {" "}
+                    <input
+                      className="vhs-table-input"
+                      value={searchExecutive}
+                      onChange={(e) => setsearchExecutive(e.target.value)}
+                    />{" "}
+                  </th>
+                  <th scope="col" className="bor">
+                    <input
+                      className="vhs-table-input"
+                      value={bookedBy}
+                      onChange={(e) => setbookedBy(e.target.value)}
+                    />{" "}
+                  </th>
+
+                  <th scope="col" className="bor">
+                    {/* <input
+                    className="vhs-table-input"
+                    value={searchenquirydate}
+                    onChange={(e) => setsearchenquirydate(e.target.value)}
+                  />{" "} */}
+                  </th>
+
+                  <th scope="col" className="bor">
+                    {/* <input
+                    className="vhs-table-input"
+                    value={searchNxtfoll}
+                    onChange={(e) => setSearchNxtfoll(e.target.value)}
+                  />{" "} */}
+                  </th>
+                  <th scope="col" className="bor">
+                    {/* <input
+                    className="vhs-table-input"
+                    value={searchDesc}
+                    onChange={(e) => setSearchDesc(e.target.value)}
+                  />{" "} */}
+                  </th>
+                  <th scope="col" className="bor">
+                    <select className="vhs-table-input" onChange={(e) => setType(e.target.value)}>
+                      <option>Select </option>
+
+                      <option value="NOT SHARED">NOT SHARED </option>
+                      <option value="QUOTE SHARED">QUOTE SHARED </option>
+                      <option value="CONFIRMED">CONFIRMED </option>
+                    </select>{" "}
+                  </th>
+                </tr>
+                <tr className="bg">
+                  <th className="bor">#</th>
+                  <th className="bor">Category</th>
+                  <th className="bor">QId</th>
+                  <th className="bor">Q Dt-Tm</th>
+                  <th className="bor">Name</th>
+                  <th className="bor">Contact</th>
+                  <th className="bor">Address</th>
+                  <th className="bor">City</th>
+                  <th className="bor">Service</th>
+                  <th className="bor">QAmt</th>
+                  <th className="bor">Sales Executive</th>
+                  <th className="bor">Booked by</th>
+                  <th className="bor">Last F/W Dt</th>
+                  <th className="bor">Next F/W Dt</th>
+                  <th className="bor">Desc</th>
+                  <th className="bor">Type</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {searchResults.map((item, index) => (
+
+                  <tr
+                    className="trnew"
+                    style={{ backgroundColor: calculateBackgroundColor(item) }}
+                  >
+                    <td>{index + 1}</td>
+                    <td>{item?.enquirydata[0]?.category}</td>
+                    <td>{item?.quoteId}</td>
+                    <td>
+                      {item?.date}
+                      <br />
+                      {item?.time}
+                    </td>
+                    <td>{item?.enquirydata[0]?.name}</td>
+                    <td>{item?.enquirydata[0]?.mobile}</td>
+                    <td>{item?.enquirydata[0]?.address}</td>
+                    <td>{item?.enquirydata[0]?.city}</td>
+                    <td>{item?.enquirydata[0]?.intrestedfor} </td>
+                    <td>{item?.netTotal}</td>
+                    <td>{item?.enquirydata[0]?.executive}</td>
+                    <td>{item?.Bookedby}</td>
+                    <td>{item?.enquirydata[0]?.date}</td>
+                    <td>{item?.quotefollowup[0]?.nxtfoll}</td>
+                    <td>{item?.quotefollowup[0]?.desc}</td>
+                    <td>
+                      {item?.quotefollowup[0]?.response === "Confirmed"
+                        ? "CONFIRMED"
+                        : item?.type === "QUOTE SHARED"
+                          ? "QUOTE SHARED"
+                          : "NOT SHARED"
+                      }
+
+
+                    </td>
+                  </tr>
+
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

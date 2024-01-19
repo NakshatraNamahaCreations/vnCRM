@@ -68,8 +68,9 @@ function Quotationterm() {
   useEffect(() => {
    
       const uniqueCategories = [
-        ...new Set(data[0]?.treatmentdetails?.map((item) => item?.category)),
+        (data[0]?.treatmentdetails[0]?.category),
       ];
+      console.log("uniqueCategories",uniqueCategories)
       const filteredTcdata = tcdata.filter((item) =>
         uniqueCategories.includes(item.category)
       );

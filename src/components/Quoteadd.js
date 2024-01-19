@@ -9,6 +9,8 @@ import Surveynav from "./Surveynav";
 import Quotenav from "./Quotenav";
 
 function Quotelist() {
+  const admin = JSON.parse(sessionStorage.getItem("admin"));
+
   const navigate = useNavigate();
   const [enquiryflwdata, setenquiryflwdata] = useState([]);
   const apiURL = process.env.REACT_APP_API_URL;
@@ -67,10 +69,7 @@ function Quotelist() {
     ele.quotefollowup.map((item) => item.response)
   );
 
-  // const filteringResponse = enquiryflwdata.map((ele) => ele.quotefollowup);
-  // const gettingResponse = filteringResponse.map((item) => item.response);
 
-  console.log("gettingResponse", gettingResponse);
 
   useEffect(() => {
     const filterResults = () => {
@@ -91,6 +90,21 @@ function Quotelist() {
             item.date.toLowerCase().includes(searchDateTime.toLowerCase())
         );
       }
+      if (Type) {
+        results = results.filter((item) => {
+          switch (Type) {
+            case "NOT SHARED":
+              return !(item.quotefollowup[0]?.response === "Confirmed" || item.type === "QUOTE SHARED");
+            case "QUOTE SHARED":
+              return item.type === "QUOTE SHARED";
+            case "CONFIRMED":
+              return item.quotefollowup[0]?.response === "Confirmed";
+            default:
+              return true;
+          }
+        });
+      }
+      
 
       if (searchName) {
         results = results.filter(
@@ -205,6 +219,7 @@ function Quotelist() {
     bookedBy,
     searchDesc,
     searchNxtfoll,
+    Type
   ]);
 
   const click = (data) => {
@@ -236,17 +251,20 @@ function Quotelist() {
   };
   const calculateBackgroundColor = (item) => {
     const response = item?.quotefollowup[0]?.response;
+    const qshared = item?.type;
+
     const dateDifference = Date.now() - new Date(item?.updatedAt).getTime();
     const isDateOld = dateDifference > 30 * 60 * 60 * 1000; // 30 hours in milliseconds
     const daysDifference = Math.floor(dateDifference / (24 * 60 * 60 * 1000));
 
     return response === "Confirmed" || response === ""
-      ? "#ffb9798f"
-      : isDateOld
-      ? daysDifference > 10
-        ? "pink"
-        : "red"
-      : "white";
+      ? "#ffb9798f" :
+      qshared === "QUOTE SHARED" ? "rgba(0, 128, 0, 0.18)"
+        : isDateOld
+          ? daysDifference > 10
+            ? "pink"
+            : "#ff00004a"
+          : "white";
   };
   return (
     <div className="web">
@@ -321,17 +339,20 @@ function Quotelist() {
             <thead>
               <tr className="bg ">
                 <th scope="col" className="bor">
-                  <input className="vhs-table-input" />{" "}
+                
                 </th>
                 <th scope="col" className="bor">
                   {" "}
                   <select
+                    className="vhs-table-input"
                     value={searchCatagory}
                     onChange={(e) => setSearchCatagory(e.target.value)}
                   >
                     <option value="">Select</option>
-                    {[...duplicateCategory].map((category) => (
-                      <option key={category}>{category}</option>
+                    {admin?.category.map((category, index) => (
+                      <option key={index} value={category.name}>
+                        {category.name}
+                      </option>
                     ))}
                   </select>{" "}
                 </th>
@@ -371,20 +392,14 @@ function Quotelist() {
                 <th scope="col" className="bor">
                   {" "}
                   <select
+                    className="vhs-table-input"
                     value={searchCity}
                     onChange={(e) => setSearchCity(e.target.value)}
                   >
                     <option value="">Select </option>
-                    {/* {searchResults.map((e) => (
-                      <option
-                        value={e.enquirydata[0]?.city}
-                        key={e.enquirydata[0]?.city}
-                      >
-                        {e.enquirydata[0]?.city}{" "}
-                      </option>
-                    ))} */}
-                    {[...duplicateCity].map((city) => (
-                      <option key={city}>{city}</option>
+
+                    {admin?.city.map((item) => (
+                      <option value={item.name}>{item.name}</option>
                     ))}
                   </select>{" "}
                 </th>
@@ -445,14 +460,12 @@ function Quotelist() {
                   />{" "} */}
                 </th>
                 <th scope="col" className="bor">
-                  <select onChange={(e) => setType(e.target.value)}>
+                  <select className="vhs-table-input" onChange={(e) => setType(e.target.value)}>
                     <option>Select </option>
-                    {gettingResponse.map((item) => (
-                      <option>{item} </option>
-                    ))}
-                    {/* <option value="NOT SHARED">NOT SHARED </option>
+
+                    <option value="NOT SHARED">NOT SHARED </option>
                     <option value="QUOTE SHARED">QUOTE SHARED </option>
-                    <option value="CONFIRMED">CONFIRMED </option> */}
+                    <option value="CONFIRMED">CONFIRMED </option>
                   </select>{" "}
                 </th>
               </tr>
@@ -475,70 +488,7 @@ function Quotelist() {
                 <th className="bor">Type</th>
               </tr>
             </thead>
-            {/* <tbody>
-          
-                  <div className="tbl">
-                    {currentItems.map((item, index) => {
-                      const response = item?.quotefollowup[0]?.response;
-                      const dateDifference =
-                        Date.now() - new Date(item?.updatedAt).getTime();
-                      const isDateOld = dateDifference > 30 * 60 * 60 * 1000; // 30 hours in milliseconds
 
-                      // Calculate the difference in days
-                      const daysDifference = Math.floor(
-                        dateDifference / (24 * 60 * 60 * 1000)
-                      );
-                      const isDateMoreThan10Days = daysDifference > 10;
-
-                      return (
-                   
-                          <tr
-                            key={index}
-                            className="trnew"
-                            style={{
-                              backgroundColor:
-                                response === "Confirmed" || response === ""
-                                  ? "#ffb9798f"
-                                  : isDateOld
-                                  ? isDateMoreThan10Days
-                                    ? "pink"
-                                    : "red"
-                                  : "white",
-                            }}
-                          >
-                            <a onClick={()=>click(item?.enquirydata[0]?.EnquiryId)}>
-                              <td>{item?.enquirydata[0]?.EnquiryId}</td>
-                              <td>{item?.enquirydata[0]?.category}</td>
-                              <td>{item?.quoteId}</td>
-                              <td>
-                                {item?.date}
-                                <br />
-                                {item?.time}
-                              </td>
-                              <td>{item?.enquirydata[0]?.name}</td>
-                              <td>{item?.enquirydata[0]?.contact1}</td>
-                              <td>{item?.enquirydata[0]?.address}</td>
-
-                              <td>{item?.enquirydata[0]?.city}</td>
-                              <td>{item?.enquirydata[0]?.intrestedfor}</td>
-                              <td>{item?.netTotal}</td>
-                              <td>{item?.enquirydata[0]?.executive}</td>
-                              <td>{item?.Bookedby}</td>
-                              <td>{item?.enquirydata[0]?.enquirydate}</td>
-                              <td>{item?.quotefollowup[0]?.nxtfoll}</td>
-                              <td>{item?.quotefollowup[0]?.desc}</td>
-                              {item?.quotefollowup[0]?.response ===
-                              "Confirmed" ? (
-                                <td>CONFIRMED</td>
-                              ) : (
-                                <td>NOT SHARED</td>
-                              )}
-                            </a>
-                          </tr>
-                      );
-                    })}
-                  </div>
-                </tbody> */}
             <tbody>
               {currentItems.map((item, index) => (
                 <a
@@ -550,7 +500,7 @@ function Quotelist() {
                     className="trnew"
                     style={{ backgroundColor: calculateBackgroundColor(item) }}
                   >
-                    <td>{i++}</td>
+                    <td>{index + 1}</td>
                     <td>{item?.enquirydata[0]?.category}</td>
                     <td>{item?.quoteId}</td>
                     <td>
@@ -569,11 +519,16 @@ function Quotelist() {
                     <td>{item?.enquirydata[0]?.date}</td>
                     <td>{item?.quotefollowup[0]?.nxtfoll}</td>
                     <td>{item?.quotefollowup[0]?.desc}</td>
-                    {item?.quotefollowup[0]?.response === "Confirmed" ? (
-                      <td>CONFIRMED</td>
-                    ) : (
-                      <td>NOT SHARED</td>
-                    )}
+                    <td>
+                      {item?.quotefollowup[0]?.response === "Confirmed"
+                        ? "CONFIRMED"
+                        : item?.type === "QUOTE SHARED"
+                          ? "QUOTE SHARED"
+                          : "NOT SHARED"
+                      }
+
+
+                    </td>
                   </tr>
                 </a>
               ))}

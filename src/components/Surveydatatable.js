@@ -23,6 +23,7 @@ function Surveydatatable() {
   const [searchAppoDateTime, setSearchAppoDateTime] = useState("");
   const [searchNote, setSearchNote] = useState("");
   const [searchTechnician, setSearchTechnician] = useState("");
+  const [searchType, setSearchType] = useState("");
 
   const [reasonforcancel, setreasonforcancel] = useState("");
 
@@ -36,7 +37,7 @@ function Surveydatatable() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(50);
   const [catagories, setCatagories] = useState(new Set());
   const [reference, setReference] = useState(new Set());
   const [cities, setCities] = useState(new Set());
@@ -201,6 +202,26 @@ function Surveydatatable() {
               .includes(searchAddress.toLowerCase())
         );
       }
+      if (searchType) {
+        results = results.filter((item) => {
+          switch (searchType) {
+            case "NOT ASSIGNED":
+              return (
+                item.treatmentData.length === 0 &&
+                !item.technicianname &&
+                item.type !== "SHARED"
+              );
+            case "QUOTE SHARED":
+              return item.quoteData[0]?.type === "QUOTE SHARED";
+            case "ASSIGNED FOR SURVEY":
+              return item.technicianname !== undefined;
+            case "QUOTE GENERATED":
+              return item.treatmentData.length > 0;
+            default:
+              return true;
+          }
+        });
+      }
       if (searchReference) {
         results = results.filter(
           (item) =>
@@ -282,6 +303,7 @@ function Surveydatatable() {
     searchAppoDateTime,
     searchNote,
     searchTechnician,
+    searchType
   ]);
 
   let i = 1;
@@ -523,13 +545,19 @@ function Surveydatatable() {
                 <th className="bor"></th>
                 <th className="bor"></th>
                 <th className="bor">
-                  {" "}
-                  <select
-                    // value={filters.Type} onChange={handleInputChange}
-                    className="vhs-table-input"
-                  >
-                    <option>Select</option>
-                  </select>{" "}
+                <select
+                   value={searchType}
+                   onChange={(e) => setSearchType(e.target.value)}
+                  className="vhs-table-input"
+                >
+                  <option>Select</option>
+                  <option value="NOT ASSIGNED">NOT ASSIGNED</option>
+                  <option value="QUOTE SHARED">QUOTE SHARED</option>
+                  <option value="ASSIGNED FOR SURVEY">ASSIGNED FOR SURVEY</option>
+                  <option value="QUOTE GENERATED">QUOTE GENERATED</option>
+
+
+                </select>{" "}
                 </th>
 
                 <th className="bor"></th>

@@ -9,9 +9,9 @@ import moment from "moment";
 
 function Home() {
   const apiURL = process.env.REACT_APP_API_URL;
-  const [customer, setCustomer] = useState([]);
-  const [enquiry, setEnquiry] = useState([]);
-  const [service, setService] = useState([]);
+  const [customer, setCustomer] = useState();
+  const [enquiry, setEnquiry] = useState();
+  const [service, setService] = useState();
   const [enquiryFollowup, setEnquiryFollowup] = useState([]);
   const data01 = [
     { name: "Group A", value: 400 },
@@ -70,22 +70,26 @@ function Home() {
   });
 
   const getCustomer = async () => {
-    let res = await axios.get(apiURL + "/getcustomer");
+    let res = await axios.get(apiURL + "/getcustomercount");
     if (res.status === 200) {
       setCustomer(res.data?.customers);
     }
   };
+  const [thisweekenquiry, setthisweekenquiry] = useState()
   const getEnquiry = async () => {
-    let res = await axios.get(apiURL + "/getenquiry");
+    let res = await axios.get(apiURL + "/getallenquirycount");
     if (res.status === 200) {
-      setEnquiry(res.data?.enquiryadd);
+      const today = res.data?.enquirycountToday;
+      const thisweek = res.data?.enquirycountThisWeek;
+      setEnquiry(today);
+      setthisweekenquiry(thisweek);
     }
   };
 
   const getService = async () => {
-    let res = await axios.get(apiURL + "/getservicedetails");
+    let res = await axios.get(apiURL + "/getallservicecount");
     if (res.status === 200) {
-      setService(res.data?.servicedetails);
+      setService(res.data?.servicecount);
     }
   };
 
@@ -103,10 +107,7 @@ function Home() {
     getEnquiryFollowup();
   }, []);
 
-  const enquiryCurrentDateLength = enquiry.filter((item) =>
-    moment(item.date, "MM-DD-YYYY").isSame(moment(), "day")
-  );
-  // console.log("enquiryCurrentDateLength", enquiryCurrentDateLength.length);
+
 
   const enquiryFollowUpCurrentDateLength = enquiryFollowup.filter((item) =>
     moment(item.date, "MM-DD-YYYY").isSame(moment(), "day")
@@ -129,7 +130,7 @@ function Home() {
             <div className="card-body">
               <div className="home-content">Services Details</div>
               <div className="home-desc">
-                This Month Calls : <b>{service.length}</b>
+                This Month service booked : <b>{service}</b>
               </div>
             </div>
           </div>
@@ -150,9 +151,9 @@ function Home() {
             <div className="card-body">
               <div className="home-content">Customer</div>
               <div className="home-desc">
-                Total Customers :<b>{customer.length}</b>{" "}
+                Total Customers :<b>{customer}</b>{" "}
               </div>
-              <div className="home-desc">This Month Due Amount : 1,13,129</div>
+              {/* <div className="home-desc">This Month Due Amount : 1,13,129</div> */}
             </div>
           </div>
         </div>
@@ -172,9 +173,9 @@ function Home() {
             <div className="card-body">
               <div className="home-content">Enquiry</div>
               <div className="home-desc">
-                Today : <b>{enquiryCurrentDateLength.length}</b>{" "}
+                Today : <b>{enquiry}</b>{" "}
               </div>
-              <div className="home-desc">This Week : 17</div>
+              <div className="home-desc">This Week : {thisweekenquiry}</div>
             </div>
           </div>
         </div>

@@ -721,7 +721,7 @@ function RunningProject() {
                         <p></p>
                       )}
                     </td>
-                    <td>{item.quotedata[0]?.total}</td>
+                    <td>{item.quotedata[0]?.netTotal}</td>
                     <td>
                       {item.paymentData.some(
                         (i) =>
@@ -761,7 +761,7 @@ function RunningProject() {
                                       i.paymentType === "Customer" &&
                                       i.serviceId === item._id
                                   ),
-                                  item.quotedata[0]?.total
+                                  item.quotedata[0]?.netTotal
                                 )}
                               </b>
                             </p>

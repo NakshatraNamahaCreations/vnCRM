@@ -8,247 +8,310 @@ import moment from "moment";
 import { parse, isBefore, isAfter, isSameDay } from "date-fns";
 
 function Report_Survey() {
+  const admin = JSON.parse(sessionStorage.getItem("admin"));
+
   const apiURL = process.env.REACT_APP_API_URL;
   const [surveyData, setSurveyData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [interestFor, setInterestFor] = useState("");
+  const [serviceName, setserviceName] = useState("");
   const [city, setCity] = useState("");
-  const [technicianName, setTechnicianName] = useState("");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState(moment().format("YYYY-MM-DD"));
+  const [techname, setTechnicianName] = useState("");
+  const [fromdate, setfromdate] = useState(moment().format("YYYY-MM-DD"));
+  const [todate, setToDate] = useState(moment().format("YYYY-MM-DD"));
   const [category, setCategory] = useState("");
   const [service, setService] = useState("");
-  const [backOffice, setBackOffice] = useState("");
+  const [executive, setBackOffice] = useState("");
   const [showMessage, setShowMessage] = useState(false);
   const [buttonClicked, setButtonClicked] = useState(false);
   const [closeWindow, setCloseWindow] = useState(true);
   const [searchValue, setSearchValue] = useState("");
-  // removing duplicate value from the select option
-  const [duplicateCity, setduplicateCity] = useState(new Set());
-  const [duplicateService, setduplicateService] = useState(new Set());
-  const [duplicateBackOffice, setduplicateBackOffice] = useState(new Set());
-  const [duplicateCategory, setduplicateCategory] = useState(new Set());
-  const [duplicateTechnicianName, setduplicateTechnicianName] = useState(
-    new Set()
-  );
-  const [duplicateStatus, setduplicateStatus] = useState(new Set());
 
-  useEffect(() => {
-    const uniqueCities = new Set(
-      surveyData?.map((item) => item.enquirydata[0]?.city).filter(Boolean)
-    );
+  const [searchType, setSearchType] = useState("");
+  const [serviceData, setServiceData] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
 
-    const uniqueService = new Set(
-      surveyData
-        ?.map((item) => item.enquirydata[0]?.intrestedfor)
-        .filter(Boolean)
-    );
-    const uniqueBackoffice = new Set(
-      surveyData?.map((item) => item.staffname).filter(Boolean)
-    );
-    const uniqueCatagories = new Set(
-      surveyData?.map((item) => item.category).filter(Boolean)
-    );
-    const uniqueTechnicianName = new Set(
-      surveyData?.map((item) => item.technicianname).filter(Boolean)
-    );
-    // const uniqueStatus = new Set(
-    //   surveyData?.map((item) => item.enquirydata[0]?.city).filter(Boolean)
-    // );
 
-    setduplicateCity(uniqueCities);
-    setduplicateTechnicianName(uniqueTechnicianName);
-    setduplicateCategory(uniqueCatagories);
-    setduplicateBackOffice(uniqueBackoffice);
-    setduplicateService(uniqueService);
-  }, [surveyData]);
+  const [techniciandata, settechniciandata] = useState([]);
+  const [searchCatagory, setSearchCatagory] = useState("");
+  const [searchDateTime, setSearchDateTime] = useState("");
+  const [searchName, setSearchName] = useState("");
+  const [searchContact, setSearchContact] = useState("");
+  const [searchAddress, setSearchAddress] = useState("");
+  const [searchReference, setSearchReference] = useState("");
+  const [searchCity, setSearchCity] = useState("");
+  const [searchInterest, setSearchInterest] = useState("");
+  const [searchExecutive, setSearchExecutive] = useState("");
+  const [searchAppoDateTime, setSearchAppoDateTime] = useState("");
+  const [searchNote, setSearchNote] = useState("");
+  const [searchTechnician, setSearchTechnician] = useState("");
 
-  const getSurveyDetails = async () => {
+
+
+  const [userdata, setuserdata] = useState([]);
+  const getuser = async () => {
     try {
-      const res = await axios.get(apiURL + "/getsurveyaggredata");
+      let res = await axios.get(apiURL + "/master/getuser");
       if (res.status === 200) {
-        const data = res.data.enquiryfollowup.filter(
-          (item) => item.response === "Survey"
-        );
-        console.log("SurveyData", data);
-        setSurveyData(data);
-        setFilteredData(data);
+        setuserdata(res.data?.masteruser);
       }
     } catch (error) {
-      console.error("Error fetching DSR details:", error);
+      console.error("Error fetching user data:", error);
+      // Handle the error, e.g., set an error state
     }
   };
 
   useEffect(() => {
-    getSurveyDetails();
+    getuser();
+    gettechnician();
   }, []);
 
-  const handleSearch = () => {
-    setFilteredData(surveyData);
-    setSearchValue("");
-    setShowMessage(true);
-    const filteredResults = surveyData.filter((item) => {
-      const enquiryDate = parse(item.nxtfoll, "yyyy-MM-dd", new Date());
-      const fromDateObj = fromDate
-        ? parse(fromDate, "yyyy-MM-dd", new Date())
-        : null;
-      const toDateObj = toDate ? parse(toDate, "yyyy-MM-dd", new Date()) : null;
 
-      const itemCity =
-        city.toLowerCase() === "all" ||
-        item.enquirydata[0]?.city.toLowerCase().includes(city.toLowerCase());
-      const itemFromDate =
-        !fromDate ||
-        isAfter(enquiryDate, fromDateObj) ||
-        isSameDay(enquiryDate, fromDateObj);
-      const itemToDate =
-        !toDate ||
-        isBefore(enquiryDate, toDateObj) ||
-        isSameDay(enquiryDate, toDateObj);
-      const itemInterest =
-        item.enquirydata?.[0]?.intrestedfor
-          ?.toLowerCase()
-          .includes(interestFor.toLowerCase()) ?? true;
+  const gettechnician = async () => {
+    let res = await axios.get(apiURL + "/getalltechnician");
+    if ((res.status = 200)) {
+      settechniciandata(res.data?.technician.filter((i) => i.Type == "executive"));
 
-      const itemTechnician =
-        item.technicianname
-          ?.toLowerCase()
-          .includes(technicianName.toLowerCase()) ?? true;
-
-      const itemCategory =
-        item.category?.toLowerCase().includes(category.toLowerCase()) ?? true;
-
-      const itemStaffName =
-        item.enquirydata[0]?.staffname
-          ?.toLowerCase()
-          .includes(backOffice.toLowerCase()) ?? true;
-
-      const itemService =
-        item.staffname?.toLowerCase().includes(service.toLowerCase()) ?? true;
-
-      return (
-        itemFromDate &&
-        itemToDate &&
-        itemInterest &&
-        itemCity &&
-        itemTechnician &&
-        itemCategory &&
-        itemStaffName &&
-        itemService
-      );
-    });
-    setFilteredData(filteredResults);
-    setSearchValue(
-      interestFor || city || technicianName || fromDate || toDate || category
-    );
-    setShowMessage(false);
+    }
   };
 
+  const filterData = async () => {
+    try {
+      const res = await axios.post(`${apiURL}/surveyFilterdata`, {
+
+        fromdate,
+        todate,
+
+
+      });
+
+      if (res.status === 200) {
+
+        setSearchResults(res.data?.enquiryadd)
+        setFilteredData(res.data?.enquiryadd);
+
+      } else {
+        // Set filterdata to an empty array in case of an error
+        setFilteredData([]);
+      }
+    } catch (error) {
+      setFilteredData([]);
+    }
+  };
+
+
   const handleSearchClick = () => {
-    handleSearch();
+    filterData();
     setButtonClicked(true);
   };
 
   const exportData = () => {
-    const fileName = "dsr_data.xlsx";
-    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const fileName = "Survey_Repost.xlsx";
+
+    const filteredData1 = searchResults?.map(item => ({
+      datetime: `${item.date},${item.time}`,
+      category: item?.enquirydata[0]?.category,
+      customerName: item?.enquirydata[0]?.name,
+      mobile: item.enquirydata[0]?.mobile,
+      city: item?.enquirydata[0]?.city,
+
+      address: item.enquirydata[0]?.address,
+      reference1: item?.enquirydata[0]?.reference1,
+
+      appoDate: item.appoDate ? item.appoDate : item.nxtfoll,
+      intrestedfor: item.enquirydata[0]?.intrestedfor,
+
+      desc: item?.desc,
+      Backofficer: item?.enquirydata[0]?.executive,
+      Executive: item?.technicianname,
+      status: item.treatmentData.length > 0
+        ? "QUOTE GENERATED"
+        : item.technicianname
+          ? "ASSIGNED FOR SURVEY"
+          : item.quoteData[0]?.type === "QUOTE SHARED" ?
+            "QUOTE SHARED"
+            : "NOT ASSIGNED"
+
+
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(filteredData1);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Category Data");
     XLSX.writeFile(workbook, fileName);
   };
 
-  const columns = [
-    {
-      name: "Sl  No",
-      selector: (row, index) => index + 1,
-    },
-    {
-      name: "Category",
-      selector: (row) =>
-        row.enquirydata[0]?.category ? row.enquirydata[0]?.category : "-",
-    },
-    {
-      name: "	Enq Date Time",
-      selector: (row) => (
-        <>
-          {row.enquirydata[0]?.enquirydate
-            ? row.enquirydata[0]?.enquirydate
-            : "-"}{" "}
-          <br />
-          {row.enquirydata[0]?.time ? row.enquirydata[0]?.time : "-"}
-        </>
-      ),
-    },
-    {
-      name: "Name",
-      selector: (row, index) =>
-        row.enquirydata[0]?.name ? row.enquirydata[0]?.name : "-",
-    },
-    {
-      name: "Contact",
-      selector: (row) =>
-        row.enquirydata[0]?.mobile ? row.enquirydata[0]?.mobile : "-",
-    },
-    {
-      name: "Address",
-      selector: (row) =>
-        row.enquirydata[0]?.address ? row.enquirydata[0]?.address : "-",
-    },
-    {
-      name: "Reference",
-      selector: (row) =>
-        row.enquirydata[0]?.reference1 ? row.enquirydata[0]?.reference1 : "-",
-    },
-    {
-      name: "City",
-      selector: (row) =>
-        row.enquirydata[0]?.city ? row.enquirydata[0]?.city : "-",
-    },
-    {
-      name: "Interested For",
-      selector: (row) =>
-        row.enquirydata[0]?.intrestedfor
-          ? row.enquirydata[0]?.intrestedfor
-          : "-",
-    },
-    {
-      name: "Backoffice Executive",
-      selector: (row) => (row.staffname ? row.staffname : "-"),
-    },
-    {
-      name: "Appo. Date Time	",
-      selector: (row) => (row.nxtfoll ? row.nxtfoll : "-"),
-    },
-    {
-      name: "Note",
-      selector: (row) =>
-        row.enquirydata[0]?.comment ? row.enquirydata[0]?.comment : "-",
-    },
-    {
-      name: "Technician Name",
-      selector: (row) => (row.technicianname ? row?.technicianname : "-"),
-      // (row.enquirydata[0]?.comment ? row.enquirydata[0]?.comment : "-"),
-    },
-    {
-      name: "TYPE",
-      selector: (row) => "-",
-    },
-  ];
-  const handleCityChange = (e) => {
-    const selectedCity = e.target.value;
-    console.log(selectedCity); // Check the selected city value
-    setCity(selectedCity);
-  };
-  const handleTechnicianChange = (e) => {
-    const selectedTechnician = e.target.value;
-    console.log(selectedTechnician); // Check the selected technician value
-    setTechnicianName(selectedTechnician);
-  };
-  const handleCategoryChange = (e) => {
-    const selectedcategory = e.target.value;
-    console.log(selectedcategory); // Check the selected technician value
-    setCategory(selectedcategory);
-  };
+
+
+
+
+  useEffect(() => {
+    const filterResults = () => {
+      let results = filteredData;
+      if (searchCatagory) {
+        results = results.filter(
+          (item) =>
+            item.category &&
+            item.category.toLowerCase().includes(searchCatagory.toLowerCase())
+        );
+      }
+      if (searchDateTime) {
+        results = results.filter(
+          (item) =>
+          (item.enquirydata[0]?.date &&
+            item.enquirydata[0]?.date
+              .toLowerCase()
+              .includes(searchDateTime.toLowerCase()))
+        );
+      }
+      if (searchType) {
+        results = results.filter((item) => {
+          switch (searchType) {
+            case "NOT ASSIGNED":
+              return (
+                item.treatmentData.length === 0 &&
+                !item.technicianname &&
+                item.quoteData[0]?.type !== "QUOTE SHARED"
+              );
+            case "QUOTE SHARED":
+              return item.type === "QUOTE SHARED";
+            case "ASSIGNED FOR SURVEY":
+              return item.technicianname !== undefined;
+            case "QUOTE GENERATED":
+              return item.treatmentData.length > 0;
+            default:
+              return true;
+          }
+        });
+      }
+
+      if (searchName) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.name &&
+            item.enquirydata[0]?.name
+              .toLowerCase()
+              .includes(searchName.toLowerCase())
+        );
+      }
+      if (executive) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.executive &&
+            item.enquirydata[0]?.executive
+              .toLowerCase()
+              .includes(executive.toLowerCase())
+        );
+      }
+
+      if (searchContact) {
+        results = results.filter((item) => {
+          const mainContact = item.enquirydata[0]?.mobile;
+          if (typeof mainContact === "string") {
+            return mainContact
+              .toLowerCase()
+              .includes(searchContact.toLowerCase());
+          } else if (typeof mainContact === "number") {
+            const stringMainContact = String(mainContact); // Convert number to string
+            return stringMainContact
+              .toLowerCase()
+              .includes(searchContact.toLowerCase());
+          }
+          return false; // Exclude if mainContact is neither string nor number
+        });
+      }
+      if (searchAddress) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.address &&
+            item.enquirydata[0]?.address
+              .toLowerCase()
+              .includes(searchAddress.toLowerCase())
+        );
+      }
+      if (searchReference) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.reference1 &&
+            item.enquirydata[0]?.reference1
+              .toLowerCase()
+              .includes(searchReference.toLowerCase())
+        );
+      } //
+      if (searchCity) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.city &&
+            item.enquirydata[0]?.city
+              .toLowerCase()
+              .includes(searchCity.toLowerCase())
+        );
+      }
+      if (searchInterest) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.intrestedfor &&
+            item.enquirydata[0]?.intrestedfor
+              .toLowerCase()
+              .includes(searchInterest.toLowerCase())
+        );
+      }
+      if (searchExecutive) {
+        results = results.filter(
+          (item) =>
+            item.enquirydata[0]?.executive &&
+            item.enquirydata[0]?.executive
+              .toLowerCase()
+              .includes(searchExecutive.toLowerCase())
+        );
+      }
+      if (searchAppoDateTime) {
+        results = results.filter(
+          (item) =>
+            item.appoDate &&
+            item.appoDate
+              .toLowerCase()
+              .includes(searchAppoDateTime.toLowerCase())
+        );
+      }
+      if (searchNote) {
+        results = results.filter(
+          (item) =>
+            item.comment &&
+            item.comment.toLowerCase().includes(searchNote.toLowerCase())
+        );
+      }
+      if (searchTechnician) {
+        results = results.filter(
+          (item) =>
+            item.technicianname &&
+            item.technicianname
+              .toLowerCase()
+              .includes(searchTechnician.toLowerCase())
+        );
+      }
+      // results = results.map((item) => ({
+      // ...item,
+      // category: getUniqueCategories()[item.category],
+      // }));
+      setSearchResults(results);
+    };
+    filterResults();
+  }, [
+    searchCatagory,
+    searchName,
+    searchDateTime,
+    searchContact,
+    searchAddress,
+    searchReference,
+    searchCity,
+    searchInterest,
+    searchExecutive,
+    searchAppoDateTime,
+    searchNote,
+    searchTechnician,
+    executive,
+    searchType
+  ]);
+
   return (
     <div style={{ backgroundColor: "#f9f6f6" }} className="web">
       <div>
@@ -283,13 +346,14 @@ function Report_Survey() {
                     <div className="col-md-5 ms-4">
                       <input
                         className="report-select"
-                        onChange={(e) => setFromDate(e.target.value)}
+                        onChange={(e) => setfromdate(e.target.value)}
                         type="date"
+                        value={fromdate}
                       />
                     </div>
                   </div>
                   <br />
-                  <div className="row">
+                  {/* <div className="row">
                     <div className="col-md-4">City </div>
                     <div className="col-md-1 ms-4">:</div>
                     <div className="col-md-5 ms-4">
@@ -298,8 +362,8 @@ function Report_Survey() {
                         onChange={handleCityChange}
                       >
                         <option>Select</option>
-                        {[...duplicateCity].map((city) => (
-                          <option key={city}>{city}</option>
+                        {admin?.city.map((item) => (
+                          <option value={item.name}>{item.name}</option>
                         ))}
                       </select>
                     </div>
@@ -312,12 +376,14 @@ function Report_Survey() {
                       <select
                         className="report-select"
                         // style={{ width: "100%" }}
-                        onChange={(e) => setInterestFor(e.target.value)}
+                        onChange={(e) => setserviceName(e.target.value)}
                       >
                         <option>Select</option>
-                        {[...duplicateService].map((service) => (
-                          <option key={service}>{service}</option>
-                        ))}
+                        {serviceData
+                          .sort((a, b) => a.serviceName.localeCompare(b.serviceName))
+                          .map((i) => (
+                            <option key={i.serviceName}>{i.serviceName}</option>
+                          ))}
                       </select>
                     </div>
                   </div>
@@ -332,22 +398,16 @@ function Report_Survey() {
                         onChange={(e) => setBackOffice(e.target.value)}
                       >
                         <option>Select</option>
-                        {[...duplicateBackOffice].map((staffname) => (
-                          <option key={staffname}>{staffname}</option>
-                        ))}
+                        {userdata
+                          .sort((a, b) => a.displayname.localeCompare(b.displayname))
+                          .map((i) => (
+                            <option key={i.displayname}>{i.displayname}</option>
+                          ))}
+
                       </select>
                     </div>
-                  </div>
-                  {/* <div className="row">
-                    <div className="col-md-4"> Interested For </div>
-                    <div className="col-md-1 ms-4">:</div>
-                    <div className="col-md-5 ms-4">
-                      <textarea
-                        className="report-select"
-                        onChange={(e) => setInterestFor(e.target.value)}
-                      />
-                    </div>
                   </div> */}
+
                   <br />
                 </div>
                 <div className="col-md-5">
@@ -364,10 +424,11 @@ function Report_Survey() {
                         className="report-select"
                         onChange={(e) => setToDate(e.target.value)}
                         type="date"
+                        value={todate}
                       />
                     </div>
                   </div>
-                  <br />
+                  {/* <br />
                   <div className="row">
                     <div className="col-md-4 ">Category </div>
                     <div className="col-md-1 ms-4">:</div>
@@ -377,8 +438,10 @@ function Report_Survey() {
                         onChange={handleCategoryChange}
                       >
                         <option>All</option>
-                        {[...duplicateCategory].map((category) => (
-                          <option key={category}>{category}</option>
+                        {admin?.category.map((category, index) => (
+                          <option key={index} value={category.name}>
+                            {category.name}
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -390,13 +453,15 @@ function Report_Survey() {
                     <div className="col-md-5 ms-4">
                       <select
                         className="report-select"
-                        value={technicianName} // Set the selected value from state
+                        value={techname} // Set the selected value from state
                         onChange={handleTechnicianChange} // Call the new handler
                       >
                         <option>Select</option>
-                        {[...duplicateTechnicianName].map((executive) => (
-                          <option key={executive}>{executive}</option>
-                        ))}
+                        {techniciandata
+                          .sort((a, b) => a.smsname.localeCompare(b.smsname))
+                          .map((i) => (
+                            <option key={i.smsname} value={i.vhsname}>{i.smsname}</option>
+                          ))}
                       </select>
                     </div>
                   </div>
@@ -413,13 +478,11 @@ function Report_Survey() {
                         <option>Attended</option>
                         <option>Quotation prepared</option>
                         <option>quotation sent</option>
-                        {/* {surveyData.map((item) => (
-                          <option>{item.enquirydata[0]?.technicianname}</option>
-                        ))} */}
+                      
                       </select>
                     </div>
                   </div>
-                  <br />
+                  <br /> */}
                 </div>
                 <p style={{ justifyContent: "center", display: "flex" }}>
                   <button
@@ -452,7 +515,7 @@ function Report_Survey() {
                     <i
                       class="fa-solid fa-download"
                       title="Download"
-                      // style={{ color: "white", fontSize: "27px" }}
+                    // style={{ color: "white", fontSize: "27px" }}
                     ></i>{" "}
                     Export
                   </button>
@@ -520,15 +583,245 @@ function Report_Survey() {
           </Card>
         </div>{" "}
         <br />
-        <DataTable
-          columns={columns}
-          data={filteredData}
-          pagination
-          fixedHeader
-          selectableRowsHighlight
-          subHeaderAlign="left"
-          highlightOnHover
-        />
+        <table className="m-2">
+          <thead>
+            <tr className="bg ">
+              <th className="bor"></th>
+              <th className="bor">
+                {" "}
+                <select
+                  value={searchCatagory}
+                  onChange={(e) => setSearchCatagory(e.target.value)}
+                  className="vhs-table-input"
+                >
+                  <option value="">Select</option>
+                  {admin?.category.map((category, index) => (
+                    <option key={index} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>{" "}
+              </th>
+              <th className="bor">
+                {" "}
+                {/* <input
+                    className="vhs-table-input"
+                    value={searchDateTime}
+                    onChange={(e) => setSearchDateTime(e.target.value)}
+                  />{" "} */}
+              </th>
+              <th className="bor">
+                {" "}
+                <input
+                  className="vhs-table-input"
+                  value={searchName}
+                  onChange={(e) => setSearchName(e.target.value)}
+                />{" "}
+              </th>
+              <th className="bor">
+                {" "}
+                <input
+                  className="vhs-table-input"
+                  value={searchContact}
+                  onChange={(e) => setSearchContact(e.target.value)}
+                />{" "}
+              </th>
+              <th className="bor">
+                {" "}
+                {/* <input
+                    className="vhs-table-input"
+                    value={searchAddress}
+                    onChange={(e) => setSearchAddress(e.target.value)}
+                  />{" "} */}
+              </th>
+              <th className="bor">
+                <select
+                  value={searchReference}
+                  onChange={(e) => setSearchReference(e.target.value)}
+                  className="vhs-table-input"
+                >
+                  <option value="">Select</option>
+                  {[...new Set(filteredData?.map((i) => i.enquirydata[0]?.reference1))].map(
+                    (uniqueCity) => (
+                      <option value={uniqueCity} key={uniqueCity}>
+                        {uniqueCity}
+                      </option>
+                    )
+                  )}
+                </select>{" "}
+              </th>
+              <th className="bor">
+                {" "}
+                <select
+                  value={searchCity}
+                  onChange={(e) => setSearchCity(e.target.value)}
+                  className="vhs-table-input"
+                >
+                  <option value="">Select </option>
+                  {admin?.city.map((item) => (
+                    <option value={item.name}>{item.name}</option>
+                  ))}
+                </select>{" "}
+              </th>
+              <th className="bor">
+                <select
+                  value={searchCity}
+                  onChange={(e) => setBackOffice(e.target.value)}
+                  className="vhs-table-input"
+                >
+                  <option value="">Select </option>
+                  {[...new Set(filteredData?.map((i) => i.enquirydata[0]?.executive))].map(
+                    (uniqueCity) => (
+                      <option value={uniqueCity} key={uniqueCity}>
+                        {uniqueCity}
+                      </option>
+                    )
+                  )}
+                </select>{" "}
+              </th>
+              <th className="bor">
+                {" "}
+                <input
+                  className="vhs-table-input"
+                  value={searchInterest}
+                  onChange={(e) => setSearchInterest(e.target.value)}
+                />
+              </th>
+              <th className="bor">
+                <select
+                  value={searchReference}
+                  onChange={(e) => setSearchTechnician(e.target.value)}
+                  className="vhs-table-input"
+                >
+                  <option value="">Select</option>
+                  {[...new Set(filteredData?.map((i) => i.technicianname))].map(
+                    (uniqueCity) => (
+                      <option value={uniqueCity} key={uniqueCity}>
+                        {uniqueCity}
+                      </option>
+                    )
+                  )}
+                </select>{" "}
+              </th>
+              <th className="bor">
+                {" "}
+                {/* <input
+                    className="vhs-table-input"
+                    value={searchAppoDateTime}
+                    onChange={(e) => setSearchAppoDateTime(e.target.value)}
+                  />{" "} */}
+              </th>
+              <th className="bor"></th>
+              <th className="bor"></th>
+              <th className="bor">
+                {" "}
+                <select
+                  value={searchType}
+                  onChange={(e) => setSearchType(e.target.value)}
+                  className="vhs-table-input"
+                >
+                  <option>Select</option>
+                  <option value="NOT ASSIGNED">NOT ASSIGNED</option>
+                  <option value="QUOTE SHARED">QUOTE SHARED</option>
+                  <option value="ASSIGNED FOR SURVEY">ASSIGNED FOR SURVEY</option>
+                  <option value="QUOTE GENERATED">QUOTE GENERATED</option>
+
+
+                </select>{" "}
+              </th>
+
+              {/* <th className="bor"></th> */}
+
+            </tr>
+            <tr className="bg">
+              <th className="bor">#</th>
+              <th className="bor">Category</th>
+              <th className="bor" style={{ width: "200px" }}>
+                Enq Date Time
+              </th>
+              <th className="bor">Name</th>
+              <th className="bor">Contact</th>
+              <th className="bor">Address</th>
+              <th className="bor">Reference</th>
+              <th className="bor">City</th>
+              <th className="bor">Backofficer</th>
+              <th className="bor">Interested For</th>
+              <th className="bor">Executive</th>
+
+              <th className="bor" style={{ width: "200px" }}>
+                {/* Appo. Date  */}
+                Time
+              </th>
+              {/* <th className="bor">Note</th> */}
+              <th className="bor">Description</th>
+              <th className="bor">Comment</th>
+              <th className="bor">Type</th>
+              {/* <th className="bor">Reason for cancel</th> */}
+
+            </tr>
+          </thead>
+          <tbody>
+            {searchResults.map((item, index) => (
+              <tr
+                className="trnew"
+                style={{
+                  backgroundColor:
+                    item.treatmentData.length > 0
+                      ? "#dde9fd"
+                      : item.technicianname
+                        ? "#ffb9798f"
+                        : "white",
+                }}
+              >
+
+                <td>{index + 1}</td>
+                <td>{item.category}</td>
+                <td>
+                  {item.enquirydata[0]?.date}
+                  <br />
+                  {item.enquirydata[0]?.Time}
+                </td>
+
+                <td>{item.enquirydata[0]?.name}</td>
+                <td>{item.enquirydata[0]?.mobile}</td>
+                <td>{item.enquirydata[0]?.address}</td>
+                <td>{item.enquirydata[0]?.reference1}</td>
+
+                <td>{item.enquirydata[0]?.city}</td>
+                <td>{item.enquirydata[0]?.executive}</td>
+                <td>{item.enquirydata[0]?.intrestedfor}</td>
+                <td>{item.technicianname}</td>
+                <td>
+                  {item.appoDate ? item.appoDate : item.nxtfoll}
+                  <br />
+                  {item.appoTime}
+                </td>
+                <td>{item.desc}</td>
+                {/* <td>{item.enquirydata[0]?.comment}</td> */}
+                {/* <td>{item.technicianname}</td> */}
+                <td>{item.enquirydata[0]?.intrestedfor}</td>
+
+                <td>
+                  {item.treatmentData.length > 0
+                    ? "QUOTE GENERATED"
+                    : item.technicianname
+                      ? "ASSIGNED FOR SURVEY"
+                      : item.quoteData[0]?.type === "QUOTE SHARED" ?
+                        "QUOTE SHARED"
+                        : "NOT ASSIGNED"}
+                </td>
+                {/* <td>
+                      {item.reasonForCancel} <br />
+                      {item.adminname} <br />
+                      {item.admindate}
+                    </td> */}
+
+
+
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

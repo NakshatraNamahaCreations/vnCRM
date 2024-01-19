@@ -3,6 +3,7 @@ import Header from "../layout/Header";
 import B2Bnav from "../B2Bnav";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import moment from "moment";
 
 function B2badd() {
   const admin = JSON.parse(sessionStorage.getItem("admin"));
@@ -37,7 +38,7 @@ function B2badd() {
 
   const addb2b = async (e) => {
     e.preventDefault();
-
+  
     if (
       !b2bname ||
       !contactperson ||
@@ -55,7 +56,6 @@ function B2badd() {
           url: "/addB2B",
           method: "post",
           baseURL: apiURL,
-          // data: formdata,
           headers: { "content-type": "application/json" },
           data: {
             b2bname: b2bname,
@@ -71,25 +71,31 @@ function B2badd() {
             approach: approach,
             executiveName: admin.displayname,
             executivenumber: admin.contactno,
+            date: moment().format("YYYY-MM-DD"),
+            time: moment().format('LTS')
           },
         };
-        await axios(config).then(function (response) {
-          if (response.status === 200) {
-            // console.log("success");
-            // alert(" Added");
-            navigate(
-              `/b2bdetails/${latestEnquiryId ? latestEnquiryId + 1 : 1}`
-            );
-
-            // window.location.assign("/b2bdetails");
-          }
-        });
+        
+        const response = await axios(config);
+  
+        if (response.status === 200) {
+          alert("B2B Account created.");
+          navigate(`/b2bdetails/${latestEnquiryId ? latestEnquiryId + 1 : 1}`);
+        } else {
+          alert("Failed to add B2B Account. Please try again.");
+        }
       } catch (error) {
-        console.error(error);
-        alert(" Not Added");
+        if (error.response && error.response.status === 500) {
+          const errorMessage = error.response.data.error;
+          alert(`Failed to add B2B Account: ${errorMessage}`);
+        } else {
+          console.error(error.message);
+          alert("Failed to add B2B Account. Please try again.");
+        }
       }
     }
   };
+  
 
   useEffect(() => {
     getcity();

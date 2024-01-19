@@ -131,7 +131,7 @@ function Quotationterm() {
     netTotalInWords = toWords(netTotal).replace(/,/g, ""); // Remove commas
   }
 
-  console.log("data",data)
+
   return (
     <div className="row">
       {/* <Header /> */}

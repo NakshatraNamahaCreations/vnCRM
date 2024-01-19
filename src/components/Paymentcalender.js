@@ -1,13 +1,29 @@
 import { Scheduler } from "@aldabil/react-scheduler";
 import React, { useState, useEffect } from "react";
 import Header from "../components/layout/Header";
-
+import size from "react-element-popper/animations/size";
 import axios from "axios";
 import { Calendar, momentLocalizer, Views } from "react-big-calendar";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
+import "react-multi-date-picker/styles/colors/purple.css"
+import DatePicker, { DateObject } from "react-multi-date-picker";
 
 function Paymentcalender() {
+
+  const defaultFromDate = new DateObject().subtract(4, "days");
+  const defaultToDate = new DateObject().add(4, "days");
+
+  const [values, setValues] = useState([defaultFromDate, defaultToDate]);
+
+
+  const fromDate = values[0] || defaultFromDate;
+  const toDate = values[1] || defaultToDate;
+
+  console.log("From Date:", moment(fromDate.toDate()).format("YYYY-MM-DD"));
+  console.log("To Date:", moment(toDate.toDate()).format("YYYY-MM-DD"));
+
+
   const apiURL = process.env.REACT_APP_API_URL;
   const [totalservice, settotalservice] = useState(0);
 
@@ -90,15 +106,15 @@ function Paymentcalender() {
 
   const getAlldsr = async () => {
     try {
-      let res = await axios.post(apiURL+"/getPaymentcalenderlist", {
-        startDate: rstart, 
-        endDate: rend, 
+      let res = await axios.post(apiURL + "/getPaymentcalenderlist", {
+        startDate: rstart,
+        endDate: rend,
       });
 
       if (res.status === 200) {
         setdsrdata(res.data.dividedamtDates);
       }
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const eventCounts = dsrdata.reduce((counts, item) => {
@@ -142,11 +158,36 @@ function Paymentcalender() {
 
       <div className="row m-auto">
         <div className="col-md-12">
-          <div className="p-3">
+          <div className="p-3" style={{ justifyContent: "space-between", display: "flex" }}>
             <h4>Payment Reports</h4>
+            {/* <div style={{ display: "grid" }}>
+
+              <DatePicker
+                value={values}
+                onChange={setValues}
+                range
+                animations={[size()]}
+                className="yellow"
+                style={{
+                  backgroundColor: "#86b7fe",
+                  height: "24px",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  padding: "15px 20px",
+                  color: "black"
+                }}
+              />
+              <button style={{
+                marginTop: " 10px",
+                borderRadius: "5px",
+                border: "none",
+                background: "#ffc107"
+              }}>Search</button>
+            </div> */}
           </div>
 
-          <div style={{ width: "94%", margin: "3%" }}>
+
+          <div style={{ width: "100%", margin: "3%", }}>
             <Calendar
               localizer={localizer}
               events={myEventsList}
@@ -170,7 +211,7 @@ function Paymentcalender() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 export default Paymentcalender;

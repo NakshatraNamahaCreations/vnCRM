@@ -4,14 +4,17 @@ import axios from "axios";
 import DataTable from "react-data-table-component";
 import { Card } from "react-bootstrap";
 import * as XLSX from "xlsx";
+import moment from "moment";
 
 function Report_B2B() {
+  const admin = JSON.parse(sessionStorage.getItem("admin"));
+
   const apiURL = process.env.REACT_APP_API_URL;
   const [b2bData, setb2bdata] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [city, setCity] = useState("");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  const [fromdate, setfromdate] = useState(moment().format("YYYY-MM-DD"));
+  const [todate, setToDate] = useState(moment().format("YYYY-MM-DD"));
   const [statusData, setStatus] = useState("");
   const [sentMails, setSentMails] = useState("");
   const [b2bType, setB2BType] = useState("");
@@ -19,140 +22,122 @@ function Report_B2B() {
   const [buttonClicked, setButtonClicked] = useState(false);
   const [closeWindow, setCloseWindow] = useState(true);
   const [searchValue, setSearchValue] = useState("");
-  // removing duplicate value from the select option
-  const [duplicateCity, setduplicateCity] = useState(new Set());
-  const [duplicateB2BType, setduplicateB2BType] = useState(new Set());
+  const [searchResults, setSearchResults] = useState([]);
 
-  useEffect(() => {
-    const uniqueCities = new Set(
-      b2bData?.map((item) => item.city).filter(Boolean)
-    );
 
-    const uniqueB2BType = new Set(
-      b2bData?.map((item) => item.b2btype).filter(Boolean)
-    );
 
-    setduplicateCity(uniqueCities);
-    setduplicateB2BType(uniqueB2BType);
-  }, [b2bData]);
-
-  const getb2b = async () => {
+  const filterData = async () => {
     try {
-      const res = await axios.get(apiURL + "/getB2B");
-      if (res.status === 200) {
-        const data = res.data?.B2B;
+      const res = await axios.get(`${apiURL}/getB2Breports`, {
 
-        setb2bdata(data);
-        setFilteredData(data); // Initialize filteredData with the fetched data
+        fromdate,
+        todate,
+
+
+      });
+
+      if (res.status === 200) {
+
+        setSearchResults(res.data?.b2bdata)
+        setFilteredData(res.data?.b2bdata);
+
+      } else {
+        // Set filterdata to an empty array in case of an error
+        setFilteredData([]);
       }
     } catch (error) {
-      // Handle error if necessary
-      console.error(error);
+      setFilteredData([]);
     }
   };
 
-  useEffect(() => {
-    getb2b();
-  }, []);
-
-  const handleSearch = () => {
-    setFilteredData(b2bData);
-    setSearchValue("");
-    setShowMessage(true);
-    const filteredResults = b2bData.filter((item) => {
-      const itemCity =
-        item.city?.toLowerCase().includes(city.toLowerCase()) ?? true;
-
-      const itemFromDate =
-        item.createdAt?.toLowerCase().includes(fromDate.toLowerCase()) ?? true;
-
-      const itemToDate =
-        item.createdAt?.toLowerCase().includes(toDate.toLowerCase()) ?? true;
-
-      // const itemStatus =
-      //   item.status?.toLowerCase().includes(statusData.toLowerCase()) ?? true;
-
-      const itemB2BType =
-        item.b2btype?.toLowerCase().includes(b2bType.toLowerCase()) ?? true;
-
-      return itemFromDate && itemToDate && itemCity && itemB2BType;
-    });
-    setFilteredData(filteredResults);
-    setSearchValue(city || fromDate || toDate || b2bType);
-    setShowMessage(false);
-  };
 
   const handleSearchClick = () => {
-    handleSearch();
-    setButtonClicked(true);
+    filterData();
+
   };
 
   const exportData = () => {
-    const fileName = "b2b_details.xlsx";
-    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const fileName = `b2b_details.xlsx`;
+
+      // Assuming each object in searchResults has properties like 'category' and 'img'
+      const filteredData1 = searchResults?.map(item => ({
+        date: item.date,
+        b2bname: item?.b2bname,
+        contactperson: item?.contactperson,
+        maincontact: item?.maincontact,
+        email: item?.email,
+        city: item?.city,
+        address: item?.address,
+        b2btype: item?.b2btype,
+        approach: item?.approach,
+        executiveName:item?.executiveName
+      }));
+    
+    const worksheet = XLSX.utils.json_to_sheet(filteredData1);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "B2B_details");
     XLSX.writeFile(workbook, fileName);
   };
 
-  const columns = [
-    {
-      name: "S.No",
-      selector: (row, index) => index + 1,
-    },
-    {
-      name: "Date",
-      selector: (row) => row.createdAt,
-    },
-    {
-      name: "Name",
-      selector: (row) => row.b2bname,
-    },
-    {
-      name: "Contact Person",
-      selector: (row) => row.contactperson,
-    },
-    {
-      name: "Contact 1",
-      selector: (row) => row.maincontact,
-    },
-    {
-      name: "Contact 2",
-      selector: (row) => row.alternateno,
-    },
-    {
-      name: "Email Id",
-      selector: (row) => row.email,
-    },
-    // {
-    //   name: "Gst",
-    //   selector: (row) => row.gst,
-    // },
-    {
-      name: "Address",
-      selector: (row) => row.address,
-    },
-    {
-      name: "B2B type",
-      selector: (row) => row.b2btype,
-    },
-    {
-      name: "city",
-      selector: (row) => row.city,
-    },
-    // {
-    //   name: "Instructions",
-    //   selector: (row) => row.instructions,
-    // },
-    {
-      name: "Approach",
-      selector: (row) => row.approach,
-    },
-    {
-      name: "Executive",
-      selector: (row) => row.executiveName,
-    },
-  ];
+  const [searchB2Btype, setsearchB2Btype] = useState("");
+  const [searchReference, setsearchReference] = useState("");
+  const [searchCity, setsearchCity] = useState("");
+  const [searchExecutive, setsearchExecutive] = useState("")
+
+  useEffect(() => {
+    const filterResults = () => {
+      let results = filteredData;
+
+      if (searchB2Btype) {
+        results = results.filter(
+          (item) =>
+            item.b2btype &&
+            item.b2btype
+              .toLowerCase()
+              .includes(searchB2Btype.toLowerCase())
+        );
+      }
+      if (searchReference) {
+        results = results.filter(
+          (item) =>
+            item.approach &&
+            item.approach
+              .toLowerCase()
+              .includes(searchReference.toLowerCase())
+        );
+      } //
+      if (searchCity) {
+        results = results.filter(
+          (item) =>
+            item.city &&
+            item.city
+              .toLowerCase()
+              .includes(searchCity.toLowerCase())
+        );
+      }
+
+      if (searchExecutive) {
+        results = results.filter(
+          (item) =>
+            item.executiveName &&
+            item.executiveName
+              .toLowerCase()
+              .includes(searchExecutive.toLowerCase())
+        );
+      }
+
+
+      setSearchResults(results);
+    };
+    filterResults();
+  }, [
+    searchB2Btype,
+    searchReference,
+    searchCity, 
+    searchExecutive,
+   
+  ]);
+
 
   return (
     <div style={{ backgroundColor: "#f9f6f6" }} className="web">
@@ -188,13 +173,14 @@ function Report_B2B() {
                     <div className="col-md-5 ms-4">
                       <input
                         className="report-select"
-                        onChange={(e) => setFromDate(e.target.value)}
+                        onChange={(e) => setfromdate(e.target.value)}
                         type="date"
+                        value={fromdate}
                       />
                     </div>
                   </div>
                   <br />
-                  <div className="row">
+                  {/* <div className="row">
                     <div className="col-md-4">City </div>
                     <div className="col-md-1 ms-4">:</div>
                     <div className="col-md-5 ms-4">
@@ -208,9 +194,9 @@ function Report_B2B() {
                         ))}
                       </select>
                     </div>
-                  </div>
+                  </div> */}
                   <br />
-                  <div className="row">
+                  {/* <div className="row">
                     <div className="col-md-4">Type </div>
                     <div className="col-md-1 ms-4">:</div>
                     <div className="col-md-5 ms-4">
@@ -225,7 +211,7 @@ function Report_B2B() {
                         ))}
                       </select>
                     </div>
-                  </div>
+                  </div> */}
                   <br />
                 </div>
                 {/* next column=========================== */}
@@ -241,24 +227,24 @@ function Report_B2B() {
                     <div className="col-md-5 ms-4">
                       <input
                         className="report-select"
+
                         onChange={(e) => setToDate(e.target.value)}
                         type="date"
+                        value={todate}
                       />
                     </div>
                   </div>
-                  <br />
+                  {/* <br />
                   <div className="row">
                     <div className="col-md-4 ">Status *</div>
                     <div className="col-md-1 ms-4">:</div>
                     <div className="col-md-5 ms-4">
                       <select
                         className="report-select"
-                        // onClick={(e) => setStatus(e.target.value)}
+                       
                       >
                         <option>All</option>
-                        {/* {[...duplicateCategory].map((statusData) => (
-                          <option key={statusData}>{statusData}</option>
-                        ))} */}
+                       
                       </select>
                     </div>
                   </div>
@@ -274,24 +260,12 @@ function Report_B2B() {
                         // onClick={(e) => setSentMails(e.target.value)}
                       >
                         <option>Select</option>
-                        {/* <option>Attended</option>
-                        <option>Quotation prepared</option>
-                        <option>quotation sent</option> */}
+                     
                       </select>
                     </div>
                   </div>
-                  <br />
-                  {/* <div className="row">
-                    <div className="col-md-4"> Reference 2</div>
-                    <div className="col-md-1 ms-4">:</div>
-                    <div className="col-md-5 ms-4">
-                      <textarea
-                        className="report-select"
-                        onChange={(e) => setReference2(e.target.value)}
-                      />
-                    </div>
-                  </div>
                   <br /> */}
+
                 </div>
                 <p style={{ justifyContent: "center", display: "flex" }}>
                   <button
@@ -320,7 +294,7 @@ function Report_B2B() {
                     <i
                       class="fa-solid fa-download"
                       title="Download"
-                      // style={{ color: "white", fontSize: "27px" }}
+                    // style={{ color: "white", fontSize: "27px" }}
                     ></i>{" "}
                     Export
                   </button>
@@ -388,15 +362,159 @@ function Report_B2B() {
           </Card>
         </div>{" "}
         <br />
-        <DataTable
-          columns={columns}
-          data={filteredData}
-          pagination
-          fixedHeader
-          selectableRowsHighlight
-          subHeaderAlign="left"
-          highlightOnHover
-        />
+        <table className="m-2">
+          <thead>
+            <tr className="bg ">
+              <th className="bor"></th>
+              <th className="bor">
+              
+              </th>
+              <th className="bor">
+              
+              </th>
+              <th className="bor">
+                {" "}
+               
+              </th>
+              <th className="bor">
+                {" "}
+              
+              </th>
+              <th className="bor">
+                
+              </th>
+              <th className="bor">
+               
+              </th>
+              <th className="bor">
+                {" "}
+              
+              </th>
+              <th className="bor">
+              <select
+                  value={searchB2Btype}
+                  onChange={(e) => setsearchB2Btype(e.target.value)}
+                  className="vhs-table-input"
+                >
+                  <option value="">Select</option>
+                  {[...new Set(filteredData?.map((i) => i.b2btype))].map(
+                    (uniqueCity) => (
+                      <option value={uniqueCity} key={uniqueCity}>
+                        {uniqueCity}
+                      </option>
+                    )
+                  )}
+                </select>{" "}
+               
+              </th>
+              <th className="bor">
+              <select
+                  value={searchCity}
+                  onChange={(e) => setsearchCity(e.target.value)}
+                  className="vhs-table-input"
+                >
+                  <option value="">Select </option>
+                  {admin?.city.map((item) => (
+                    <option value={item.name}>{item.name}</option>
+                  ))}
+                </select>{" "}
+              </th>
+              <th className="bor">
+              <select
+                  value={searchReference}
+                  onChange={(e) => setsearchReference(e.target.value)}
+                  className="vhs-table-input"
+                >
+                  <option value="">Select</option>
+                  {[...new Set(filteredData?.map((i) => i.approach))].map(
+                    (uniqueCity) => (
+                      <option value={uniqueCity} key={uniqueCity}>
+                        {uniqueCity}
+                      </option>
+                    )
+                  )}
+                </select>{" "}
+              </th>
+              <th className="bor">
+              <select
+                  value={searchExecutive}
+                  onChange={(e) => setsearchExecutive(e.target.value)}
+                  className="vhs-table-input"
+                >
+                  <option value="">Select </option>
+                  {[...new Set(filteredData?.map((i) => i.executiveName))].map(
+                    (uniqueCity) => (
+                      <option value={uniqueCity} key={uniqueCity}>
+                        {uniqueCity}
+                      </option>
+                    )
+                  )}
+                </select>{" "}
+            </th>
+              
+            
+
+    
+
+            </tr>
+            <tr className="bg">
+              <th className="bor">#</th>
+              <th className="bor">Date & Time</th>
+              <th className="bor" >
+              Name
+              </th>
+              <th className="bor">Contact Person</th>
+              <th className="bor">Contact 1</th>
+              <th className="bor">Contact 2</th>
+              <th className="bor">Email Id</th>
+              <th className="bor">Address</th>
+              <th className="bor">B2B type</th>
+              <th className="bor">city</th>
+              <th className="bor">Approach</th>
+
+              <th className="bor" >
+              Executive
+              </th>
+             
+
+            </tr>
+          </thead>
+          <tbody>
+            {searchResults.map((item, index) => (
+              <tr
+                className="trnew"
+               
+              >
+
+                <td>{index + 1}</td>
+             
+                <td>
+                  {item.date}
+                  <br />
+                  {item.time}
+                </td>
+
+                <td>{item.b2bname}</td>
+                <td>{item.contactperson}</td>
+                <td>{item.maincontact}</td>
+                <td>{item.alternateno}</td>
+
+                <td>{item.email}</td>
+                <td>{item.address}</td>
+                <td>{item.b2btype}</td>
+                <td>{item.city}</td>
+                <td>
+                  {item.approach}
+               
+                </td>
+                <td>{item.executiveName}</td>
+               
+
+
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

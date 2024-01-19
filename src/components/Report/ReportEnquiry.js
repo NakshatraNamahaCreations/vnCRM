@@ -10,9 +10,9 @@ import moment from "moment";
 function Report_Enquiry() {
   const admin = JSON.parse(sessionStorage.getItem("admin"));
   const apiURL = process.env.REACT_APP_API_URL;
-  const [enquiryData, setEnquiryData] = useState([]);
+
   const [filteredData, setFilteredData] = useState([]);
-  const [interestFor, setInterestFor] = useState("");
+ 
   const [reference2, setReference2] = useState("");
   const [reference1, setReference1] = useState("");
   const [response, setResponse] = useState("");
@@ -26,7 +26,7 @@ function Report_Enquiry() {
   const [buttonClicked, setButtonClicked] = useState(false);
   const [closeWindow, setCloseWindow] = useState(true);
   const [searchValue, setSearchValue] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+ 
 
   const [serviceData, setServiceData] = useState([]);
   const [serviceId, setSeviceId] = useState("");
@@ -130,8 +130,28 @@ function Report_Enquiry() {
   };
 
   const exportData = () => {
-    const fileName = "dsr_data.xlsx";
-    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const fileName = "Enquiry_Reports.xlsx";
+
+    const filteredData1 = filteredData?.map(item => ({
+      Enquirdatetime: `${item.date},${item.Time}`,
+      category: item?.category,
+      customerName: item?.name,
+      mobile: item.mobile,
+      city: item?.city,
+   
+      address: item.address,
+      reference1: item?.reference1,
+      reference2: item?.reference2,
+      reference3: item?.reference3,
+
+      intrestedfor:item.intrestedfor,
+      Comment: item?.Comment,
+      desc: item?.desc,
+
+      BackofficeExecutive: item?.BackofficeExecutive,
+      status: item.enquiryFollow[0]?.response
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(filteredData1);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Category Data");
     XLSX.writeFile(workbook, fileName);
@@ -167,8 +187,12 @@ function Report_Enquiry() {
       selector: (row) => (row.address ? row.address : "-"),
     },
     {
-      name: "Reference",
+      name: "Reference1",
       selector: (row) => (row.reference1 ? row.reference1 : "-"),
+    },
+    {
+      name: "Reference2",
+      selector: (row) => (row.reference2 ? row.reference2 : "-"),
     },
 
     {
@@ -440,7 +464,7 @@ const handleClear =()=>{
                     ></i>{" "}
                     Export
                   </button>
-                  <button
+                  {/* <button
                     className="ps-3 pt-2 pb-2 pe-3 mx-3"
                     style={{
                       border: 0,
@@ -451,7 +475,7 @@ const handleClear =()=>{
                     onClick={handleClear}
                   >
                     Clear
-                  </button>
+                  </button> */}
                 </p>
                 <p>
                   {showMessage && buttonClicked && (

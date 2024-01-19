@@ -101,7 +101,7 @@ function Technician() {
         });
       } catch (error) {
         console.error(error); // Log the error to the browser console
-        alert("An error occurred: " + error.message);
+        alert("An error occurred: " + error.data.error);
       }
     }
   };

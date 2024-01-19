@@ -78,7 +78,7 @@ function Reports() {
         </div>
 
         <div className="col-md-3">
-          <Link to="/report/enquiry">
+          <Link to="/report/closedp">
             <div className="card home-col">
               <div className="card-body">
                 <div className="home-content">Closed Projects</div>
@@ -98,7 +98,15 @@ function Reports() {
         <div className="col-md-3 "></div>
       </div>
       <div className="row m-auto">
-        <div className="col-md-3"></div>
+      <div className="col-md-3">
+          <Link to="/report/payments">
+            <div className="card home-col">
+              <div className="card-body">
+                <div className="home-content">Payment Reports</div>
+              </div>
+            </div>
+          </Link>
+        </div>
 
         <div className="col-md-3"></div>
 

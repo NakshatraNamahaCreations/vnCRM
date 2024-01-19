@@ -51,6 +51,13 @@ function Enquirydatatable() {
  
   const enquirydetail = (data) => {
     navigate(`/enquirydetail/${data.EnquiryId}`);
+    const queryString = new URLSearchParams({
+      enquiryData: JSON.stringify(data),
+    }).toString();
+    const newTab = window.open(
+      `/enquirydetail/${data.EnquiryId}?${queryString}`,
+      "_blank"
+    );
   };
   let i = 0;
 
@@ -403,7 +410,7 @@ function Enquirydatatable() {
             </thead>
             <tbody>
               {currentItems.map((item, index) => (
-                <a onClick={() => enquirydetail(item)} className="tbl">
+                <a onClick={() => enquirydetail(item.enquirydata[0])} className="tbl">
                   <tr
                     key={item.id}
                     className="user-tbale-body tbl1 trnew"

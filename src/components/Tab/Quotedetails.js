@@ -66,12 +66,13 @@ function Quotedetails() {
   const [advpaymentdata, setAdvPaymentData] = useState([]);
 
   const getquote = async () => {
-    let res = await axios.get(apiURL + "/getquote");
+    let res = await axios.get(apiURL + `/getfilterwithEnquiryid/${EnquiryId}`);
     if ((res.status = 200)) {
-      setquotedata(res.data?.quote.filter((i) => i.EnquiryId == EnquiryId));
+      setquotedata(res.data?.quote);
+
     }
   };
-  // useEffect to update netTotal when quotedata changes
+
 
 
   useEffect(() => {
@@ -84,11 +85,11 @@ function Quotedetails() {
             ? total + Gst - parseFloat(quotedata[0]?.adjustments)
             : 0 // Replace 0 with a default value if needed
       );
-      
-    }
-  }, [quotedata,quotepagedata ]);
 
- 
+    }
+  }, [quotedata, quotepagedata]);
+
+
   useEffect(() => {
     getresponse();
     getcategory();
@@ -114,43 +115,49 @@ function Quotedetails() {
       setenquirydata(
         res.data?.enquiryadd
       );
-      console.log("res.data?.enquiryadd",res.data?.enquiryadd)
+      console.log("res.data?.enquiryadd", res.data?.enquiryadd)
     }
   };
 
   const addquotefollowup = async (e) => {
     e.preventDefault();
+    if (response1)
+      try {
+        const config = {
+          url: `/addquotefollowup`,
+          method: "post",
+          baseURL: apiURL,
+          // data: formdata,
+          headers: { "content-type": "application/json" },
+          data: {
+            EnquiryId: EnquiryId,
+            category: quotepagedata[0]?.category,
+            staffname: admin.displayname,
+            folldate: moment().format("L"),
+            folltime: moment().format("LT"),
+            response: response1,
+            nxtfoll: quotenxtfoll,
+            desc: descrption,
+            colorcode: colorcode,
+          },
+        };
 
-    try {
-      const config = {
-        url: `/addquotefollowup`,
-        method: "post",
-        baseURL: apiURL,
-        // data: formdata,
-        headers: { "content-type": "application/json" },
-        data: {
-          EnquiryId: EnquiryId,
-          category: quotepagedata[0]?.category,
-          staffname: admin.displayname,
-          folldate: moment().format("L"),
-          folltime: moment().format("LT"),
-          response: response1,
-          nxtfoll: quotenxtfoll,
-          desc: descrption,
-          colorcode: colorcode,
-        },
-      };
-      await axios(config).then(function (response) {
-        if (response.status === 200) {
-          console.log("success");
-          window.location.reload();
-          // window.location.assign(`/quotedetails/${EnquiryId}`);
-        }
-      });
-    } catch (error) {
-      console.error(error);
-      alert(" Not Added");
-    }
+        await axios(config).then(function (response) {
+
+
+          if (response.status === 200) {
+            console.log("success");
+            if (response1 === "Confirmed") {
+              updatedquotationtype();
+              console.log("hello ")
+            }
+            window.location.reload('')
+          }
+        });
+      } catch (error) {
+        console.error(error);
+        alert(" Not Added");
+      }
   };
 
   const addtreatment = async (e) => {
@@ -198,7 +205,7 @@ function Quotedetails() {
     let res = await axios.get(apiURL + `/getenquiryquote/${EnquiryId}`);
     if ((res.status = 200)) {
       setquotepagedata(
-        res.data?.enquiryadd );
+        res.data?.enquiryadd);
     }
   };
   const gettreatment = async () => {
@@ -338,7 +345,7 @@ function Quotedetails() {
             netTotal: netTotal,
             Bookedby: admin.displayname,
             salesExecutive: admin.displayname,
-            exenumber:admin.contactno,
+            exenumber: admin.contactno,
             date: moment().format("L"),
             time: moment().format("LT"),
           },
@@ -355,6 +362,7 @@ function Quotedetails() {
     }
   };
 
+  console.log("quotedata[0]?._id", quotedata[0]?._id)
   const updatequote = async (e) => {
     e.preventDefault();
 
@@ -382,7 +390,7 @@ function Quotedetails() {
             time: quotedata[0]?.time,
             salesExecutive: admin.displayname,
             Bookedby: admin.displayname,
-            exenumber:admin.contactno,
+            exenumber: admin.contactno,
           },
         };
         await axios(config).then(function (response) {
@@ -433,15 +441,19 @@ function Quotedetails() {
             `/customersearchdetailsqote/${customerData?._id}/${enquirydata[0]?.EnquiryId}?${queryString}`,
             "_blank"
           );
-         
+
         } else {
           console.log("Phone number not available");
-          navigate(`/convertcustomer/${enquirydata[0]?.EnquiryId}`);
+          const enquiryDataString = JSON.stringify(enquirydata[0]);
+          navigate(`/convertcustomer/${enquirydata[0]?.EnquiryId}?enquiryData=${enquiryDataString}`);
+
         }
       }
     } catch (error) {
       console.error("Error fetching customer:", error);
-      navigate(`/convertcustomer/${enquirydata[0]?.EnquiryId}`);
+      const enquiryDataString = JSON.stringify(enquirydata[0]);
+      navigate(`/convertcustomer/${enquirydata[0]?.EnquiryId}?enquiryData=${enquiryDataString}`);
+
       // Handle errors accordingly
     }
   };
@@ -512,21 +524,18 @@ function Quotedetails() {
       return "transparent";
     }
   }
+
   const [netTotal, setnetTotal] = useState(
     quotedata[0]?.netTotal !== null && quotedata[0]?.netTotal !== undefined
       ? quotedata[0]?.netTotal
       : Gst
-      ? total + total * 0.05 - adjustments
-      : total - adjustments
+        ? total + total * 0.05 - adjustments
+        : total - adjustments
   );
 
-  console.log("yogid", Gst || adjustments
-  ? total + Gst - parseFloat(quotedata[0]?.adjustments):0);
 
-
-
-  
   const [whatsappdata, setwhatsappdata] = useState([]);
+
   useEffect(() => {
     getwhatsapptemplate();
   }, []);
@@ -535,7 +544,7 @@ function Quotedetails() {
     try {
       let res = await axios.get(apiURL + "/getwhatsapptemplate");
       if (res.status === 200) {
-        console.log("whatsapp template", res.data?.whatsapptemplate);
+
         let getTemplateDatails = res.data?.whatsapptemplate?.filter(
           (item) => item.templatename === "Send Quotation"
         );
@@ -550,9 +559,13 @@ function Quotedetails() {
     if (whatsappdata.length > 0) {
       const selectedResponse = whatsappdata[0];
       const invoiceLink = `quotations?id=${EnquiryId}`;
+      const a = "SHARED";
+      if (quotedata[0]?.type !== "Confirmed") {
+        updatedquotationtype(a);
+
+      }
       makeApiCall(
         selectedResponse,
-
         quotepagedata[0]?.mobile,
         invoiceLink
       );
@@ -563,6 +576,31 @@ function Quotedetails() {
     // Navigate(`/dsrquote/${data}`);
   };
 
+  const updatedquotationtype = async (a) => {
+
+    try {
+      const config = {
+        url: `/findwithidupdatetype/${quotedata[0]?._id}`,
+        method: "post",
+        baseURL: apiURL,
+        // data: formdata,
+        headers: { "content-type": "application/json" },
+        data: {
+          type: a === "SHARED" ? "QUOTE SHARED" : "CONFIRMED",
+
+        },
+      };
+      await axios(config).then(function (response) {
+        if (response.status === 200) {
+
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      alert(" Not Added");
+    }
+
+  };
 
   const makeApiCall = async (selectedResponse, contactNumber, invoiceId) => {
     const apiURL =
@@ -575,24 +613,20 @@ function Quotedetails() {
       console.error("Content template is empty. Cannot proceed.");
       return;
     }
-    // console.log("91" + data.customerData[0]?.mainContact);
+
     const content = contentTemplate.replace(
       /\{Customer_name\}/g,
       quotepagedata[0]?.name
     );
 
-    console.log("quotepagedata[0]?.treatmentdetails[0]?.category",quotepagedata[0]?.treatmentdetails[0]?.category)
     const serviceName = content.replace(/\{Service_name\}/g, quotepagedata[0]?.treatmentdetails[0]?.category);
 
-    console.log("serviceName",serviceName);
     const serivePrice = serviceName.replace(
       /\{Executive_name\}/g,
       admin.displayname
     );
 
-    
-
-    const invoiceUrl = `http://vijayhomeservicebengaluru.in/quotations?id=${EnquiryId}`;
+    const invoiceUrl = `https://vijayhomeservicebengaluru.in/quotations?id=${EnquiryId}`;
 
     const invoiceLink = serivePrice.replace(
       /\{Quote_link\}/g,
@@ -635,7 +669,7 @@ function Quotedetails() {
       console.error("Error making API call:", error);
     }
   };
-  console.log("advpaymentdata[0]", advpaymentdata[0]);
+
 
   return (
     <div className="web">
@@ -686,30 +720,30 @@ function Quotedetails() {
                   )}
                 </div>
                 {advpaymentdata?.amount ?
-                <p>
-                  <b>
-                    Advance Payment :
-                   { advpaymentdata?.amount }
-                  </b>
-                </p>: ""}
+                  <p>
+                    <b>
+                      Advance Payment :
+                      {advpaymentdata?.amount}
+                    </b>
+                  </p> : ""}
                 {advpaymentdata?.paymentDate
-                      ?
-                <p>
-                  <b>
-                    Adv Payment Date :
-                    {advpaymentdata?.paymentDate}
-                     
-                  </b>
-                </p> : ""}
-                {advpaymentdata?.paymentMode?
-                <p>
-                  <b>
-                    Adv Payment mode :
-                    
-                      {advpaymentdata?.paymentMode} 
-                     
-                  </b>
-                </p> : ""}
+                  ?
+                  <p>
+                    <b>
+                      Adv Payment Date :
+                      {advpaymentdata?.paymentDate}
+
+                    </b>
+                  </p> : ""}
+                {advpaymentdata?.paymentMode ?
+                  <p>
+                    <b>
+                      Adv Payment mode :
+
+                      {advpaymentdata?.paymentMode}
+
+                    </b>
+                  </p> : ""}
 
                 <hr />
                 <div className="row">
@@ -1235,6 +1269,7 @@ function Quotedetails() {
                     <input
                       type="date"
                       className="col-md-12 vhs-input-value"
+                      defaultValue={moment().format("DD-MM-YYYY")}
                       onChange={(e) => setquotenxtfoll(e.target.value)}
                     />
                   </div>
@@ -1298,7 +1333,7 @@ function Quotedetails() {
                         type="date"
                         className="col-md-12 vhs-input-value"
                         onChange={(e) => setPaymentDate(e.target.value)}
-                        value={moment().format("DD-MM-YYYY")}
+                        value={paymentDate}
                       />
                     </div>
                   </div>

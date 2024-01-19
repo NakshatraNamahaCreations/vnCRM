@@ -171,6 +171,8 @@ import Quotations from "./components/Tab/Quotations";
 import Today from "./components/Tab/Today";
 import Customersearchdetailsqote from "./components/Customersearchdetailsqote";
 import Pmaterial from "./components/Tab/Pmaterial";
+import Reports_payments from "./components/Report/Reports_payments";
+import Report_closedp from "./components/Report/Report_closedp";
 
 function App() {
   return (
@@ -332,6 +334,8 @@ function App() {
           <Route path="/report/quotation" element={<ReportQuotation />} />
           <Route path="/report/b2b" element={<Report_B2B />} />
           <Route path="/report/onecommunity" element={<Report_1Community />} />
+          <Route path="/report/payments" element={<Reports_payments />} />
+          <Route path="/report/closedp" element={<Report_closedp />} />
 
           <Route
             path="/report/runningprojects"

@@ -15,7 +15,7 @@ function DSRcategory() {
   const localizer = momentLocalizer(moment);
   const [view, setView] = React.useState("month");
   const navigate = useNavigate();
-  
+
   const [dsrnewdata, setdsrnewdata] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [filteredData, setFilteredData] = useState([]);
@@ -33,14 +33,14 @@ function DSRcategory() {
     let count = 0;
 
     initialFilteredData.forEach((item) => {
-   
+
       count += item.dividedDates.length;
     });
-    
 
-    
-    
-   
+
+
+
+
 
     setTotalCount(count);
     setFilteredData(initialFilteredData);
@@ -98,7 +98,7 @@ function DSRcategory() {
 
   const postAllJobs = async () => {
     try {
-      const res = await axios.post( apiURL+"/postservicecatdevideddatesnew", {
+      const res = await axios.post(apiURL + "/postservicecatdevideddatesnew", {
         category: dCategory,
         startDate: rstart,
         endDate: rend,
@@ -106,10 +106,10 @@ function DSRcategory() {
       });
 
       if (res.status === 200) {
-  
 
+        
         setdsrnewdata(res.data?.dividedDates);
-      
+
       }
     } catch (error) {
       console.error(error);
