@@ -78,6 +78,7 @@ function Dsrcallist() {
 
   useEffect(() => {
     getAlldata();
+
   }, [treatmentData]);
 
   const getAlldata = async () => {
@@ -91,6 +92,7 @@ function Dsrcallist() {
       // Handle error
     }
   };
+
 
   useEffect(() => {
     async function filterResults() {

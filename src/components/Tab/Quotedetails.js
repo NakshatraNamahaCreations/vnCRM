@@ -444,15 +444,21 @@ function Quotedetails() {
 
         } else {
           console.log("Phone number not available");
-          const enquiryDataString = JSON.stringify(enquirydata[0]);
-          navigate(`/convertcustomer/${enquirydata[0]?.EnquiryId}?enquiryData=${enquiryDataString}`);
+          const queryString = new URLSearchParams({
+            enquiryData: JSON.stringify(enquirydata[0]),
+          }).toString();
+       
+          navigate(`/convertcustomer/${enquirydata[0]?.EnquiryId}?${queryString}`);
 
         }
       }
     } catch (error) {
       console.error("Error fetching customer:", error);
-      const enquiryDataString = JSON.stringify(enquirydata[0]);
-      navigate(`/convertcustomer/${enquirydata[0]?.EnquiryId}?enquiryData=${enquiryDataString}`);
+      const queryString = new URLSearchParams({
+        enquiryData: JSON.stringify(enquirydata[0]),
+      }).toString();
+   
+      navigate(`/convertcustomer/${enquirydata[0]?.EnquiryId}?${queryString}`);
 
       // Handle errors accordingly
     }

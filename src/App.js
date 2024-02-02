@@ -173,6 +173,7 @@ import Customersearchdetailsqote from "./components/Customersearchdetailsqote";
 import Pmaterial from "./components/Tab/Pmaterial";
 import Reports_payments from "./components/Report/Reports_payments";
 import Report_closedp from "./components/Report/Report_closedp";
+import Outsidevendor from "./components/Tab/Outsidevendor"
 
 function App() {
   return (
@@ -213,6 +214,8 @@ function App() {
           <Route path="/community" element={<Community />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/technician" element={<Technician />} />
+          <Route path="/vendors" element={<Outsidevendor />} />
+
           <Route
             path="/enquirydetail/:EnquiryId"
             element={<Enquirynewdetail />}

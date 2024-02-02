@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Header from "../layout/Header";
 import Enquiryfollowupnav from "../Enquiryfollowupnav";
 import axios from "axios";
@@ -37,12 +37,12 @@ function Enquirynew() {
   const getenquiry = async () => {
     let res = await axios.get(apiURL + "/getallnewfollow");
     if ((res.status = 200)) {
+      console.log(res.data, "data")
       setfilterdata(res.data?.enquiryadd);
-
       setSearchResults(res.data?.enquiryadd);
     }
   };
-
+  console.log("filterdata", filterdata)
   const enquirydetail = (row) => {
     const queryString = new URLSearchParams({
       enquiryData: JSON.stringify(row),
@@ -52,6 +52,7 @@ function Enquirynew() {
       "_blank"
     );
   };
+  
 
   useEffect(() => {
     const filterResults = () => {
@@ -205,7 +206,8 @@ function Enquirynew() {
   // Get current items for the current page
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = searchResults.slice(indexOfFirstItem, indexOfLastItem);
+  // const currentItems = searchResults.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = useMemo(() => Array.isArray(searchResults) ? searchResults.slice(indexOfFirstItem, indexOfLastItem) : [], [searchResults, indexOfFirstItem, indexOfLastItem]);
 
   // Change page
   const handlePageChange = (selectedPage) => {
@@ -308,13 +310,16 @@ function Enquirynew() {
                     onChange={(e) => setSearchCity(e.target.value)}
                   >
                     <option value="">Select </option>
-                    {[...new Set(filterdata?.map((city) => city.city))].map(
+                    {[...new Set(Array.isArray(filterdata) && filterdata?.map((city) => city.city))].map(
                       (uniquecity) => (
                         <option value={uniquecity} key={uniquecity}>
                           {uniquecity}
                         </option>
                       )
                     )}
+
+
+
                   </select>{" "}
                 </th>
 
@@ -366,7 +371,7 @@ function Enquirynew() {
                   >
                     <td>{startSerialNumber + index}</td>
                     <td>{item.category}</td>
-                    <td>{item.date} < br/>{item.Time}</td>
+                    <td>{item.date} < br />{item.Time}</td>
 
                     <td>{item.name}</td>
                     <td>{item.mobile}</td>

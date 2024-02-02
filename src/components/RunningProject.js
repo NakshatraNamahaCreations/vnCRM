@@ -5,6 +5,8 @@ import moment from "moment";
 import { useNavigate } from "react-router-dom";
 
 function RunningProject() {
+  const admin = JSON.parse(sessionStorage.getItem("admin"));
+
   const apiURL = process.env.REACT_APP_API_URL;
   const navigate = useNavigate();
   const [selected, setSelected] = useState(0);
@@ -64,6 +66,9 @@ function RunningProject() {
 
   const handleClick = (divNum) => () => {
     setSelected(divNum);
+
+
+    
   };
 
   useEffect(() => {
@@ -86,32 +91,14 @@ function RunningProject() {
   const getservicedata = async () => {
     let res = await axios.get(apiURL + "/getfilterrunningdata");
     if (res.status === 200) {
-      const filteredData = res.data?.runningdata.filter((i) => !i.closeProject);
+      const filteredData = res.data?.runningdata.filter((i) => !i.closeProject && i.dsrdata[0]?.startproject);
 
       settreatmentData(filteredData);
       setSearchResults(filteredData);
     }
   };
 
-  // const getservicedata = async () => {
-  //   let res = await axios.get(apiURL + "/getrunningdata");
-  //   if (res.status === 200) {
-  //     const data = res.data?.runningdata;
-  //     console.log(data);
-
-  //     const filteredData = data.filter((item) => {
-  //       const formattedDates = item.dividedamtDates.map((date) =>
-  //         moment(date).format("YYYY-MM-DD")
-  //       );
-  //       return formattedDates;
-  //     });
-
-  //     console.log("mydata", filteredData);
-  //     settreatmentData(filteredData);
-  //     setSearchResults(filteredData);
-  //     console.log(filteredData);
-  //   }
-  // };
+ 
 
   const updatetoclose = async (id) => {
     try {
@@ -166,8 +153,8 @@ function RunningProject() {
       if (projectManager && projectManager !== "Show All") {
         results = results.filter(
           (item) =>
-            item.dsrdata[0]?.techName &&
-            item.dsrdata[0]?.techName
+          item.dsrdata[0]?.TechorPMorVendorName &&
+          item.dsrdata[0]?.TechorPMorVendorName
               .toLowerCase()
               .includes(projectManager.toLowerCase())
         );
@@ -175,8 +162,8 @@ function RunningProject() {
       if (salesExecutive) {
         results = results.filter(
           (item) =>
-            item.dsrdata[0]?.salesExecutive &&
-            item.dsrdata[0]?.salesExecutive
+           item.enquiryFollowupData[0]?.technicianname &&
+            item.enquiryFollowupData[0]?.technicianname
               .toLowerCase()
               .includes(salesExecutive.toLowerCase())
         );
@@ -194,7 +181,6 @@ function RunningProject() {
         results = results.filter((item) => {
           const mainContact = item.customerData[0]?.mainContact;
           if (typeof mainContact === "number") {
-            // Convert contactNo to a string before comparing (assuming it's a number)
             return mainContact.toString().includes(contactNo);
           }
           return false;
@@ -222,11 +208,13 @@ function RunningProject() {
       if (city) {
         results = results.filter(
           (item) =>
-            item.customerData[0]?.city &&
-            item.customerData[0]?.city
+            item.city &&
+            item.city
               .toLowerCase()
               .includes(city.toLowerCase())
         );
+
+        
       }
       // if (quoteNo) {
       //   results = results.filter(
@@ -400,17 +388,30 @@ function RunningProject() {
                       onChange={(e) => setProjectManager(e.target.value)}
                     >
                       <option value="">-show all-</option>
-                      {[...techName].map((techName) => (
-                        <option key={techName}>{techName}</option>
-                      ))}
+                      {[...new Set(treatmentdata?.map((item) => item.dsrdata[0]?.TechorPMorVendorName))].map(
+                      (uniqueCity) => (
+                        <option value={uniqueCity} key={uniqueCity}>
+                          {uniqueCity}
+                        </option>
+                      )
+                    )}
                     </select>
                   </th>
                   <th scope="col">
-                    <input
-                      type="text"
+               
+                     <select
                       className="vhs-table-input"
                       onChange={(e) => setSalesExecutive(e.target.value)}
-                    />
+                    >
+                      <option value="">-show all-</option>
+                      {[...new Set(treatmentdata?.map((item) => item.enquiryFollowupData[0]?.technicianname))].map(
+                      (uniqueCity) => (
+                        <option value={uniqueCity} key={uniqueCity}>
+                          {uniqueCity}
+                        </option>
+                      )
+                    )}
+                    </select>
                   </th>
                   <th scope="col">
                     <input
@@ -448,6 +449,7 @@ function RunningProject() {
                       className="vhs-table-input"
                       onChange={(e) => setCity(e.target.value)}
                     />
+                    
                   </th>
                   <th scope="col">
                     <input
@@ -499,22 +501,10 @@ function RunningProject() {
                     />
                   </th>
                   <th scope="col">
-                    {/* <select
-                        className="vhs-table-input"
-                        onChange={(e) => setPayment(e.target.value)}
-                      >
-                        <option>-show all-</option>
-                        <option>Book for deep cleaning</option>
-                        <option>Closed by project manager</option>
-                        <option>Running Projects</option>
-                      </select> */}
+                    
                   </th>
                   <th scope="col">
-                    {/* <input
-                        type="text"
-                        className="vhs-table-input"
-                        onChange={(e) => setType(e.target.value)}
-                      /> */}
+              
                   </th>
                   <th scope="col"></th>
                   <th scope="col"></th>

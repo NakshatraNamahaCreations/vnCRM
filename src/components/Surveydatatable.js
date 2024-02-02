@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import Header from "../components/layout/Header";
 import Surveynav from "../components/Surveynav";
 import axios from "axios";
-import Table from "react-bootstrap/Table";
+
 import { useParams, Link } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
@@ -517,7 +517,13 @@ function Surveydatatable() {
                     ))}
                   </select>{" "}
                 </th>
-                <th className="bor"></th>
+                <th className="bor">
+                <input
+                    className="vhs-table-input"
+                    value={searchExecutive}
+                    onChange={(e) => setSearchExecutive(e.target.value)}
+                  />{" "}
+                </th>
                 <th className="bor">
                   {" "}
                   <input
@@ -530,8 +536,8 @@ function Surveydatatable() {
                   {" "}
                   <input
                     className="vhs-table-input"
-                    value={searchExecutive}
-                    onChange={(e) => setSearchExecutive(e.target.value)}
+                    value={searchTechnician}
+                    onChange={(e) => setSearchTechnician(e.target.value)}
                   />{" "}
                 </th>
                 <th className="bor">

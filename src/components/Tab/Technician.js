@@ -6,6 +6,7 @@ import Nav from "../Nav1";
 import axios from "axios";
 import DataTable from "react-data-table-component";
 import Multiselect from "multiselect-react-dropdown";
+import { Link } from "react-router-dom";
 
 const active = {
   backgroundColor: "rgb(169, 4, 46)",
@@ -61,47 +62,52 @@ function Technician() {
 
   const addtechnician = async (e) => {
     e.preventDefault();
-
-    if (
-      !city ||
-      !category1 ||
-      !vhsname ||
-      !number ||
-      !password ||
-      !experiance ||
-      !language
-    ) {
-      alert("Please fill all fields");
+    if (number.length !== 10) {
+      alert("Please enter 10 digit mobile number correctly")
     } else {
-      try {
-        const config = {
-          url: "/addtechnician",
-          method: "post",
-          baseURL: apiURL,
-          // data: formdata,
-          headers: { "content-type": "application/json" },
-          data: {
-            Type: Type,
-            category: category1,
-            vhsname: vhsname,
-            smsname: smsname,
-            number: number,
-            password: password,
-            experiance: experiance,
-            languagesknow: language,
-            city: city,
-          },
-        };
-        await axios(config).then(function (response) {
-          if (response.status === 200) {
-            console.log("success");
-            alert(" Added");
-            window.location.assign("/technician");
-          }
-        });
-      } catch (error) {
-        console.error(error); // Log the error to the browser console
-        alert("An error occurred: " + error.data.error);
+
+
+      if (
+        !city ||
+        !category1 ||
+        !vhsname ||
+        !number ||
+        !password ||
+        !experiance ||
+        !language
+      ) {
+        alert("Please fill all fields");
+      } else {
+        try {
+          const config = {
+            url: "/addtechnician",
+            method: "post",
+            baseURL: apiURL,
+            // data: formdata,
+            headers: { "content-type": "application/json" },
+            data: {
+              Type: Type,
+              category: category1,
+              vhsname: vhsname,
+              smsname: smsname,
+              number: number,
+              password: password,
+              experiance: experiance,
+              languagesknow: language,
+              city: city,
+            },
+          };
+          await axios(config).then(function (response) {
+            if (response.status === 200) {
+              console.log("success");
+              alert(" Added");
+              window.location.assign("/technician");
+            }
+          });
+        } catch (error) {
+          console.error(error); // Log the error to the browser console
+          alert("An error occurred: " + error.response.data.error);
+        }
       }
     }
   };
@@ -114,8 +120,8 @@ function Technician() {
   const gettechnician = async () => {
     let res = await axios.get(apiURL + "/getalltechnician");
     if ((res.status = 200)) {
-      settechniciandata(res.data?.technician);
-      setfilterdata(res.data?.technician);
+      settechniciandata(res.data?.technician.filter((i) => i.Type !== "outVendor"));
+      setfilterdata(res.data?.technician.filter((i) => i.Type !== "outVendor"));
     }
   };
 
@@ -292,12 +298,26 @@ function Technician() {
         <div className="col-md-12">
           <div className="row justify-content-end pt-3">
             <div className="col-md-1 p-0">
-              <button className="btn-primary-technician-button1">
-                Technician
-              </button>
+              <Link to="/technisian">
+                <button className="btn-primary-technician-button1">
+                  Inhouse
+                </button>
+              </Link>
+
+            </div>
+            <div className="col-md-1 p-0">
+              <Link to="/vendors">
+
+                <button className="btn-primary-technician-button1" >
+                  Vendor
+                </button>
+              </Link>
+
             </div>
           </div>
           <div className="card" style={{ marginTop: "30px" }}>
+            <h4 className="p-3">Inhouse </h4>
+
             <div className="card-body p-3">
               <form>
                 <div className="row pt-2">
