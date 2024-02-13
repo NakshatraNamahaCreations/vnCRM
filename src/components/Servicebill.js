@@ -13,60 +13,40 @@ function Servicebill() {
   const [bankdata, setbankdata] = useState([]);
   const [treatmentdata, settreatmentdata] = useState([]);
   const location = useLocation();
-  const { data } = location.state || null;
+  const { data, } = location.state || null;
 
   const apiURL = process.env.REACT_APP_API_URL;
   const imgURL = process.env.REACT_APP_IMAGE_API_URL;
 
-  const [section2data, setsection2data] = useState([]);
-  const [filtcdata, setfiltcdata] = useState([]);
-  const [filsecdata, setsec2data] = useState([]);
-  const [cgstRate, setCgstRate] = useState(2.5);
-  const [sgstRate, setSgstRate] = useState(2.5);
-  const [cgstAmount, setCgstAmount] = useState(0);
-  const [sgstAmount, setSgstAmount] = useState(0);
+  // const [section2data, setsection2data] = useState([]);
   const [termsAndCondition, setTemsAndCondition] = useState([]);
-  console.log(data);
 
   useEffect(() => {
     gettermsgroup();
-    gettermsgroup2();
-  }, []);
+  }, [data]);
 
   const gettermsgroup = async () => {
     let res = await axios.get(apiURL + "/master/gettermgroup");
     if (res.status === 200) {
-      settcdata(res.data?.termsgroup);
-      const a = res.data?.termsgroup.filter((i) => i.type === "INVOICE");
-      const filteredTcdata = a.filter(
-        (item) => item.category === data?.category
+      setTemsAndCondition(res.data?.termsgroup);
+      const invoicType = res.data?.termsgroup.filter(
+        (i) => i.type === "INVOICE"
       );
-      setfiltcdata(filteredTcdata);
+      const filterByCategory = invoicType.filter(
+        (item) => item.category === data.category
+      );
+      settcdata(filterByCategory);
     }
   };
-  const gettermsgroup2 = async () => {
-    try {
-      let res = await axios.get(apiURL + "/master/gettermgroup2");
-      if (res.status === 200) {
-        setTemsAndCondition(res.data?.termsgroup2);
-        setsection2data(res.data?.termsgroup2);
-        const a1 = res.data?.termsgroup2.filter((i) => i.type === "INVOICE"); // Corrected line
-        const filteredsec2data = a1.filter(
-          (item) => item.category === data.category
-        );
-        setsec2data(filteredsec2data);
-      }
-    } catch (error) {
-      console.error("An error occurred:", error);
-    }
-  };
-  console.log("termsAndCondition", termsAndCondition);
+
   let i = 1;
 
   useEffect(() => {
     getheaderimg();
     getfooterimg();
     getbank();
+
+    // gettermsgroup2();
   }, []);
 
   const getheaderimg = async () => {
@@ -90,50 +70,49 @@ function Servicebill() {
     }
   };
 
-  useEffect(() => {
-    const calculatedCgstAmount = (data?.serviceCharge * cgstRate) / 100;
-    const calculatedSgstAmount = (data?.serviceCharge * sgstRate) / 100;
-    setCgstAmount(calculatedCgstAmount);
-    setSgstAmount(calculatedSgstAmount);
-  }, [data?.serviceCharge, cgstRate, sgstRate]);
+  const date = new Date(data?.creatAt);
+
+  const options = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+
+  const formattedDate = date.toLocaleString("en-US", options);
+
+  const decimalValue = parseInt(data?._id, 16);
+
+  // Get the last 5 digits
+  const last5Digits = decimalValue % 100000;
   return (
-    <div className="row">
-      {/* <Header /> */}
+    <div >
+      {/* <Header />s */}
 
       <div className="row justify-content-center mt-3">
-        <div className="col-md-11">
+        <div className="col-md-12">
           <div
             className="card shadow  bg-white rounded"
             style={{ border: "none" }}
           >
-            <div className="d-flex  mt-2 w-100">
-              <div className="">
-                {headerimgdata.map((item) => (
-                  <img
-                    src={imgURL + "/quotationheaderimg/" + item.headerimg}
-                    height="120px"
-                  />
-                ))}
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div style={{ marginLeft: "10px", display: "flex" }}>
+                <img
+                  src="/images/vhs.png"
+                  style={{ width: "100PX", height: "100px" }}
+                />
+                <h6 className="nameinvoice">VIJAY HOME SERVICES</h6>
               </div>
-              <div
-                className=""
-                style={{
-                  justifyContent: "end",
-                  textAlign: "end",
-                  width: "100%",
-                  marginRight: "10px",
-                }}
-              >
+              <div className="p-1">
                 <h2>GST INVOICE</h2>
                 <p>Original For Recipient</p>
                 <p>
-                  <b>Invoice# , Date :</b> {moment().format("L")}
+                  <b>Invoice No: VHS-{last5Digits}  <br />Date :</b> {formattedDate}
                 </p>
               </div>
             </div>
 
-            <div className="row  mt-2">
-              <div className="col-md-6 b-col">
+            <div className=" col-12 mt-2 " style={{ display: "flex", gap: "10px" }}>
+              <div className="col-6 b-col">
                 <div className="" style={{ fontWeight: "bold" }}>
                   BILLED BY
                 </div>
@@ -141,31 +120,29 @@ function Servicebill() {
                   Vijay Home Services
                 </div>
                 <p>
-                  #21, 4th Cross. Baddi Krishnappa Layout, Near Gangama Temple
-                  Road, Mahadevpura Outer Ring Road, Bangalore - 560048
+                  #1/1, 2nd Floor, Shamraj building MN Krishnarao Road Mahadevapura Outer Ring Road, Banglore 560048
                 </p>
-                <b> GSTIN :</b>
+                <p>GSTN : 29EIXPK0545M1ZE</p>
               </div>
-              <div className="col-md-6 b-col" style={{ marginLeft: "9px" }}>
+              <div className="col-6 b-col" >
                 <div className="" style={{ fontWeight: "bold" }}>
                   BILLED TO
                 </div>
 
                 <h5>{data?.customerData[0]?.customerName}</h5>
                 <p className="mb-0">
-                  {data?.customerData[0]?.lnf}
-                  {data?.customerData[0]?.rbhf}
-                  {data?.customerData[0]?.mainArea}
-                  {data?.customerData[0]?.pinCode}
+                  {data?.deliveryAddress?.platNo},
+                  {data?.deliveryAddress?.address}
+                  {data?.deliveryAddress?.landmark}
                 </p>
                 <p className="mb-0">{data?.customerData[0]?.mainContact}</p>
-                <b> GSTIN :{data?.customerData[0]?.gst}</b>
+
               </div>
             </div>
 
             <div className="row m-auto mt-2 w-100">
               <div className="col-md-12">
-                <table class="table table-bordered border-danger">
+                <table class="">
                   <thead>
                     <tr className="hclr">
                       <th className="text-center">S.No</th>
@@ -173,222 +150,160 @@ function Servicebill() {
                       <th className="text-center">Description</th>
                       <th className="text-center">Contract</th>
                       <th className="text-center">Service Date</th>
-                      <th className="text-center">Amount Paid Date</th>
+                      {/* <th className="text-center">Amount Paid Date</th> */}
+
                       <th className="text-center">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td scope="row" className="text-center">
+                      <td scope="row" className="text-center " style={{ border: "1px solid grey" }}>
                         {i++}
                       </td>
-                      <td scope="row" className="text-center">
+                      <td scope="row" className="text-center" style={{ border: "1px solid grey" }}>
                         {data.category}
                       </td>
-                      <td scope="row" className="text-center">
+                      <td scope="row" className="text-center " style={{ border: "1px solid grey" }}>
                         {data.desc}
                       </td>
 
-                      <td className="text-center">{data?.contractType}</td>
+                      <td className="text-center" style={{ border: "1px solid grey" }}>{data?.contractType}</td>
                       {data?.contractType === "AMC" ? (
-                        <td>
-                          {data.dividedDates.map((item) => (
+                        <td className="text-center" style={{ border: "1px solid grey" }}>
+                          {data?.dividedDates?.map((item) => (
                             <div>
                               <p className="text-center">
-                                {new Date(item).toLocaleDateString()}
+                                {new Date(item.date).toLocaleDateString()}
                               </p>
                             </div>
                           ))}
+                          {/* <div>
+                            <p className="text-center">
+                              }
+                            </p>
+                          </div> */}
+
                         </td>
                       ) : (
-                        <td>{data?.dateofService}</td>
+                        <td className="text-center" style={{ border: "1px solid grey" }}>{data?.dateofService}</td>
                       )}
 
-                      {data?.contractType === "AMC" ? (
-                        <td>
+                      {/* {data?.contractType === "AMC" ? (
+                        <td className="text-center" style={{ border: "1px solid grey" }}>
                           {data.dividedamtDates.map((item) => (
                             <div>
                               <p className="text-end">
-                                {new Date(item).toLocaleDateString()}
+                                {new Date(item.date).toLocaleDateString()}
                               </p>
                             </div>
                           ))}
                         </td>
                       ) : (
-                        <td>{data?.dateofService}</td>
-                      )}
+                        <td className="text-center" style={{ border: "1px solid grey" }}>{data?.dateofService}</td>
+                      )} */}
 
                       {data?.contractType === "AMC" ? (
-                        <td>
-                          {data.dividedamtCharges.map((item) => (
+                        <td className="text-center" style={{ border: "1px solid grey" }}>
+                          {data?.dividedamtCharges?.map((item) => (
                             <div>
-                              <p className="text-end">{item}</p>
+                              <p className="text-end">{((item?.charge) / 105 * 100).toFixed(2)}</p>
                             </div>
                           ))}
                         </td>
                       ) : (
-                        <td>{data?.serviceCharge}</td>
+                        <td className="text-center" style={{ border: "1px solid grey" }}>{((data.GrandTotal / 105) * 100).toFixed(2)}</td>
                       )}
                     </tr>
                   </tbody>
                 </table>
 
-                <div
-                  className="row col-12 "
-                  style={{ justifyContent: "flex-end", marginTop: "10px" }}
-                >
-                  <div className="col-2">
-                    <h5 style={{ textAlign: "right" }}> Taxable Amount :</h5>
-                  </div>
-                  <div className="col-1">
-                    <h5>{data.serviceCharge - (sgstAmount + cgstAmount)}</h5>
-                  </div>
-                </div>
 
-                <div
-                  className="row col-12 "
-                  style={{ justifyContent: "flex-end", marginTop: "10px" }}
-                >
-                  <div className="col-2">
-                    <h5 style={{ textAlign: "right" }}> CGST(2.5%) :</h5>
-                  </div>
-                  <div className="col-1">
-                    <h5>{cgstAmount}</h5>
-                  </div>
-                </div>
-                <div
-                  className="row col-12 "
-                  style={{ justifyContent: "flex-end", marginTop: "10px" }}
-                >
-                  <div className="col-2">
-                    <h5 style={{ textAlign: "right" }}> SGST(2.5%) :</h5>
-                  </div>
-                  <div className="col-1">
-                    <h5>{sgstAmount}</h5>
-                  </div>
-                </div>
-                <div
-                  className="row col-12 "
-                  style={{ justifyContent: "flex-end", marginTop: "10px" }}
-                >
-                  <div className="col-2">
-                    <h5 style={{ textAlign: "right", fontWeight: "bold" }}>
-                      {" "}
-                      Total :
-                    </h5>
-                  </div>
-                  <div className="col-1">
-                    <h5>
-                      <b> {data.serviceCharge}</b>
-                    </h5>
-                  </div>
-                </div>
 
-                {/* <div className="row m-auto mt-3 hclr">Terms & Condition</div> */}
               </div>
             </div>
-            <div
-              className="text-end px-2"
-              style={{ fontWeight: "bold", fontSize: "20px" }}
-            >
-              Amount In Words :{" "}
-              <span style={{ fontWeight: 400, fontSize: "20px" }}>
-                {numberToWords.toWords(data.serviceCharge) + " Only"}
-              </span>
-            </div>
 
-            {/* <div className="p-3">
-              <h3>Terms & Conditions</h3>
-              <ul>
-                <li>100% Payment Post Work Completion Immediately.</li>
-                <li>In Cleaning Any Hard Stain Will Not Be Resolved 100%.</li>
-                <li>
-                  If Any Compliant On Service Quality, Customer Need To Notify
-                  Within 24 Hours.
-                </li>
-                <li>
-                  Customer Need To Verify The Work Before Service Team Leaves
-                  The Premises.
-                </li>
-                <li>
-                  For GPC Warranty Would Be 90 Days From The Date Of First
-                  Service.
-                </li>
-                <li>
-                  For BBMS Warranty Would Be 60 Days From The Date Of First
-                  Service.
-                </li>
 
-                <li>
-                  In Case Of Any Renovation Happened In The Premises Then The
-                  Warranty Will Not Be Applicable.{" "}
-                </li>
-                <li>
-                  Result Of Pest Control Service Is Based On Weather Variation,
-                  House Maintenance And House Surrounding Environments.
-                </li>
-                <li>
-                  This Is A Computer Generated Invoice, No Need Of Signature.
-                </li>
-              </ul>
-            </div> */}
-            <div className="mx-5">
-              <div>
-                <div className="" style={{ fontWeight: "bold" }}>
-                  BANK DETAILS
-                </div>
-              </div>
+            <div className="row">
 
-              {bankdata.map((item) => (
+
+              <div className="col-sm-6 mt-4" style={{ paddingLeft: "25px" }}>
                 <div>
-                  <div className="pt-2" style={{ fontWeight: "bold" }}>
-                    Account Name :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.accname}
-                    </span>
-                  </div>
-
                   <div className="" style={{ fontWeight: "bold" }}>
-                    Account Number :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.accno}
-                    </span>
-                  </div>
-
-                  <div className="" style={{ fontWeight: "bold" }}>
-                    IFSC :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.ifsccode}
-                    </span>
-                  </div>
-
-                  <div className="" style={{ fontWeight: "bold" }}>
-                    BANK NAME :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.bankname}
-                    </span>
-                  </div>
-                  <div className="" style={{ fontWeight: "bold" }}>
-                    Branch Name :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.branch}
-                    </span>
-                  </div>
-
-                  <div className="mt-3" style={{ fontWeight: "bold" }}>
-                    Gpay / Phonepe Details
-                  </div>
-
-                  <div className="pb-3" style={{ fontWeight: "bold" }}>
-                    Mobile No. :{" "}
-                    <span style={{ color: "black", fontWeight: 400 }}>
-                      {item.upinumber}
-                    </span>
+                    BANK DETAILS
                   </div>
                 </div>
-              ))}
+
+                {bankdata.map((item) => (
+                  <div>
+                    <div className="pt-2" style={{ fontWeight: "bold" }}>
+                      Account Name :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.accname}
+                      </span>
+                    </div>
+
+                    <div className="" style={{ fontWeight: "bold" }}>
+                      Account Number :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.accno}
+                      </span>
+                    </div>
+
+                    <div className="" style={{ fontWeight: "bold" }}>
+                      IFSC :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.ifsccode}
+                      </span>
+                    </div>
+
+                    <div className="" style={{ fontWeight: "bold" }}>
+                      BANK NAME :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.bankname}
+                      </span>
+                    </div>
+                    <div className="" style={{ fontWeight: "bold" }}>
+                      Branch Name :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.branch}
+                      </span>
+                    </div>
+
+                    <div className="mt-3" style={{ fontWeight: "bold" }}>
+                      Gpay / Phonepe Details
+                    </div>
+
+                    <div className="pb-3" style={{ fontWeight: "bold" }}>
+                      Mobile No. :{" "}
+                      <span style={{ color: "black", fontWeight: 400 }}>
+                        {item.upinumber}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="col-sm-6">
+
+                <div className="row mt-4">
+
+
+                  <div className="" style={{ textAlign: "end", paddingRight: "50px" }}>
+                    <h6> GST(5%):{(data.GrandTotal - (data.GrandTotal / 105) * 100).toFixed(2)}</h6>
+
+                    <h5 >Total : {data.GrandTotal}</h5>   </div>
+                  <div style={{ textAlign: "end", paddingRight: "50px" }}>
+                    <h5> Amount In Words :{" "}
+                      <span style={{ fontWeight: 400 }}>
+                        {numberToWords.toWords(data.serviceCharge) + " Only"}
+                      </span></h5>
+                  </div>
+                </div>
+              </div>
             </div>
-            {filtcdata.map((item) => (
+
+
+            {tcdata.map((item) => (
               <div>
                 <div
                   className="row m-auto mt-3"
@@ -422,34 +337,17 @@ function Servicebill() {
                 </table>
               </div>
             ))}
-            <div>
-              {filsecdata.map((item) => (
-                <div>
-                  <div
-                    className="row m-auto mt-3"
-                    style={{
-                      backgroundColor: "#a9042e",
-                      color: "white",
-                      fontWeight: "bold",
-                      justifyContent: "center",
-                      padding: "8px",
-                    }}
-                  >
-                    {item.header}
-                  </div>
-                  <table class="table table-bordered border-danger">
-                    <tbody>
-                      <div className="mt-2">
-                        <div
-                          dangerouslySetInnerHTML={{ __html: item.content }}
-                        />
-                      </div>
-                    </tbody>
-                    <hr />
-                  </table>
-                </div>
-              ))}
-            </div>
+          </div>
+          <div>
+            {footerimgdata.map((item) => (
+              <div className="col-md-12">
+                <img
+                  src={"https://api.vijayhomeservicebengaluru.in/quotationfooterimg/" + item.footerimg}
+                  height="auto"
+                  width="100%"
+                />
+              </div>
+            ))}
           </div>
         </div>
       </div>

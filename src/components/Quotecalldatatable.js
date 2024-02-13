@@ -193,9 +193,15 @@ function Quotecalldatatable() {
   ]);
 
   const click = (data) => {
-    navigate(`/quotedetails/${data.EnquiryId}`);
+    if (data) {
+      window.location.assign(`/quotedetails/?id=${data.EnquiryId}`, {
+        state: { data: data },
+      });
+    } else {
+      // Handle the case when data is null or undefined
+      // For example, show an error message or perform a different action
+    }
   };
-
   // Pagination logic
   const totalPages = Math.ceil(searchResults.length / itemsPerPage);
   const pageOptions = Array.from(
@@ -371,13 +377,13 @@ function Quotecalldatatable() {
                     onChange={(e) => setSearchNxtfoll(e.target.value)}
                   />{" "}
                 </th>
-                <th scope="col" className="bor">
+                {/* <th scope="col" className="bor">
                   <input
                     className="vhs-table-input"
                     value={searchDesc}
                     onChange={(e) => setSearchDesc(e.target.value)}
                   />{" "}
-                </th>
+                </th> */}
               </tr>
               <tr className="bg">
                 <th className="bor">#</th>
@@ -395,7 +401,7 @@ function Quotecalldatatable() {
                 <th className="bor">Last F/W Dt</th>
                 <th className="bor">Next F/W Dt</th>
                 <th className="bor">Desc</th>
-                <th className="bor">Type</th>
+                {/* <th className="bor">Type</th> */}
               </tr>
             </thead>
             <tbody>
@@ -411,7 +417,7 @@ function Quotecalldatatable() {
                       {item?.quotedata[0]?.time}
                     </td>
                     <td>{item?.enquirydata[0]?.name}</td>
-                    <td>{item?.enquirydata[0]?.contact1}</td>
+                    <td>{item?.enquirydata[0]?.mobile}</td>
                     <td>{item?.enquirydata[0]?.address}</td>
 
                     <td>{item?.enquirydata[0]?.city}</td>
@@ -422,7 +428,7 @@ function Quotecalldatatable() {
                     <td>{item?.enquirydata[0]?.date}</td>
                     <td>{item?.nxtfoll}</td>
                     <td>{item?.desc}</td>
-                    <td> </td>
+                    {/* <td> </td> */}
                   </tr>
                 </a>
                 // </Link>

@@ -5,11 +5,7 @@ import Quotationnav from "../Quotationnav";
 import Modal from "react-bootstrap/Modal";
 import DataTable from "react-data-table-component";
 import axios from "axios";
-import { Link, useLocation } from "react-router-dom";
-import Col from "react-bootstrap/Col";
-import Nav from "react-bootstrap/Nav";
-import Row from "react-bootstrap/Row";
-import Tab from "react-bootstrap/Tab";
+
 import Contentnav from "../Contentnav";
 
 function Ajob() {
@@ -131,7 +127,17 @@ function Ajob() {
 
     {
       name: "Qty/Desc",
-      selector: (row) => row.desc,
+     
+      cell:(row)=>(
+        <div className="mt-2">
+
+        <p>
+          {row.desc.split('\n').map((item, index) => (
+            <p key={index}>{item}</p>
+          ))}
+        </p>
+      </div>
+      )
     },
     {
       name: "Rate ",
@@ -218,8 +224,9 @@ function Ajob() {
                       Desc/Qty <span className="text-danger"> *</span>
                     </div>
                     <div className="group pt-1">
-                      <input
-                        type="text"
+                      <textarea
+                         rows={5}
+                         cols={10}
                         className="col-md-12 vhs-input-value"
                         onChange={(e) => setdesc(e.target.value)}
                       />

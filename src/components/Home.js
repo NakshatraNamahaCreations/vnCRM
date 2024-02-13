@@ -6,6 +6,10 @@ import Nav from "./Nav1";
 import axios from "axios";
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from "recharts";
 import moment from "moment";
+import { pink } from '@mui/material/colors';
+import Switch from '@mui/material/Switch';
+import { alpha, styled } from '@mui/material/styles';
+import Button from '@mui/material/Button';
 
 function Home() {
   const apiURL = process.env.REACT_APP_API_URL;
@@ -120,6 +124,50 @@ function Home() {
     (item) => item.response === "Not Intrested"
   );
 
+  const PinkSwitch = styled(Switch)(({ theme }) => ({
+    '& .MuiSwitch-switchBase.Mui-checked': {
+      color: pink[600],
+      '&:hover': {
+        backgroundColor: alpha(pink[600], theme.palette.action.hoverOpacity),
+      },
+    },
+    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+      backgroundColor: pink[600],
+    },
+  }));
+
+  const label = { inputProps: { 'aria-label': 'Color switch demo' } };
+  const [isSwitchChecked, setIsSwitchChecked] = React.useState(false);
+
+ 
+
+
+
+  const updatedAutomatedServiceOption = async (e) => {
+    // e.preventDefault();
+
+    try {
+      const config = {
+        url: "/createandupdateAutomated",
+        method: "post",
+        baseURL: apiURL,
+        headers: { "content-type": "application/json" },
+        data: {
+          Automated: isSwitchChecked
+        }
+      }
+      const response = await axios(config);
+      if (response.status === 200) {
+        alert("Automated updated succesfull")
+      }
+    } catch (error) {
+      
+
+    }
+
+
+  }
+
   return (
     <div className="web">
       <Header />
@@ -226,7 +274,11 @@ function Home() {
           </div>
         </div>
 
-        <div className="col-md-3"></div>
+        <div className="col-md-3">
+          <p>Automated Option</p>
+          <PinkSwitch {...label} checked={isSwitchChecked} onChange={(event) => setIsSwitchChecked(event.target.checked)} />
+          <Button variant="outlined" onClick={updatedAutomatedServiceOption}>UPDATE</Button>
+        </div>
 
         <div className="col-md-3"></div>
         <div className="col-md-3 "></div>

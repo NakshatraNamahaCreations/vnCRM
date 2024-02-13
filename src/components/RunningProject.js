@@ -68,7 +68,7 @@ function RunningProject() {
     setSelected(divNum);
 
 
-    
+
   };
 
   useEffect(() => {
@@ -98,7 +98,7 @@ function RunningProject() {
     }
   };
 
- 
+
 
   const updatetoclose = async (id) => {
     try {
@@ -127,7 +127,7 @@ function RunningProject() {
   };
 
   const redirectURL = (data) => {
-  
+
     navigate(`/painting/${data?._id}`);
   };
 
@@ -153,8 +153,8 @@ function RunningProject() {
       if (projectManager && projectManager !== "Show All") {
         results = results.filter(
           (item) =>
-          item.dsrdata[0]?.TechorPMorVendorName &&
-          item.dsrdata[0]?.TechorPMorVendorName
+            item.dsrdata[0]?.TechorPMorVendorName &&
+            item.dsrdata[0]?.TechorPMorVendorName
               .toLowerCase()
               .includes(projectManager.toLowerCase())
         );
@@ -162,7 +162,7 @@ function RunningProject() {
       if (salesExecutive) {
         results = results.filter(
           (item) =>
-           item.enquiryFollowupData[0]?.technicianname &&
+            item.enquiryFollowupData[0]?.technicianname &&
             item.enquiryFollowupData[0]?.technicianname
               .toLowerCase()
               .includes(salesExecutive.toLowerCase())
@@ -214,7 +214,7 @@ function RunningProject() {
               .includes(city.toLowerCase())
         );
 
-        
+
       }
       // if (quoteNo) {
       //   results = results.filter(
@@ -345,6 +345,37 @@ function RunningProject() {
     }
   }
 
+  const [selectedStatus, setSelectedStatus] = useState("");
+
+  // Function to handle legend item clicks and filter data
+  const handleLegendItemClick = (status) => {
+    setSelectedStatus(status);
+
+    // Use the original treatmentData if searchResults is empty
+    const dataToFilter =
+      searchResults.length > 0 ? searchResults : treatmentdata;
+
+    // Logic to filter data based on the selected status
+    const filteredData = dataToFilter.filter((item) => {
+      switch (status) {
+        case "START":
+          return (
+            item.dsrdata[0]?.startproject === "start" &&
+            item.dsrdata[0]?.jobComplete !== "YES" &&
+            item.dsrdata[0]?.deepcleaningstart !== "start"
+          );
+        case "CLOSED":
+          return item.dsrdata[0]?.jobComplete === "YES" ;
+        case "DEEPCLEANING":
+          return item.dsrdata[0]?.deepcleaningstart === "start";
+
+        default:
+          return true;
+      }
+    });
+
+    setSearchResults(filteredData);
+  };
   return (
     <div className="web">
       <Header />
@@ -353,7 +384,37 @@ function RunningProject() {
           <h3>Running Projects</h3>
         </div>
       </div>
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <div className="shadow-sm" style={{ border: "1px #cccccc solid" }}>
+          <div
+            className="ps-1 pe-1"
+            style={{ borderBottom: "1px #cccccc solid", backgroundColor: "skyblue", cursor: "pointer" }}
+            onClick={() => handleLegendItemClick("START")}
+          >
+            Job start
+          </div>
 
+          <div
+            className="ps-1 pe-1"
+            style={{
+              backgroundColor: "#0080002e",
+              cursor: "pointer",
+            }}
+            onClick={() => handleLegendItemClick("DEEPCLEANING")}
+          >
+            Deep cleaning Assigned
+          </div>
+          <div
+            className="ps-1 pe-1"
+            style={{ backgroundColor: "#ffb9798f", cursor: "pointer" }}
+            onClick={() => handleLegendItemClick("CLOSED")}
+          >
+            Job closed
+          </div>
+
+
+        </div>
+      </div>
       <div className="row m-auto" style={{ width: "100%" }}>
         <div className="col-md-12">
           <>
@@ -389,28 +450,28 @@ function RunningProject() {
                     >
                       <option value="">-show all-</option>
                       {[...new Set(treatmentdata?.map((item) => item.dsrdata[0]?.TechorPMorVendorName))].map(
-                      (uniqueCity) => (
-                        <option value={uniqueCity} key={uniqueCity}>
-                          {uniqueCity}
-                        </option>
-                      )
-                    )}
+                        (uniqueCity) => (
+                          <option value={uniqueCity} key={uniqueCity}>
+                            {uniqueCity}
+                          </option>
+                        )
+                      )}
                     </select>
                   </th>
                   <th scope="col">
-               
-                     <select
+
+                    <select
                       className="vhs-table-input"
                       onChange={(e) => setSalesExecutive(e.target.value)}
                     >
                       <option value="">-show all-</option>
                       {[...new Set(treatmentdata?.map((item) => item.enquiryFollowupData[0]?.technicianname))].map(
-                      (uniqueCity) => (
-                        <option value={uniqueCity} key={uniqueCity}>
-                          {uniqueCity}
-                        </option>
-                      )
-                    )}
+                        (uniqueCity) => (
+                          <option value={uniqueCity} key={uniqueCity}>
+                            {uniqueCity}
+                          </option>
+                        )
+                      )}
                     </select>
                   </th>
                   <th scope="col">
@@ -449,7 +510,6 @@ function RunningProject() {
                       className="vhs-table-input"
                       onChange={(e) => setCity(e.target.value)}
                     />
-                    
                   </th>
                   <th scope="col">
                     <input
@@ -501,10 +561,10 @@ function RunningProject() {
                     />
                   </th>
                   <th scope="col">
-                    
+
                   </th>
                   <th scope="col">
-              
+
                   </th>
                   <th scope="col"></th>
                   <th scope="col"></th>
@@ -586,7 +646,7 @@ function RunningProject() {
                   <th scope="col" className="table-head">
                     TYPE
                   </th>
-                  <th scope="col" className="table-head" style={{width:"20%"}}>
+                  <th scope="col" className="table-head" style={{ width: "20%" }}>
                     Deep Clean Details
                   </th>
 
@@ -606,9 +666,9 @@ function RunningProject() {
                           ? "#ffb9798f"
                           : item.dsrdata[0]?.deepcleaningstart === "start" // Corrected key here
                             ? "#0080002e"
-                            :item.dsrdata[0]?.startproject ==="start"?
-                            "skyblue":
-                            "white",
+                            : item.dsrdata[0]?.startproject === "start" ?
+                              "skyblue" :
+                              "white",
                       color: "black",
                     }}
                   >
@@ -790,11 +850,11 @@ function RunningProject() {
                           ? "CLOSED BY PROJECT MANAGER"
                           : item.dsrdata[0]?.deepcleaningstart === "start"
                             ? "BOOK FOR DEEP CLEANING"
-                            : item.dsrdata[0]?.startproject=== "start"?
-                            "PROJECT STARTED"
-                            :
-                            "RUNNING PROJECTS"
-                           }
+                            : item.dsrdata[0]?.startproject === "start" ?
+                              "PROJECT STARTED"
+                              :
+                              "RUNNING PROJECTS"
+                        }
                       </div>
                     </td>
                     <td>

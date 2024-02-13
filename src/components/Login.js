@@ -69,7 +69,7 @@ function Login() {
     <div>
       <div
         className="row justify-content-center"
-        style={{ alignItems: "center", backgroundColor: "rgb(236, 225, 225)" }}
+        style={{ alignItems: "center", backgroundColor: "rgb(236, 225, 225)",height:"100vh" }}
       >
         <div className="row">
           <div className="col-6">
@@ -91,7 +91,8 @@ function Login() {
                 style={{ width: "100%", height: "600px" }}
               />
             </div>
-            <div style={{}} className="col-6">
+            <div style={{}} className="col-1"></div>
+            <div style={{}} className="col-5">
               <Card
                 style={{
                   boxShadow: "0px 0px 5px 1px lightgray",

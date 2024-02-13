@@ -253,6 +253,8 @@ function Dsrcallist() {
 
     return filterpaymentmde[0]?.paymentType;
   };
+
+  
   const returndata = (data) => {
     const dateToMatch = new Date(date);
     const matchingData = [];
@@ -260,15 +262,18 @@ function Dsrcallist() {
     let charge = 0;
     data.dividedamtDates.forEach((dateObj, index) => {
       const dividedDate = new Date(dateObj.date);
+      console.log("dividedDate.getDate() === dateToMatch.getDate()",dividedDate.getDate() === dateToMatch.getDate())
       if (dividedDate.getDate() === dateToMatch.getDate()) {
         matchingData.push({
           date: dateObj.date,
           charge: data.dividedamtCharges[index].charge,
         });
+      }else{
+
       }
     });
 
-    return matchingData[0]?.charge;
+    return matchingData[0]?.charge ?matchingData[0]?.charge :0;
   };
 
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -728,17 +733,16 @@ function Dsrcallist() {
 
                       <td>{selectedData?.service}</td>
 
-                      {selectedData?.type === "userapp" ? (
-                        <td>{selectedData?.GrandTotal}</td>
-                      ) : (
+                    
+
                         <td>
                           {selectedData?.contractType === "AMC"
                             ? returndata(selectedData)
                               ? returndata(selectedData)
                               : "0"
-                            : selectedData.serviceCharge}
+                            : selectedData.GrandTotal}
                         </td>
-                      )}
+                    
                       {selectedData?.type === "userapp" ? (
                         <td>{selectedData.paymentMode}</td>
                       ) : (

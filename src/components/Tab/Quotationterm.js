@@ -258,7 +258,10 @@ function Quotationterm() {
                         <td>
                           <div className="" style={{ fontWeight: "bold" }}>
                             {item.region}
-                            <div>{item.job}</div>
+                            <div>{item.job.split("\n")
+                              .map((item, index) => (
+                                <p key={index}>{item}</p>
+                              ))}</div>
                           </div>
                           <div>
                             <b>Note:</b>

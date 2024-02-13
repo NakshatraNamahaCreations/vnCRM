@@ -24,7 +24,6 @@ function Dsrdetails() {
   const { data, data1, TTname } = location.state || {};
 
 
-
   const id = data?._id;
   const [dsrdata, setdsrdata] = useState([]);
   const [dsrloader, setdsrloader] = useState(true);
@@ -240,13 +239,18 @@ function Dsrdetails() {
   };
 
   const newdata = async () => {
-    // e.preventDefault();
+    if (loading) {
+      console.log("alredy hiting")
+      return;
+    }
+
     setSV(true);
     setLoading(true);
     if (!wtsms) {
       setShow(false);
       setLoading(false)
-      alert("Please select the whatsapp message sending option!   ")
+      alert("Please select the whatsapp message sending option!   ");
+      window.location.reload()
     }
     else {
       try {
@@ -326,7 +330,7 @@ function Dsrdetails() {
           if (response.status === 200) {
             setLoading(false);
             setSV(false);
-
+            console.log("jobcople", jobComplete)
             if (wtsms === "YES") {
               if (jobComplete === "CANCEL") {
                 const selectedResponse = scancelwhat[0];
@@ -337,7 +341,7 @@ function Dsrdetails() {
                 );
               } else {
                 const selectedResponse = assigntechwhat[0];
-
+                console.log("whatsapptectassign", selectedResponse)
                 whatsapptectassign(
                   selectedResponse,
                   data.customerData[0]?.mainContact
@@ -357,23 +361,23 @@ function Dsrdetails() {
         alert(" Not Added");
       }
     }
-
-
-
-
   };
 
   // console.log("data.customerData[0]?.EnquiryId",data?.customerData[0]?.EnquiryId)
   // 16-9
   const Update = async (e) => {
     e.preventDefault();
-
+    if (loading) {
+      console.log("alredy hiting")
+      return;
+    }
     if (!wtsms) {
       setShow(false);
       setLoading(false)
       alert("Please select the whatsapp message sending option!");
     }
     else {
+      setLoading(true)
       try {
         const config = {
           url: `/updatedsrdata/${dsrdata[0]?._id}`,
@@ -519,20 +523,43 @@ function Dsrdetails() {
     (slot) => slot.slotCity === customerCity
   );
 
-  // console.log("getCitySlots", filteredSlots);
-  const dateToMatch = new Date(data1);
-  const matchingData = [];
+  // // console.log("getCitySlots", filteredSlots);
+  // const dateToMatch = new Date(data1);
+  // const matchingData = [];
 
-  let charge = 0;
-  data.dividedamtDates.forEach((dateObj, index) => {
-    const dividedDate = new Date(dateObj.date);
-    if (dividedDate.getDate() === dateToMatch.getDate()) {
-      matchingData.push({
-        date: dateObj.date,
-        charge: data.dividedamtCharges[index].charge,
-      });
-    }
-  });
+  // let charge = 0;
+  // data.dividedamtDates.forEach((dateObj, index) => {
+  //   const dividedDate = new Date(dateObj.date);
+  //   if (dividedDate.getDate() === dateToMatch.getDate()) {
+  //     matchingData.push({
+  //       date: dateObj.date,
+  //       charge: data.dividedamtCharges[index].charge,
+  //     });
+  //   }
+  // });
+
+
+  const returndata = (data) => {
+    const dateToMatch = new Date(data1);
+    const matchingData = [];
+
+    let charge = 0;
+    data.dividedamtDates.forEach((dateObj, index) => {
+      const dividedDate = new Date(dateObj.date);
+      console.log("dividedDate.getDate() === dateToMatch.getDate()",dividedDate.getDate() === dateToMatch.getDate())
+      if (dividedDate.getDate() === dateToMatch.getDate()) {
+        matchingData.push({
+          date: dateObj.date,
+          charge: data.dividedamtCharges[index].charge,
+        });
+      }else{
+
+      }
+    });
+
+    return matchingData[0]?.charge ?matchingData[0]?.charge :0;
+  };
+
 
   useEffect(() => {
     getAlldata();
@@ -582,7 +609,7 @@ function Dsrdetails() {
   const renderEndDate = updatedEndTime || "0000-00-00 00:00:00";
 
   let i = 1;
-console.log("id",id)
+  console.log("id", id)
   useEffect(() => {
     getwhatsapptemplate();
   }, []);
@@ -764,9 +791,11 @@ console.log("id",id)
         window.location.assign(`/dsrcallist/${data1}/${data.category}`);
       } else {
         console.error("API call unsuccessful. Status code:", response.status);
+        window.location.assign(`/dsrcallist/${data1}/${data.category}`);
       }
     } catch (error) {
       console.error("Error making API call:", error);
+      window.location.assign(`/dsrcallist/${data1}/${data.category}`);
     }
   };
 
@@ -1422,9 +1451,9 @@ console.log("id",id)
                       <th className="table-head" scope="col">
                         Service Date
                       </th>
-                      <th className="table-head" scope="col">
+                      {/* <th className="table-head" scope="col">
                         Payment Date
-                      </th>
+                      </th> */}
                       <th className="table-head" scope="col">
                         Description
                       </th>
@@ -1445,7 +1474,7 @@ console.log("id",id)
                         {data?.dateofService}/{data?.expiryDate}
                       </td>
                       <td>{data1}</td>
-                      <td>
+                      {/* <td>
                         {data.contractType === "AMC" ? (
                           <>
                             {" "}
@@ -1458,22 +1487,17 @@ console.log("id",id)
                         ) : (
                           <> {data.dateofService}</>
                         )}
-                      </td>
+                      </td> */}
                       <td>{data?.desc}</td>
 
+                    
                       <td>
-                        {data.type === "userapp" ? (
-                          <>{data.GrandTotal}</>
-                        ) : data.contractType === "AMC" ? (
-                          <>
-                            {matchingData?.length > 0
-                              ? matchingData[0]?.charge
-                              : ""}
-                          </>
-                        ) : (
-                          <>{data.GrandTotal}</>
-                        )}
-                      </td>
+                          {data?.contractType === "AMC"
+                            ? returndata(data)
+                              ? returndata(data)
+                              : "0"
+                            : data.GrandTotal}
+                        </td>
                     </tr>
                   </tbody>
                 </table>

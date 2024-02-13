@@ -1,10 +1,8 @@
-
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Header from "../layout/Header";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import Surveynav from "../Surveynav";
+import { Link, useLocation, useNavigate,  } from "react-router-dom";
+
 import Quotenav from "../Quotenav";
 import moment from "moment";
 

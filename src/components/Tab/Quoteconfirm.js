@@ -192,10 +192,17 @@ function Quoteconfirmed() {
     searchBookedby,
   ]);
 
+  
   const click = (data) => {
-    navigate(`/quotedetails/${data.EnquiryId}`);
+    if (data) {
+      window.location.assign(`/quotedetails/?id=${data.EnquiryId}`, {
+        state: { data: data },
+      });
+    } else {
+      // Handle the case when data is null or undefined
+      // For example, show an error message or perform a different action
+    }
   };
-
   // Pagination logic
   const totalPages = Math.ceil(searchResults.length / itemsPerPage);
   const pageOptions = Array.from(

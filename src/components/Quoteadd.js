@@ -43,7 +43,7 @@ function Quotelist() {
   }, []);
 
   const getenquiryadd = async () => {
-    let res = await axios.get(apiURL + "/getallquote");
+    let res = await axios.get(apiURL + "/getallagreegatequoteall");
     if (res.status === 200) {
       setenquiryflwdata(res.data?.quote);
       setSearchResults(res.data?.quote); // Update the searchResults state with the full data

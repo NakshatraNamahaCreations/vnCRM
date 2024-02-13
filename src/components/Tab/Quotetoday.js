@@ -187,13 +187,15 @@ function Quotetoday() {
     searchAddress,
     searchReference,
     searchCity,
-
+    searchServices,
     searchExecutive,
     searchStaff,
     searchResponse,
     searchDesc,
     searchNxtfoll,
     searchBookedby,
+    searchTotal,
+    searchExecutive
   ]);
 
   const click = (data) => {
@@ -272,23 +274,25 @@ function Quotetoday() {
             <thead>
               <tr className="bg ">
                 <th scope="col" className="bor">
-                  <input className="vhs-table-input" />{" "}
+                  
                 </th>
                 <th scope="col" className="bor">
                   {" "}
+                 
+
                   <select
+                    className="vhs-table-input"
                     value={searchCatagory}
                     onChange={(e) => setSearchCatagory(e.target.value)}
                   >
                     <option value="">Select</option>
-                    {searchResults.map((e) => (
-                      <option
-                        value={e.enquirydata[0]?.category}
-                        key={e.enquirydata[0]?.category}
-                      >
-                        {e.enquirydata[0]?.category}{" "}
-                      </option>
-                    ))}
+                    {[...new Set(searchResults?.map((i) => i.enquirydata[0]?.category))].map(
+                      (uniqueCity) => (
+                        <option value={uniqueCity} key={uniqueCity}>
+                          {uniqueCity}
+                        </option>
+                      )
+                    )}
                   </select>{" "}
                 </th>
                 <th scope="col" className="bor"></th>
@@ -333,20 +337,20 @@ function Quotetoday() {
                   />{" "}
                 </th>
                 <th scope="col" className="bor">
-                  {" "}
+                 
                   <select
+                    className="vhs-table-input"
                     value={searchCity}
                     onChange={(e) => setSearchCity(e.target.value)}
                   >
-                    <option value="">Select </option>
-                    {searchResults.map((e) => (
-                      <option
-                        value={e.enquirydata[0]?.city}
-                        key={e.enquirydata[0]?.city}
-                      >
-                        {e.enquirydata[0]?.city}{" "}
-                      </option>
-                    ))}
+                    <option value="">Select</option>
+                    {[...new Set(searchResults?.map((i) => i.enquirydata[0]?.city))].map(
+                      (uniqueCity) => (
+                        <option value={uniqueCity} key={uniqueCity}>
+                          {uniqueCity}
+                        </option>
+                      )
+                    )}
                   </select>{" "}
                 </th>
 
@@ -354,7 +358,7 @@ function Quotetoday() {
                   <input
                     className="vhs-table-input"
                     value={searchServices}
-                    onChange={(e) => setsearchServices(e.target.value)}
+                    onChange={(e) =>setsearchServices(e.target.value)}
                   />{" "}
                 </th>
 

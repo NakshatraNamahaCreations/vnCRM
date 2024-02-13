@@ -191,8 +191,10 @@ const [Type, setType] = useState("")
     searchBookedby
   ]);
 
+
+
   const click = (data) => {
-     if (data) {
+    if (data) {
       window.location.assign(`/quotedetails/?id=${data.EnquiryId}`, {
         state: { data: data },
       });
