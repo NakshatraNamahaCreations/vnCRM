@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import Header from "../layout/Header";
+
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
-import { da } from "date-fns/locale";
+
 import { toWords } from "number-to-words";
-import { filledInputClasses } from "@mui/material";
 
 function Quotationterm() {
   const [tcdata, settcdata] = useState([]);
@@ -34,7 +33,6 @@ function Quotationterm() {
       if (res.status === 200) {
         // Change from = to === for comparison
         setdata(res.data?.enquiryadd);
-       
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -57,7 +55,7 @@ function Quotationterm() {
     };
 
     gettermsgroup();
-  }, [data, /* Add any other dependencies here */]);
+  }, [data /* Add any other dependencies here */]);
   const gettermsgroup2 = async () => {
     let res = await axios.get(apiURL + "/master/gettermgroup2");
     if ((res.status = 200)) {
@@ -66,22 +64,18 @@ function Quotationterm() {
   };
 
   useEffect(() => {
-   
-      const uniqueCategories = [
-        (data[0]?.treatmentdetails[0]?.category),
-      ];
-      console.log("uniqueCategories",uniqueCategories)
-      const filteredTcdata = tcdata.filter((item) =>
-        uniqueCategories.includes(item.category)
-      );
-      const filteredsec2data = section2data.filter((item) =>
-        uniqueCategories.includes(item.category)
-      );
+    const uniqueCategories = [data[0]?.treatmentdetails[0]?.category];
+    console.log("uniqueCategories", uniqueCategories);
+    const filteredTcdata = tcdata.filter((item) =>
+      uniqueCategories.includes(item.category)
+    );
+    const filteredsec2data = section2data.filter((item) =>
+      uniqueCategories.includes(item.category)
+    );
 
-      setfiltcdata(filteredTcdata);
-      setsec2data(filteredsec2data);
-   
-  }, [data,tcdata]);
+    setfiltcdata(filteredTcdata);
+    setsec2data(filteredsec2data);
+  }, [data, tcdata]);
 
   let i = 1;
 
@@ -146,29 +140,74 @@ function Quotationterm() {
     netTotalInWords = toWords(netTotal).replace(/,/g, ""); // Remove commas
   }
 
-  const a = ['','One ','Two ','Three ','Four ', 'Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
-  const b = ['', '', 'Twenty','Thirty','Forty','Fifty', 'Sixty','Seventy','Eighty','Ninety'];
-  
+  const a = [
+    "",
+    "One ",
+    "Two ",
+    "Three ",
+    "Four ",
+    "Five ",
+    "Six ",
+    "Seven ",
+    "Eight ",
+    "Nine ",
+    "Ten ",
+    "Eleven ",
+    "Twelve ",
+    "Thirteen ",
+    "Fourteen ",
+    "Fifteen ",
+    "Sixteen ",
+    "Seventeen ",
+    "Eighteen ",
+    "Nineteen ",
+  ];
+  const b = [
+    "",
+    "",
+    "Twenty",
+    "Thirty",
+    "Forty",
+    "Fifty",
+    "Sixty",
+    "Seventy",
+    "Eighty",
+    "Ninety",
+  ];
+
   const inWords = (num) => {
-    if ((num = num.toString()).length > 9) return 'overflow';
-    const n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-    if (!n) return '';
-    let str = '';
-    str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'crore ' : '';
-    str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'lakh ' : '';
-    str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'thousand ' : '';
-    str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'hundred ' : '';
+    if ((num = num.toString()).length > 9) return "overflow";
+    const n = ("000000000" + num)
+      .substr(-9)
+      .match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+    if (!n) return "";
+    let str = "";
+    str +=
+      n[1] != 0
+        ? (a[Number(n[1])] || b[n[1][0]] + " " + a[n[1][1]]) + "crore "
+        : "";
+    str +=
+      n[2] != 0
+        ? (a[Number(n[2])] || b[n[2][0]] + " " + a[n[2][1]]) + "lakh "
+        : "";
+    str +=
+      n[3] != 0
+        ? (a[Number(n[3])] || b[n[3][0]] + " " + a[n[3][1]]) + "thousand "
+        : "";
+    str +=
+      n[4] != 0
+        ? (a[Number(n[4])] || b[n[4][0]] + " " + a[n[4][1]]) + "hundred "
+        : "";
     // str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'only ' : '';
-   
+
     return str;
   };
 
-  const [words, setWords] = useState('');
+  const [words, setWords] = useState("");
   useEffect(() => {
     setWords(inWords(netTotal));
-   
-  }, [data])
-  
+  }, [data]);
+
   return (
     <div className="row">
       {/* <Header /> */}
@@ -181,7 +220,10 @@ function Quotationterm() {
           >
             {headerimgdata.map((item) => (
               <img
-                src={"https://api.vijayhomeservicebengaluru.in/quotationheaderimg/" + item.headerimg}
+                src={
+                  "https://api.vijayhomeservicebengaluru.in/quotationheaderimg/" +
+                  item.headerimg
+                }
                 height="200px"
               />
             ))}
@@ -272,10 +314,11 @@ function Quotationterm() {
                           <td>
                             <div className="" style={{ fontWeight: "bold" }}>
                               {item.region}
-                              <div>{item.job.split("\n")
-                              .map((item, index) => (
-                                <p key={index}>{item}</p>
-                              ))}</div>
+                              <div>
+                                {item.job.split("\n").map((item, index) => (
+                                  <p key={index}>{item}</p>
+                                ))}
+                              </div>
                             </div>
                             <div>
                               <b>Note:</b>
@@ -310,7 +353,7 @@ function Quotationterm() {
                     </tbody>
                   </table>
                 </div>
-               
+
                 <div className="row">
                   <div className="col-sm-6">
                     <div>
@@ -369,8 +412,6 @@ function Quotationterm() {
                     ))}
                   </div>
                   <div className="col-sm-6">
-
-
                     <div
                       className="row  "
                       style={{ justifyContent: "flex-end", marginTop: "10px" }}
@@ -379,7 +420,7 @@ function Quotationterm() {
                         <div className="col-4">
                           <h6 style={{ textAlign: "right" }}>Gst(5%) :</h6>
                         </div>
-                       
+
                         <div className="col-4" style={{ textAlign: "right" }}>
                           {data[0]?.quotedata[0]?.GST == true ? (
                             <h6>{(total * 0.05).toFixed(2)}</h6>
@@ -389,11 +430,14 @@ function Quotationterm() {
                         </div>
                       </div>
                     </div>
-                    <div className="row " style={{ justifyContent: "flex-end" }}>
+                    <div
+                      className="row "
+                      style={{ justifyContent: "flex-end" }}
+                    >
                       <div className="col-4">
                         <h6 style={{ textAlign: "right" }}>Adjustment :</h6>
                       </div>
-                
+
                       <div className="col-4" style={{ textAlign: "right" }}>
                         {data[0]?.quotedata[0]?.adjustments ? (
                           <h6>{data[0]?.quotedata[0]?.adjustments}</h6>
@@ -403,46 +447,53 @@ function Quotationterm() {
                       </div>
                     </div>
 
-                    <div className="row " style={{ justifyContent: "flex-end" }}>
+                    <div
+                      className="row "
+                      style={{ justifyContent: "flex-end" }}
+                    >
                       <div style={{ display: "flex", justifyContent: "end" }}>
                         <div className="col-4">
-                          <h6 style={{ textAlign: "right", fontWeight: "bold",fontSize:"20px" }}>
+                          <h6
+                            style={{
+                              textAlign: "right",
+                              fontWeight: "bold",
+                              fontSize: "20px",
+                            }}
+                          >
                             {" "}
                             Total :
                           </h6>
                         </div>
                         <div className="col-4" style={{ textAlign: "right" }}>
-                          <h6 style={{fontSize:"20px"}}>
+                          <h6 style={{ fontSize: "20px" }}>
                             <b>{data[0]?.quotedata[0]?.netTotal}</b>
                           </h6>
                         </div>
                       </div>
                     </div>
                     <div
-                    className="text-center"
-                    style={{
-                      fontWeight: "bold",
-                      paddingTop: "23px",
-                      float: "inline-end",
-                    }}
-                  >
-                    In Words :{" "}
-                    <span style={{ fontWeight: 400 }}>
-                      {netTotalInWords !== "" ? (
-                        <>
-                          {words+"Only"}
-                          {/* {netTotalInWords.charAt(0).toUpperCase() +
+                      className="text-center"
+                      style={{
+                        fontWeight: "bold",
+                        paddingTop: "23px",
+                        float: "inline-end",
+                      }}
+                    >
+                      In Words :{" "}
+                      <span style={{ fontWeight: 400 }}>
+                        {netTotalInWords !== "" ? (
+                          <>
+                            {words + "Only"}
+                            {/* {netTotalInWords.charAt(0).toUpperCase() +
                             netTotalInWords.slice(1)} */}
-                        </>
-                      ) : (
-                        <>{data[0]?.quotedata[0]?.netTotal}</>
-                      )}
-                    </span>
+                          </>
+                        ) : (
+                          <>{data[0]?.quotedata[0]?.netTotal}</>
+                        )}
+                      </span>
+                    </div>
                   </div>
-                  </div>
-                 
                 </div>
-              
               </div>
             </div>
             {filtcdata.map((item) => (
@@ -507,14 +558,16 @@ function Quotationterm() {
                 </div>
               ))}
             </div>
-           
           </div>
         </div>
         <div>
           {footerimgdata.map((item) => (
             <div className="col-md-12">
               <img
-                src={"https://api.vijayhomeservicebengaluru.in/quotationfooterimg/" + item.footerimg}
+                src={
+                  "https://api.vijayhomeservicebengaluru.in/quotationfooterimg/" +
+                  item.footerimg
+                }
                 height="auto"
                 width="100%"
               />

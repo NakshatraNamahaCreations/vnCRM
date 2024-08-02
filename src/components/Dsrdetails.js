@@ -23,7 +23,6 @@ function Dsrdetails() {
   const location = useLocation();
   const { data, data1, TTname } = location.state || {};
 
-
   const id = data?._id;
   const [dsrdata, setdsrdata] = useState([]);
   const [dsrloader, setdsrloader] = useState(true);
@@ -91,10 +90,9 @@ function Dsrdetails() {
   const [selectedTechName, setSelectedTechName] = useState(
     data.dsrdata.find((dsrItem) => dsrItem.serviceDate === data1)
       ? data.dsrdata.find((itemAmount) => itemAmount.serviceDate === data1)
-        .TechorPMorVendorName
+          .TechorPMorVendorName
       : ""
   );
-
 
   useEffect(() => {
     gettechnician();
@@ -121,7 +119,7 @@ function Dsrdetails() {
       );
       setvendordata(
         filteredTechnicians.filter(
-          (i) => i.city === data?.city && i.Type === "Vendor"
+          (i) => i.city === data?.city && i.Type === "outVendor"
         )
       );
       setvddata(
@@ -143,7 +141,8 @@ function Dsrdetails() {
 
   useEffect(() => {
     getslots();
-  }, []);
+    getTechmanualdata();
+  }, [data]);
 
   const getslots = async () => {
     let res = await axios.get(
@@ -155,6 +154,7 @@ function Dsrdetails() {
   };
 
   const [techdetailsk, setTechDetailsk] = useState([]);
+  const [Techmanualdata, setTechmanualdata] = useState({});
 
   useEffect(() => {
     getTechById();
@@ -177,7 +177,20 @@ function Dsrdetails() {
       console.error("Error fetching technician details:", error);
     }
   };
+  const getTechmanualdata = async () => {
+    try {
+      let res = await axios.get(
+        `https://api.vijayhomeservicebengaluru.in/api/getmanuljobwithserviceID/${data?._id}`
+      );
 
+      if (res.status === 200 && res.data?.data) {
+        setTechmanualdata(res.data.data);
+      }
+    } catch (error) {
+      // Handle the case where the request fails
+      console.error("Error fetching technician details:", error);
+    }
+  };
 
   const getnameof = async () => {
     let res = await axios.get(apiURL + "/getalltechnician");
@@ -196,7 +209,6 @@ function Dsrdetails() {
       );
     }
   };
-
 
   const handleChange1 = (event) => {
     setjobComplete(event.target.value);
@@ -238,9 +250,93 @@ function Dsrdetails() {
     }
   };
 
+  const manualupdate = async () => {
+    try {
+      const config = {
+        url: "/assignjobmaualfromcrm",
+        method: "post",
+        baseURL: apiURL,
+        // data: formdata,
+        headers: { "content-type": "application/json" },
+        data: {
+          serviceDate: data1,
+          serviceInfo: {
+            _id: data._id,
+            customerData: data.customerData,
+            dCategory: data.dCategory,
+            cardNo: data.cardNo,
+            contractType: data.contractType,
+            service: data.service,
+            planName: data.planName,
+            slots: data.slots,
+            serviceId: data.serviceId,
+            serviceCharge: data.serviceCharge,
+            serviceDate: data.serviceDate,
+            desc: data.desc,
+            category: data.category,
+            expiryDate: data.expiryDate,
+            dividedDates: data.dividedDates,
+            dividedCharges: data.dividedCharges,
+            dividedamtDates: data.dividedamtDates,
+            dividedamtCharges: data.dividedamtCharges,
+            oneCommunity: data.oneCommunity,
+            communityId: data.communityId,
+            BackofficeExecutive: data.BackofficeExecutive,
+            deliveryAddress: data.deliveryAddress,
+            type: data.type,
+            userId: data.userId,
+            selectedSlotText: data.selectedSlotText,
+            AddOns: data.AddOns,
+            TotalAmt: data.TotalAmt,
+            GrandTotal: data.GrandTotal,
+
+            city: data.city,
+          },
+          EnquiryId: data?.customerData[0]?.EnquiryId,
+          serviceId: data?._id,
+          cardNo: data.cardNo,
+          category: data.category,
+          bookingDate: moment().format("DD-MM-YYYY"),
+          priorityLevel: priorityLevel,
+          appoDate: data1,
+          appoTime: selectedSlot ? selectedSlot : appoTime,
+          customerFeedback: customerFeedback,
+          techComment: techComment,
+          workerName: workerName,
+          workerAmount: workerAmount,
+          daytoComplete: daytoComplete,
+          backofficerno: admin.contactno,
+          techName: techName,
+          TechorPMorVendorID: selectedTechId,
+          TechorPMorVendorName: selectedTechName,
+          showinApp: Showinapp,
+          sendSms: sendSms,
+          jobType: jobType,
+          type: type,
+          jobComplete: jobComplete,
+          amount: data?.GrandTotal ? data?.GrandTotal : data.serviceCharge,
+          cancelOfficerName: admin.displayname,
+          cancelOfferNumber: admin.contactno,
+          reason: Reason,
+          techName: techName,
+          vCancel: "",
+          cancelDate: moment().format("MMMM Do YYYY, h:mm:ss a"),
+        },
+      };
+      await axios(config).then(function (response) {
+        window.location.assign(`/dsrcallist/${data1}/${data.category}`);
+        alert("updated succesfuly");
+      });
+    } catch (error) {
+      console.error(error);
+
+      alert(" Not Added");
+    }
+  };
+
   const newdata = async () => {
     if (loading) {
-      console.log("alredy hiting")
+      console.log("alredy hiting");
       return;
     }
 
@@ -248,11 +344,10 @@ function Dsrdetails() {
     setLoading(true);
     if (!wtsms) {
       setShow(false);
-      setLoading(false)
+      setLoading(false);
       alert("Please select the whatsapp message sending option!   ");
-      window.location.reload()
-    }
-    else {
+      window.location.reload();
+    } else {
       try {
         const config = {
           url: "/adddsrcall",
@@ -330,7 +425,7 @@ function Dsrdetails() {
           if (response.status === 200) {
             setLoading(false);
             setSV(false);
-            console.log("jobcople", jobComplete)
+            console.log("jobcople", jobComplete);
             if (wtsms === "YES") {
               if (jobComplete === "CANCEL") {
                 const selectedResponse = scancelwhat[0];
@@ -341,7 +436,7 @@ function Dsrdetails() {
                 );
               } else {
                 const selectedResponse = assigntechwhat[0];
-                console.log("whatsapptectassign", selectedResponse)
+                console.log("whatsapptectassign", selectedResponse);
                 whatsapptectassign(
                   selectedResponse,
                   data.customerData[0]?.mainContact
@@ -351,7 +446,6 @@ function Dsrdetails() {
               window.location.assign(`/dsrcallist/${data1}/${data.category}`);
               setShow(false);
             }
-
           }
         });
       } catch (error) {
@@ -368,16 +462,15 @@ function Dsrdetails() {
   const Update = async (e) => {
     e.preventDefault();
     if (loading) {
-      console.log("alredy hiting")
+      console.log("alredy hiting");
       return;
     }
     if (!wtsms) {
       setShow(false);
-      setLoading(false)
+      setLoading(false);
       alert("Please select the whatsapp message sending option!");
-    }
-    else {
-      setLoading(true)
+    } else {
+      setLoading(true);
       try {
         const config = {
           url: `/updatedsrdata/${dsrdata[0]?._id}`,
@@ -462,8 +555,12 @@ function Dsrdetails() {
                   selectedResponse,
                   data.customerData[0]?.mainContact
                 );
-              } else {
+              } 
+
+
+   if (selectedTechId) {
                 const selectedResponse = assigntechwhat[0];
+
                 whatsapptectassign(
                   selectedResponse,
                   data.customerData[0]?.mainContact
@@ -481,7 +578,6 @@ function Dsrdetails() {
               setShow(false);
               window.location.assign(`/dsrcallist/${data1}/${data.category}`);
             }
-
           }
         });
       } catch (error) {
@@ -489,8 +585,6 @@ function Dsrdetails() {
         alert("Somthing went wrong");
       }
     }
-
-
   };
 
   const getServiceManagement = async () => {
@@ -538,7 +632,6 @@ function Dsrdetails() {
   //   }
   // });
 
-
   const returndata = (data) => {
     const dateToMatch = new Date(data1);
     const matchingData = [];
@@ -546,24 +639,25 @@ function Dsrdetails() {
     let charge = 0;
     data.dividedamtDates.forEach((dateObj, index) => {
       const dividedDate = new Date(dateObj.date);
-      console.log("dividedDate.getDate() === dateToMatch.getDate()",dividedDate.getDate() === dateToMatch.getDate())
+      console.log(
+        "dividedDate.getDate() === dateToMatch.getDate()",
+        dividedDate.getDate() === dateToMatch.getDate()
+      );
       if (dividedDate.getDate() === dateToMatch.getDate()) {
         matchingData.push({
           date: dateObj.date,
           charge: data.dividedamtCharges[index].charge,
         });
-      }else{
-
+      } else {
       }
     });
 
-    return matchingData[0]?.charge ?matchingData[0]?.charge :0;
+    return matchingData[0]?.charge ? matchingData[0]?.charge : 0;
   };
-
 
   useEffect(() => {
     getAlldata();
-  }, []);
+  }, [data]);
 
   const getAlldata = async () => {
     try {
@@ -609,7 +703,7 @@ function Dsrdetails() {
   const renderEndDate = updatedEndTime || "0000-00-00 00:00:00";
 
   let i = 1;
-  console.log("id", id)
+  console.log("id", id);
   useEffect(() => {
     getwhatsapptemplate();
   }, []);
@@ -703,31 +797,21 @@ function Dsrdetails() {
       .replace(/<strong>(.*?)<\/strong>/g, "<b>$1</b>")
       .replace(/<[^>]*>/g, "");
 
-    const requestData = [
-      {
-        dst: "91" + contactNumber,
-        messageType: "0",
-        textMessage: {
-          content: convertedText,
-        },
-      },
-    ];
     try {
-      const response = await axios.post(apiURL, requestData, {
-        headers: {
-          "access-token": accessToken,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.post(
+        "https://api.vijayhomeservicebengaluru.in/send-message",
+        {
+          mobile: contactNumber,
+          msg: convertedText,
+        }
+      );
 
       if (response.status === 200) {
         setWhatsappTemplate(response.data);
-        alert("Sent");
-      } else {
-        console.error("API call unsuccessful. Status code:", response.status);
+        // window.location.reload("");
       }
     } catch (error) {
-      console.error("Error making API call:", error);
+      console.error(error);
     }
   };
 
@@ -747,7 +831,6 @@ function Dsrdetails() {
       return;
     }
 
-
     const invoiceLink = contentTemplate
       .replace(/\{Customer_name\}/g, data.customerData[0]?.customerName)
       .replace(/\{Job_type\}/g, data?.desc)
@@ -755,6 +838,7 @@ function Dsrdetails() {
       .replace(/\{Call_date\}/g, data1)
       .replace(/\{Slot_timing\}/g, data.selectedSlotText)
       .replace(/\{Staff_name\}/g, admin.displayname)
+      .replace(/\{Service_date\}/g, data1)
       .replace(/\{Staff_contact\}/g, admin.contactno)
       .replace(/\{Technician_name\}/g, selectedTechName)
       .replace(/\{Technician_experiance\}/g, techdetailsk?.experiance)
@@ -769,22 +853,14 @@ function Dsrdetails() {
       .replace(/<strong>(.*?)<\/strong>/g, "<b>$1</b>")
       .replace(/<[^>]*>/g, "");
 
-    const requestData = [
-      {
-        dst: "91" + contactNumber,
-        messageType: "0",
-        textMessage: {
-          content: convertedText,
-        },
-      },
-    ];
     try {
-      const response = await axios.post(apiURL, requestData, {
-        headers: {
-          "access-token": accessToken,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.post(
+        "https://api.vijayhomeservicebengaluru.in/send-message",
+        {
+          mobile: contactNumber,
+          msg: convertedText,
+        }
+      );
 
       if (response.status === 200) {
         setWhatsappTemplate(response.data);
@@ -830,28 +906,17 @@ function Dsrdetails() {
       .replace(/<strong>(.*?)<\/strong>/g, "<b>$1</b>")
       .replace(/<[^>]*>/g, "");
 
-    const requestData = [
-      {
-        dst: "91" + contactNumber,
-        messageType: "0",
-        textMessage: {
-          content: convertedText,
-        },
-      },
-    ];
     try {
-      const response = await axios.post(apiURL, requestData, {
-        headers: {
-          "access-token": accessToken,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.post(
+        "https://api.vijayhomeservicebengaluru.in/send-message",
+        {
+          mobile: contactNumber,
+          msg: convertedText,
+        }
+      );
 
       if (response.status === 200) {
-        setWhatsappTemplate(response.data);
         window.location.assign(`/dsrcallist/${data1}/${data.category}`);
-      } else {
-        console.error("API call unsuccessful. Status code:", response.status);
       }
     } catch (error) {
       console.error("Error making API call:", error);
@@ -860,10 +925,6 @@ function Dsrdetails() {
 
   // console.log("data?.serviceDate",data.dividedDates[0]?.date)
   const whatsappscancel = async (selectedResponse, contactNumber) => {
-    const apiURL =
-      "https://wa.chatmybot.in/gateway/waunofficial/v1/api/v2/message";
-    const accessToken = "c7475f11-97cb-4d52-9500-f458c1a377f4";
-
     const contentTemplate = selectedResponse?.template || "";
 
     if (!contentTemplate) {
@@ -890,32 +951,39 @@ function Dsrdetails() {
       .replace(/<strong>(.*?)<\/strong>/g, "<b>$1</b>")
       .replace(/<[^>]*>/g, "");
 
-    const requestData = [
-      {
-        dst: "91" + contactNumber,
-        messageType: "0",
-        textMessage: {
-          content: convertedText,
-        },
-      },
-    ];
     try {
-      const response = await axios.post(apiURL, requestData, {
-        headers: {
-          "access-token": accessToken,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.post(
+        "https://api.vijayhomeservicebengaluru.in/send-message",
+        {
+          mobile: contactNumber,
+          msg: convertedText,
+        }
+      );
 
       if (response.status === 200) {
-        setWhatsappTemplate(response.data);
         window.location.assign(`/dsrcallist/${data1}/${data.category}`);
-      } else {
-        console.error("API call unsuccessful. Status code:", response.status);
       }
     } catch (error) {
       console.error("Error making API call:", error);
     }
+
+    // try {
+    //   const response = await axios.post(apiURL, requestData, {
+    //     headers: {
+    //       "access-token": accessToken,
+    //       "Content-Type": "application/json",
+    //     },
+    //   });
+
+    //   if (response.status === 200) {
+    //     setWhatsappTemplate(response.data);
+    //     window.location.assign(`/dsrcallist/${data1}/${data.category}`);
+    //   } else {
+    //     console.error("API call unsuccessful. Status code:", response.status);
+    //   }
+    // } catch (error) {
+    //   console.error("Error making API call:", error);
+    // }
   };
 
   const whatsappreschedule = async (
@@ -948,28 +1016,18 @@ function Dsrdetails() {
       .replace(/<strong>(.*?)<\/strong>/g, "<b>$1</b>")
       .replace(/<[^>]*>/g, "");
 
-    const requestData = [
-      {
-        dst: "91" + contactNumber,
-        messageType: "0",
-        textMessage: {
-          content: convertedText,
-        },
-      },
-    ];
     try {
-      const response = await axios.post(apiURL, requestData, {
-        headers: {
-          "access-token": accessToken,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.post(
+        "https://api.vijayhomeservicebengaluru.in/send-message",
+        {
+          mobile: contactNumber,
+          msg: convertedText,
+        }
+      );
 
       if (response.status === 200) {
-        setWhatsappTemplate(response.data);
+        alert("order rescheduled sucussfully");
         window.location.assign(`/dsrcallist/${data1}/${data.category}`);
-      } else {
-        console.error("API call unsuccessful. Status code:", response.status);
       }
     } catch (error) {
       console.error("Error making API call:", error);
@@ -1004,7 +1062,6 @@ function Dsrdetails() {
 
   const [reasonforresh, setreasonforresh] = useState("");
 
-
   const recheduledate = async (id) => {
     if (!reasonforresh) {
       alert("Please enter a reason");
@@ -1037,7 +1094,6 @@ function Dsrdetails() {
             selectedResponse,
             data.customerData[0]?.mainContact
           );
-
         }
       } catch (error) {
         if (error.response) {
@@ -1071,11 +1127,9 @@ function Dsrdetails() {
     e.preventDefault();
     try {
       const config = {
-        url:
-          dsrdata[0]?._id
-            ? `/changeappotime/${data._id}/${dsrdata[0]?._id}`
-            : `/changeappotimewithoutdsr/${data._id}`,
-
+        url: dsrdata[0]?._id
+          ? `/changeappotime/${data._id}/${dsrdata[0]?._id}`
+          : `/changeappotimewithoutdsr/${data._id}`,
         method: "post",
         baseURL: apiURL,
         headers: { "content-type": "application/json" },
@@ -1101,10 +1155,9 @@ function Dsrdetails() {
     e.preventDefault();
     try {
       const config = {
-        url:
-          dsrdata[0]?._id
-            ? `/changeappotime/${data._id}/${dsrdata[0]?._id}`
-            : `/changeappotimewithoutdsr/${data._id}`,
+        url: dsrdata[0]?._id
+          ? `/changeappotime/${data._id}/${dsrdata[0]?._id}`
+          : `/changeappotimewithoutdsr/${data._id}`,
 
         method: "post",
         baseURL: apiURL,
@@ -1117,10 +1170,7 @@ function Dsrdetails() {
       };
       await axios(config).then(function (response) {
         if (response.status === 200) {
-
-
           window.location.assign(`/dsrcallist/${data1}/${data.category}`);
-
         }
       });
     } catch (error) {
@@ -1171,17 +1221,22 @@ function Dsrdetails() {
                     </select>
                   </div>
                 </div>
-                {data.complaint ?
+                {data.complaint ? (
                   <div className="col-md-4">
-                    <div className="vhs-input-label" style={{ color: "darkred", fontWeight: "bold" }}>Complaint call</div>
+                    <div
+                      className="vhs-input-label"
+                      style={{ color: "darkred", fontWeight: "bold" }}
+                    >
+                      Complaint call
+                    </div>
                     <div className="group pt-1">
                       <p>Tech Name:{data.ctechName}</p>
                       <p>Date:{data.date}</p>
                     </div>
-                  </div> :
+                  </div>
+                ) : (
                   ""
-                }
-
+                )}
               </div>
 
               <div className="row pt-3">
@@ -1233,6 +1288,7 @@ function Dsrdetails() {
                     </select>
                   </div>
                 </div>
+
                 <div className="col-md-4">
                   <div className="vhs-input-label">City</div>
                   <div className="group pt-1">
@@ -1254,8 +1310,8 @@ function Dsrdetails() {
               <div className="row pt-3">
                 <div className="col-md-4">
                   {dsrdata[0]?.jobComplete === "NO" ||
-                    dsrdata[0]?.jobComplete === undefined ||
-                    dsrdata[0]?.jobComplete === null ? (
+                  dsrdata[0]?.jobComplete === undefined ||
+                  dsrdata[0]?.jobComplete === null ? (
                     <>
                       <button onClick={() => setShow1(true)}>
                         Reschedule date
@@ -1288,8 +1344,8 @@ function Dsrdetails() {
                   )}
                 </div>
                 {dsrdata[0]?.jobComplete === "NO" ||
-                  dsrdata[0]?.jobComplete === undefined ||
-                  dsrdata[0]?.jobComplete === null ?
+                dsrdata[0]?.jobComplete === undefined ||
+                dsrdata[0]?.jobComplete === null ? (
                   <div className="col-md-4">
                     <button
                       onClick={editservicedetails}
@@ -1297,12 +1353,13 @@ function Dsrdetails() {
                     >
                       Update Time
                     </button>
-                  </div> : (
-                    <></>
-                  )}
+                  </div>
+                ) : (
+                  <></>
+                )}
                 {dsrdata[0]?.jobComplete === "NO" ||
-                  dsrdata[0]?.jobComplete === undefined ||
-                  dsrdata[0]?.jobComplete === null ?
+                dsrdata[0]?.jobComplete === undefined ||
+                dsrdata[0]?.jobComplete === null ? (
                   <div className="col-md-4">
                     <button
                       onClick={editservicecity}
@@ -1310,9 +1367,10 @@ function Dsrdetails() {
                     >
                       Update City
                     </button>
-                  </div> : (
-                    <></>
-                  )}
+                  </div>
+                ) : (
+                  <></>
+                )}
               </div>
               <h5 className="mt-3">Customer Information</h5>
               <hr />
@@ -1373,7 +1431,7 @@ function Dsrdetails() {
                       style={{ height: "fit-content" }}
                     >
                       {data.deliveryAddress === null ||
-                        data.deliveryAddress === undefined ? (
+                      data.deliveryAddress === undefined ? (
                         <>
                           {data.customerData[0]?.cnap},
                           {data.customerData[0]?.rbhf},
@@ -1405,7 +1463,7 @@ function Dsrdetails() {
                   <div className="group pt-1">
                     <div className="vhs-non-editable">
                       {data.customerData[0]?.city === null ||
-                        data.customerData[0]?.city === undefined ? (
+                      data.customerData[0]?.city === undefined ? (
                         <>{data.customerData[0]?.city}</>
                       ) : (
                         <>{data.city}</>
@@ -1490,14 +1548,13 @@ function Dsrdetails() {
                       </td> */}
                       <td>{data?.desc}</td>
 
-                    
                       <td>
-                          {data?.contractType === "AMC"
+                        {data?.contractType === "AMC"
+                          ? returndata(data)
                             ? returndata(data)
-                              ? returndata(data)
-                              : "0"
-                            : data.GrandTotal}
-                        </td>
+                            : "0"
+                          : data.GrandTotal}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -1673,7 +1730,9 @@ function Dsrdetails() {
               </div>
 
               <div className="group pt-1 col-6">
-                {dsrdata[0]?.TechorPMorVendorName}
+                {dsrdata[0]?.TechorPMorVendorName
+                  ? dsrdata[0]?.TechorPMorVendorName
+                  : Techmanualdata?.vendorName}
                 <select
                   className="col-md-12 vhs-input-value"
                   onChange={handleTechNameChange}
@@ -1701,33 +1760,25 @@ function Dsrdetails() {
                       </option>
                     ))}
                 </select>
+                {type === "Vendor" && (
+                  <button
+                    onClick={manualupdate}
+                    style={{
+                      width: "200px",
+                      marginTop: "10px",
+                      padding: "10px",
+                      background: "skyblue",
+                      border: "none",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Manual Update
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </div>
-
-        {/* <div className="row pt-3">
-          <div className="row">
-            <div className="col-6 d-flex">
-              <div className="col-4">Send SMS</div>
-              <div className="col-1">:</div>
-              <div className="group pt-1 col-7">
-                <select
-                  className="col-md-12 vhs-input-value"
-                  onChange={(e) => setsendSms(e.target.value)}
-                >
-                  {dsrdata[0]?.sendSms ? (
-                    <option>{dsrdata[0]?.sendSms}</option>
-                  ) : (
-                    <option>--select--</option>
-                  )}
-                  <option value="yes">YES</option>
-                  <option value="no">NO</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div> */}
 
         <div className="row pt-3">
           <div className="row">
@@ -1822,7 +1873,6 @@ function Dsrdetails() {
                 />
                 NO
               </label>
-
             </div>
           </div>
         </div>
@@ -1967,7 +2017,7 @@ function Dsrdetails() {
           </div>
         )}
 
-        { }
+        {}
         <Modal
           show={show}
           onHide={handleClose}

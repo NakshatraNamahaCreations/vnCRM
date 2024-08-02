@@ -25,10 +25,10 @@ function Quoteconfirmed() {
   const [searchDesc, setSearchDesc] = useState("");
   const [searchNxtfoll, setSearchNxtfoll] = useState("");
   const [searchBookedby, setsearchBookedby] = useState("");
-
+  const [Type, setType] = useState("");
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(25);
 
   useEffect(() => {
     getenquiryadd();
@@ -168,6 +168,20 @@ function Quoteconfirmed() {
             item.nxtfoll.toLowerCase().includes(searchNxtfoll.toLowerCase())
         );
       }
+      if (Type) {
+        results = results.filter((item) => {
+          switch (Type) {
+            case "NOT SHARED":
+              return !(item.quotefollowup[0]?.response === "Confirmed" || item.type === "QUOTE SHARED");
+            case "QUOTE SHARED":
+              return item.type === "QUOTE SHARED";
+            case "CONFIRMED":
+              return item.quotefollowup[0]?.response === "Confirmed";
+            default:
+              return true;
+          }
+        });
+      }
       // results = results.map((item) => ({
       //   ...item,
       //   category: getUniqueCategories()[item.category],
@@ -183,7 +197,7 @@ function Quoteconfirmed() {
     searchAddress,
     searchReference,
     searchCity,
-
+    Type,
     searchExecutive,
     searchStaff,
     searchResponse,
@@ -245,26 +259,28 @@ function Quoteconfirmed() {
           </div>
 
           <table>
-            <thead>
+          <thead>
               <tr className="bg ">
                 <th scope="col" className="bor">
-                  <input className="vhs-table-input" />{" "}
+                  
                 </th>
                 <th scope="col" className="bor">
                   {" "}
+                 
+
                   <select
+                    className="vhs-table-input"
                     value={searchCatagory}
                     onChange={(e) => setSearchCatagory(e.target.value)}
                   >
                     <option value="">Select</option>
-                    {searchResults.map((e) => (
-                      <option
-                        value={e.enquirydata[0]?.category}
-                        key={e.enquirydata[0]?.category}
-                      >
-                        {e.enquirydata[0]?.category}{" "}
-                      </option>
-                    ))}
+                    {[...new Set(enquiryflwdata?.map((i) => i.enquirydata[0]?.category))].map(
+                      (uniqueCity) => (
+                        <option value={uniqueCity} key={uniqueCity}>
+                          {uniqueCity}
+                        </option>
+                      )
+                    )}
                   </select>{" "}
                 </th>
                 <th scope="col" className="bor"></th>
@@ -309,20 +325,20 @@ function Quoteconfirmed() {
                   />{" "}
                 </th>
                 <th scope="col" className="bor">
-                  {" "}
+                 
                   <select
+                    className="vhs-table-input"
                     value={searchCity}
                     onChange={(e) => setSearchCity(e.target.value)}
                   >
-                    <option value="">Select </option>
-                    {searchResults.map((e) => (
-                      <option
-                        value={e.enquirydata[0]?.city}
-                        key={e.enquirydata[0]?.city}
-                      >
-                        {e.enquirydata[0]?.city}{" "}
-                      </option>
-                    ))}
+                    <option value="">Select</option>
+                    {[...new Set(enquiryflwdata?.map((i) => i.enquirydata[0]?.city))].map(
+                      (uniqueCity) => (
+                        <option value={uniqueCity} key={uniqueCity}>
+                          {uniqueCity}
+                        </option>
+                      )
+                    )}
                   </select>{" "}
                 </th>
 
@@ -330,7 +346,7 @@ function Quoteconfirmed() {
                   <input
                     className="vhs-table-input"
                     value={searchServices}
-                    onChange={(e) => setsearchServices(e.target.value)}
+                    onChange={(e) =>setsearchServices(e.target.value)}
                   />{" "}
                 </th>
 
@@ -377,17 +393,20 @@ function Quoteconfirmed() {
                 <th scope="col" className="bor">
                   <input
                     className="vhs-table-input"
-                    value={searchDesc}
-                    onChange={(e) => setSearchDesc(e.target.value)}
-                  />{" "}
-                </th>
-                <th scope="col" className="bor">
-                  <input
-                    className="vhs-table-input"
                     value={searchNxtfoll}
                     onChange={(e) => setSearchNxtfoll(e.target.value)}
                   />{" "}
                 </th>
+                {/* <th scope="col" className="bor">
+                  <input
+                    className="vhs-table-input"
+                    value={searchDesc}
+                    onChange={(e) => setSearchDesc(e.target.value)}
+                  />{" "}
+                </th> */}
+                {/* <th scope="col" className="bor">
+               
+                </th> */}
               </tr>
               <tr className="bg">
                 <th className="bor">#</th>
@@ -405,13 +424,13 @@ function Quoteconfirmed() {
                 <th className="bor">Last F/W Dt</th>
                 <th className="bor">Next F/W Dt</th>
                 <th className="bor">Desc</th>
-                <th className="bor">Type</th>
+             
               </tr>
             </thead>
             <tbody>
               {currentItems.map((item) => (
                 <a onClick={() => click(item)} className="tbl">
-                  <tr className="trnew">
+                  <tr className="trnew" style={{backgroundColor:"#ffb9798f"}}>
                     <td>{i++}</td>
                     <td>{item?.enquirydata[0]?.category}</td>
                     <td>{item?.quotedata[0]?.quoteId}</td>
@@ -432,7 +451,7 @@ function Quoteconfirmed() {
                     <td>{item?.enquiryfollowupdata[0]?.folldate}</td>
                     <td>{item?.nxtfoll}</td>
                     <td>{item?.desc}</td>
-                    <td></td>
+                    {/* <td></td> */}
                   </tr>
                 </a>
                 // </Link>

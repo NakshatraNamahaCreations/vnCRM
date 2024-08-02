@@ -34,6 +34,7 @@ function RunningProject() {
   const [payment, setPayment] = useState(""); //need
   const [type, setType] = useState(""); //need
 
+  console.log("searchResults===", searchResults);
 
   //unique select option. removing duplicates--------
   const [catagories, setCatagories] = useState(new Set());
@@ -66,9 +67,6 @@ function RunningProject() {
 
   const handleClick = (divNum) => () => {
     setSelected(divNum);
-
-
-
   };
 
   useEffect(() => {
@@ -91,14 +89,16 @@ function RunningProject() {
   const getservicedata = async () => {
     let res = await axios.get(apiURL + "/getfilterrunningdata");
     if (res.status === 200) {
-      const filteredData = res.data?.runningdata.filter((i) => !i.closeProject && i.dsrdata[0]?.startproject);
+      const filteredData = res.data?.runningdata.filter(
+        (i) => !i.closeProject && i.dsrdata[0]?.startproject
+      );
+
+      console.log("res.data?.runningdata", res.data?.runningdata);
 
       settreatmentData(filteredData);
       setSearchResults(filteredData);
     }
   };
-
-
 
   const updatetoclose = async (id) => {
     try {
@@ -127,7 +127,6 @@ function RunningProject() {
   };
 
   const redirectURL = (data) => {
-
     navigate(`/painting/${data?._id}`);
   };
 
@@ -137,8 +136,10 @@ function RunningProject() {
       if (runningDate) {
         results = results.filter(
           (item) =>
-            item.date &&
-            item.date.toLowerCase().includes(runningDate.toLowerCase())
+            item.dsrdata[0]?.serviceDate &&
+            item.dsrdata[0]?.serviceDate
+              .toLowerCase()
+              .includes(runningDate.toLowerCase())
         );
       }
       if (catagoryData && catagoryData !== "Show All") {
@@ -154,9 +155,9 @@ function RunningProject() {
         results = results.filter(
           (item) =>
             item.dsrdata[0]?.TechorPMorVendorName &&
-            item.dsrdata[0]?.TechorPMorVendorName
-              .toLowerCase()
-              .includes(projectManager.toLowerCase())
+            item.dsrdata[0]?.TechorPMorVendorName.toLowerCase().includes(
+              projectManager.toLowerCase()
+            )
         );
       }
       if (salesExecutive) {
@@ -190,8 +191,8 @@ function RunningProject() {
       if (address) {
         results = results.filter((item) => {
           const lnf = item.customerData[0]?.lnf;
-          const cnap = item.customer[0]?.cnap;
-          const rbhf = item.customer[0]?.rbhf;
+          const cnap = item.customerData[0]?.cnap;
+          const rbhf = item.customerData[0]?.rbhf;
           if (lnf && lnf.toLowerCase().includes(address.toLowerCase())) {
             return true;
           }
@@ -208,14 +209,10 @@ function RunningProject() {
       if (city) {
         results = results.filter(
           (item) =>
-            item.city &&
-            item.city
-              .toLowerCase()
-              .includes(city.toLowerCase())
+            item.city && item.city.toLowerCase().includes(city.toLowerCase())
         );
-
-
       }
+
       // if (quoteNo) {
       //   results = results.filter(
       //     (item) =>
@@ -223,6 +220,7 @@ function RunningProject() {
       //       item.techName.toLowerCase().includes(quoteNo.toLowerCase())
       //   );
       // }
+
       if (projectType) {
         results = results.filter(
           (item) =>
@@ -322,6 +320,8 @@ function RunningProject() {
   function calculatePendingPaymentAmount(paymentData, serviceCharge) {
     const totalAmount = calculateTotalPaymentAmount(paymentData);
     const pendingAmount = parseFloat(serviceCharge) - totalAmount;
+
+    console.log("totalAmount,pendingAmount", totalAmount, pendingAmount);
     return pendingAmount.toFixed(2); // Format the pending amount with two decimal places
   }
 
@@ -365,7 +365,7 @@ function RunningProject() {
             item.dsrdata[0]?.deepcleaningstart !== "start"
           );
         case "CLOSED":
-          return item.dsrdata[0]?.jobComplete === "YES" ;
+          return item.dsrdata[0]?.jobComplete === "YES";
         case "DEEPCLEANING":
           return item.dsrdata[0]?.deepcleaningstart === "start";
 
@@ -388,7 +388,11 @@ function RunningProject() {
         <div className="shadow-sm" style={{ border: "1px #cccccc solid" }}>
           <div
             className="ps-1 pe-1"
-            style={{ borderBottom: "1px #cccccc solid", backgroundColor: "skyblue", cursor: "pointer" }}
+            style={{
+              borderBottom: "1px #cccccc solid",
+              backgroundColor: "skyblue",
+              cursor: "pointer",
+            }}
             onClick={() => handleLegendItemClick("START")}
           >
             Job start
@@ -411,8 +415,6 @@ function RunningProject() {
           >
             Job closed
           </div>
-
-
         </div>
       </div>
       <div className="row m-auto" style={{ width: "100%" }}>
@@ -449,29 +451,37 @@ function RunningProject() {
                       onChange={(e) => setProjectManager(e.target.value)}
                     >
                       <option value="">-show all-</option>
-                      {[...new Set(treatmentdata?.map((item) => item.dsrdata[0]?.TechorPMorVendorName))].map(
-                        (uniqueCity) => (
-                          <option value={uniqueCity} key={uniqueCity}>
-                            {uniqueCity}
-                          </option>
-                        )
-                      )}
+                      {[
+                        ...new Set(
+                          treatmentdata?.map(
+                            (item) => item.dsrdata[0]?.TechorPMorVendorName
+                          )
+                        ),
+                      ].map((uniqueCity) => (
+                        <option value={uniqueCity} key={uniqueCity}>
+                          {uniqueCity}
+                        </option>
+                      ))}
                     </select>
                   </th>
                   <th scope="col">
-
                     <select
                       className="vhs-table-input"
                       onChange={(e) => setSalesExecutive(e.target.value)}
                     >
                       <option value="">-show all-</option>
-                      {[...new Set(treatmentdata?.map((item) => item.enquiryFollowupData[0]?.technicianname))].map(
-                        (uniqueCity) => (
-                          <option value={uniqueCity} key={uniqueCity}>
-                            {uniqueCity}
-                          </option>
-                        )
-                      )}
+                      {[
+                        ...new Set(
+                          treatmentdata?.map(
+                            (item) =>
+                              item.enquiryFollowupData[0]?.technicianname
+                          )
+                        ),
+                      ].map((uniqueCity) => (
+                        <option value={uniqueCity} key={uniqueCity}>
+                          {uniqueCity}
+                        </option>
+                      ))}
                     </select>
                   </th>
                   <th scope="col">
@@ -560,12 +570,8 @@ function RunningProject() {
                       onChange={(e) => setQuoteValue(e.target.value)}
                     />
                   </th>
-                  <th scope="col">
-
-                  </th>
-                  <th scope="col">
-
-                  </th>
+                  <th scope="col"></th>
+                  <th scope="col"></th>
                   <th scope="col"></th>
                   <th scope="col"></th>
                   <th scope="col"></th>
@@ -633,7 +639,7 @@ function RunningProject() {
                     className="table-head"
                     style={{ minWidth: "160px" }}
                   >
-                    Customer  Payment
+                    Customer Payment
                   </th>
 
                   <th scope="col" className="table-head">
@@ -646,7 +652,11 @@ function RunningProject() {
                   <th scope="col" className="table-head">
                     TYPE
                   </th>
-                  <th scope="col" className="table-head" style={{ width: "20%" }}>
+                  <th
+                    scope="col"
+                    className="table-head"
+                    style={{ width: "20%" }}
+                  >
                     Deep Clean Details
                   </th>
 
@@ -665,15 +675,15 @@ function RunningProject() {
                         item.dsrdata[0]?.jobComplete === "YES"
                           ? "#ffb9798f"
                           : item.dsrdata[0]?.deepcleaningstart === "start" // Corrected key here
-                            ? "#0080002e"
-                            : item.dsrdata[0]?.startproject === "start" ?
-                              "skyblue" :
-                              "white",
+                          ? "#0080002e"
+                          : item.dsrdata[0]?.startproject === "start"
+                          ? "skyblue"
+                          : "white",
                       color: "black",
                     }}
                   >
                     <td>{index + 1}</td>
-                    <td>{item.date}</td>
+                    <td>{item.dsrdata[0]?.serviceDate}</td>
                     <td>{item.category}</td>
                     <td>{item.dsrdata[0]?.TechorPMorVendorName}</td>
                     <td>{item.enquiryFollowupData[0]?.technicianname}</td>
@@ -747,7 +757,9 @@ function RunningProject() {
                                 Total:{" "}
                                 {calculateTotalvendorAmount(
                                   item.paymentData.filter(
-                                    (i) => i.serviceId === item._id && i.paymentType === "Vendor"
+                                    (i) =>
+                                      i.serviceId === item._id &&
+                                      i.paymentType === "Vendor"
                                   )
                                 )}
                               </b>
@@ -797,7 +809,9 @@ function RunningProject() {
                                 Total:{" "}
                                 {calculateTotalPaymentAmount(
                                   item.paymentData.filter(
-                                    (i) => i.serviceId === item._id && i.paymentType === "Customer"
+                                    (i) =>
+                                      i.serviceId === item._id &&
+                                      i.paymentType === "Customer"
                                   )
                                 )}
                               </b>
@@ -849,18 +863,18 @@ function RunningProject() {
                         {item.dsrdata[0]?.jobComplete === "YES"
                           ? "CLOSED BY PROJECT MANAGER"
                           : item.dsrdata[0]?.deepcleaningstart === "start"
-                            ? "BOOK FOR DEEP CLEANING"
-                            : item.dsrdata[0]?.startproject === "start" ?
-                              "PROJECT STARTED"
-                              :
-                              "RUNNING PROJECTS"
-                        }
+                          ? "BOOK FOR DEEP CLEANING"
+                          : item.dsrdata[0]?.startproject === "start"
+                          ? "PROJECT STARTED"
+                          : "RUNNING PROJECTS"}
                       </div>
                     </td>
                     <td>
-
-                      <div>{item.dsrdata[0]?.deepcleaningdate}<br />
-                        {item.dsrdata[0]?.deepcleaningnote}</div>
+                      <div>
+                        {item.dsrdata[0]?.deepcleaningdate}
+                        <br />
+                        {item.dsrdata[0]?.deepcleaningnote}
+                      </div>
                     </td>
 
                     <td>

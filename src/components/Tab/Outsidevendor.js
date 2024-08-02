@@ -18,8 +18,7 @@ const inactive = { color: "black", backgroundColor: "white" };
 
 function Outsidevendor() {
     const admin = JSON.parse(sessionStorage.getItem("admin"));
-    const [selected, setSelected] = useState(0);
-    const [isVisible, setIsVisible] = useState(true);
+
     const [city, setcity] = useState("");
     const [category, setcategory] = useState("");
     const [vhsname, setvhsname] = useState("");

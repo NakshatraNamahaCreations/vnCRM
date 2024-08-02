@@ -51,7 +51,7 @@ function Surveycategory() {
       category: category,
       startDate: rstart,
       endDate: rend,
-      city: admin?.city,
+      city: admin.city,
     });
     if ((res.status = 200)) {
       setsurveycatdata(res.data?.enquiryfollowup);

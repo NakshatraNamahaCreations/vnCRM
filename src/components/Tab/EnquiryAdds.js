@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 const defaultstate = 1;
 
-function Enquiryadd() {
+function Enquiryadds() {
   const navigate = useNavigate();
   const [hit, sethit] = useState(false);
   const admin = JSON.parse(sessionStorage.getItem("admin"));
@@ -134,19 +134,9 @@ function Enquiryadd() {
         };
         await axios(config).then(function (response) {
           if (response.status === 200) {
-            const enquiryId = response.data.data.EnquiryId;
-            const data = response.data.data;
-
-            const queryString = new URLSearchParams({
-              enquiryData: JSON.stringify(data),
-            }).toString();
-            const newTab = window.open(
-              `/enquirydetail/${enquiryId}?${queryString}`,
-              "_blank"
-            );
-
             makeApiCall(getTemplateDatails, contact1);
             sethit(false);
+            window.location.reload("");
           }
         });
       } catch (error) {
@@ -231,7 +221,7 @@ function Enquiryadd() {
   return (
     <div className="web">
       <Header />
-      <Enquirynav />
+      {/* <Enquirynav /> */}
       {/* <button onClick={makeApiCall}>send</button> */}
       <div className="row m-auto">
         <div className="col-md-12">
@@ -469,4 +459,4 @@ function Enquiryadd() {
   );
 }
 
-export default Enquiryadd;
+export default Enquiryadds;

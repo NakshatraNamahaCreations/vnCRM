@@ -19,6 +19,7 @@ function Userrights() {
   const [home, setHome] = useState(false);
   const [master, setMaster] = useState(data?.master || false);
   const [enquiry, setEnquiry] = useState(data?.enquiry || false);
+  const [enquiryAdd, setEnquiryAdd] = useState(data?.enquiryAdd || false);
   const [enquiryFollowup, setEnquiryFollowup] = useState(
     data?.enquiryFollowup || false
   );
@@ -64,6 +65,7 @@ function Userrights() {
           userid: data._id,
           master: master,
           enquiry: enquiry,
+          enquiryAdd: enquiryAdd,
           enquiryFollowup: enquiryFollowup,
           survey: survey,
           quote: quote,
@@ -252,6 +254,17 @@ function Userrights() {
                     />
                   </td>
                   <td style={{ width: "80%" }}>Enquiry</td>
+                </tr>
+                <tr>
+                  <td style={{ width: "10%" }}>
+                    <input
+                      type="checkbox"
+                      className="table-checkbox"
+                      checked={enquiryAdd}
+                      onChange={(e) => setEnquiryAdd(!enquiryAdd)}
+                    />
+                  </td>
+                  <td style={{ width: "80%" }}>EnquiryAdd</td>
                 </tr>
                 <tr>
                   <td style={{ width: "10%" }}>

@@ -5,7 +5,6 @@ import Table from "react-bootstrap/Table";
 import { useParams, Link, NavLink } from "react-router-dom";
 import * as XLSX from "xlsx";
 
-
 function Paymentfilterlist() {
   const [treatmentData, settreatmentData] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
@@ -33,8 +32,6 @@ function Paymentfilterlist() {
     (_, index) => index + 1
   );
 
-
-
   // Calculate the starting serial number based on the current page
   const startSerialNumber = (currentPage - 1) * itemsPerPage + 1;
   useEffect(() => {
@@ -51,7 +48,6 @@ function Paymentfilterlist() {
       });
 
       if (res.status === 200) {
-
         settreatmentData(res.data?.runningdata);
         setSearchResults(res.data?.runningdata);
       }
@@ -59,8 +55,6 @@ function Paymentfilterlist() {
       console.error("Error fetching data:", error);
     }
   };
-
-
 
   useEffect(() => {
     getAlldata();
@@ -209,10 +203,15 @@ function Paymentfilterlist() {
     return totalAmount.toFixed(2); // Format the total amount with two decimal places
   }
 
-  function calculatePendingPaymentAmount(paymentData, serviceCharge,GT,contractType) {
+  function calculatePendingPaymentAmount(
+    paymentData,
+    serviceCharge,
+    GT,
+    contractType
+  ) {
     const totalAmount = calculateTotalPaymentAmount(paymentData);
 
-    const check=contractType==="AMC"?serviceCharge[0]?.charge:GT
+    const check = contractType === "AMC" ? serviceCharge[0]?.charge : GT;
     const pendingAmount = totalAmount - parseFloat(check);
 
     return pendingAmount.toFixed(2); // Format the pending amount with two decimal places
@@ -250,8 +249,6 @@ function Paymentfilterlist() {
         if (selectedData.dsrdata[0]?.jobComplete !== "CANCEL") {
           grandTotal += Number(selectedData?.GrandTotal) || 0;
         }
-
-
       } else {
         if (selectedData.dsrdata[0]?.jobComplete !== "CANCEL") {
           if (selectedData.dividedamtCharges.length > 0) {
@@ -335,15 +332,11 @@ function Paymentfilterlist() {
   const IMPSTotal = IMPSTotalInfo.total;
   const IMPSCount = IMPSTotalInfo.count;
 
-
- 
-
-
   const exportData = () => {
     const fileName = "Payment_Report.xlsx";
-  
+
     // Assuming each object in searchResults has properties like 'category' and 'img'
-    const filteredData1 = searchResults?.map(item => ({
+    const filteredData1 = searchResults?.map((item) => ({
       date: date,
       category: item?.category,
       customerName: item?.customerData?.[0]?.customerName,
@@ -352,16 +345,17 @@ function Paymentfilterlist() {
       desc: item?.desc,
       amount: item?.GrandTotal,
       Technician: item?.dsrdata?.[0]?.TechorPMorVendorName,
-      paymentmode:(item?.dsrdata?.[0]?.jobComplete === "CANCEL")?"CANCEL" :(item?.paymentData?.[0]?.paymentMode)
+      paymentmode:
+        item?.dsrdata?.[0]?.jobComplete === "CANCEL"
+          ? "CANCEL"
+          : item?.paymentData?.[0]?.paymentMode,
     }));
-  
+
     const worksheet = XLSX.utils.json_to_sheet(filteredData1);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Category Data");
     XLSX.writeFile(workbook, fileName);
   };
-  
-
 
   return (
     <div className="web">
@@ -402,14 +396,14 @@ function Paymentfilterlist() {
             color: "white",
             backgroundColor: "#a9042e",
             borderRadius: "5px",
-            width: "150px"
+            width: "150px",
           }}
           onClick={exportData}
         >
           <i
             class="fa-solid fa-download"
             title="Download"
-          // style={{ color: "white", fontSize: "27px" }}
+            // style={{ color: "white", fontSize: "27px" }}
           ></i>{" "}
           Export
         </button>
@@ -607,8 +601,8 @@ function Paymentfilterlist() {
                       selectedData?.status === "confirm"
                         ? "orange"
                         : selectedData.dsrdata[0]?.jobComplete === "CANCEL"
-                          ? "rgb(186, 88, 88)"
-                          : "white",
+                        ? "rgb(186, 88, 88)"
+                        : "white",
                   }}
                 >
                   <td>{startSerialNumber + index}</td>
@@ -619,8 +613,8 @@ function Paymentfilterlist() {
 
                   <td>{selectedData.city}</td>
 
-                  {selectedData?.type === "userapp" ? (
-                    <td>user app</td>
+                  {selectedData?.type ? (
+                    <td>{selectedData?.type}</td>
                   ) : (
                     <td>{selectedData.customerData[0]?.approach}</td>
                   )}
@@ -646,7 +640,7 @@ function Paymentfilterlist() {
 
                   <td>{selectedData.desc}</td>
 
-                  {selectedData?.type === "userapp" ? (
+                  {selectedData?.type ? (
                     <td>{selectedData?.GrandTotal}</td>
                   ) : (
                     <td>
@@ -673,7 +667,9 @@ function Paymentfilterlist() {
                               i.serviceId === selectedData._id &&
                               i.serviceDate === date
                           ),
-                          selectedData.dividedamtCharges,selectedData?.GrandTotal,selectedData?.contractType
+                          selectedData.dividedamtCharges,
+                          selectedData?.GrandTotal,
+                          selectedData?.contractType
                         ) == 0 ? (
                           <p style={{ color: "green" }}>PAYMENT COLLECTED</p>
                         ) : (
@@ -725,7 +721,7 @@ function Paymentfilterlist() {
                           ) : (
                             ""
                           )}{" "}
-                          <div>{ }</div>
+                          <div>{}</div>
                         </div>
                       ))}
                     </td>
@@ -780,7 +776,9 @@ function Paymentfilterlist() {
                                   // &&
                                   // i.serviceDate === date
                                 ),
-                                selectedData.dividedamtCharges,selectedData?.GrandTotal,selectedData?.contractType
+                                selectedData.dividedamtCharges,
+                                selectedData?.GrandTotal,
+                                selectedData?.contractType
                               )}
                             </b>
                           </p>
@@ -830,7 +828,7 @@ function Paymentfilterlist() {
                                 ) : (
                                   ""
                                 )}{" "}
-                                <div>{ }</div>
+                                <div>{}</div>
                               </div>
                             ))}
                           </>

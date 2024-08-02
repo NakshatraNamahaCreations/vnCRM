@@ -47,7 +47,7 @@ function Quotethismonth() {
   console.log("enquiryflwdata--", enquiryflwdata);
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(25);
 
   // Get today's date in the format 'YYYY-MM-DD'
   const today = new Date().toISOString().split("T")[0];
@@ -193,6 +193,20 @@ function Quotethismonth() {
             item.nxtfoll.toLowerCase().includes(searchNxtfoll.toLowerCase())
         );
       }
+      if (Type) {
+        results = results.filter((item) => {
+          switch (Type) {
+            case "NOT SHARED":
+              return !(item.quotefollowup[0]?.response === "Confirmed" || item.type === "QUOTE SHARED");
+            case "QUOTE SHARED":
+              return item.type === "QUOTE SHARED";
+            case "CONFIRMED":
+              return item.quotefollowup[0]?.response === "Confirmed";
+            default:
+              return true;
+          }
+        });
+      }
       // results = results.map((item) => ({
       //   ...item,
       //   category: getUniqueCategories()[item.category],
@@ -208,7 +222,7 @@ function Quotethismonth() {
     searchAddress,
     searchReference,
     searchCity,
-
+    Type,
     searchExecutive,
     searchStaff,
     searchResponse,
@@ -218,7 +232,14 @@ function Quotethismonth() {
   ]);
 
   const click = (data) => {
-    navigate(`/quotedetails/${data.EnquiryId}`);
+    if (data) {
+      window.location.assign(`/quotedetails/?id=${data.EnquiryId}`, {
+        state: { data: data },
+      });
+    } else {
+      // Handle the case when data is null or undefined
+      // For example, show an error message or perform a different action
+    }
   };
 
   // Pagination logic
@@ -291,26 +312,29 @@ function Quotethismonth() {
           </div>
 
           <table>
-            <thead>
+
+           <thead>
               <tr className="bg ">
                 <th scope="col" className="bor">
-                  <input className="vhs-table-input" />{" "}
+                  
                 </th>
                 <th scope="col" className="bor">
                   {" "}
+                 
+
                   <select
+                    className="vhs-table-input"
                     value={searchCatagory}
                     onChange={(e) => setSearchCatagory(e.target.value)}
                   >
                     <option value="">Select</option>
-                    {searchResults.map((e) => (
-                      <option
-                        value={e.enquirydata[0]?.category}
-                        key={e.enquirydata[0]?.category}
-                      >
-                        {e.enquirydata[0]?.category}{" "}
-                      </option>
-                    ))}
+                    {[...new Set(enquiryflwdata?.map((i) => i.enquirydata[0]?.category))].map(
+                      (uniqueCity) => (
+                        <option value={uniqueCity} key={uniqueCity}>
+                          {uniqueCity}
+                        </option>
+                      )
+                    )}
                   </select>{" "}
                 </th>
                 <th scope="col" className="bor"></th>
@@ -355,20 +379,20 @@ function Quotethismonth() {
                   />{" "}
                 </th>
                 <th scope="col" className="bor">
-                  {" "}
+                 
                   <select
+                    className="vhs-table-input"
                     value={searchCity}
                     onChange={(e) => setSearchCity(e.target.value)}
                   >
-                    <option value="">Select </option>
-                    {searchResults.map((e) => (
-                      <option
-                        value={e.enquirydata[0]?.city}
-                        key={e.enquirydata[0]?.city}
-                      >
-                        {e.enquirydata[0]?.city}{" "}
-                      </option>
-                    ))}
+                    <option value="">Select</option>
+                    {[...new Set(enquiryflwdata?.map((i) => i.enquirydata[0]?.city))].map(
+                      (uniqueCity) => (
+                        <option value={uniqueCity} key={uniqueCity}>
+                          {uniqueCity}
+                        </option>
+                      )
+                    )}
                   </select>{" "}
                 </th>
 
@@ -376,7 +400,7 @@ function Quotethismonth() {
                   <input
                     className="vhs-table-input"
                     value={searchServices}
-                    onChange={(e) => setsearchServices(e.target.value)}
+                    onChange={(e) =>setsearchServices(e.target.value)}
                   />{" "}
                 </th>
 
@@ -435,12 +459,14 @@ function Quotethismonth() {
                   />{" "}
                 </th> */}
                 <th scope="col" className="bor">
-                  <select onChange={(e) => setType(e.target.value)}>
+                <select className="vhs-table-input" onChange={(e) => setType(e.target.value)}>
                     <option>Select </option>
+
                     <option value="NOT SHARED">NOT SHARED </option>
                     <option value="QUOTE SHARED">QUOTE SHARED </option>
                     <option value="CONFIRMED">CONFIRMED </option>
-                  </select>{" "}
+                  
+                  </select>
                 </th>
               </tr>
               <tr className="bg">
@@ -462,6 +488,7 @@ function Quotethismonth() {
                 <th className="bor">Type</th>
               </tr>
             </thead>
+
             <tbody>
               {currentItems.map((item) => (
                 <a onClick={() => click(item)} className="tbl">

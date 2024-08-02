@@ -30,7 +30,7 @@ function Quotetoday() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(25);
 
   // Get today's date in the format 'YYYY-MM-DD'
   const today = new Date().toISOString().split("T")[0];
@@ -172,6 +172,20 @@ function Quotetoday() {
             item.nxtfoll.toLowerCase().includes(searchNxtfoll.toLowerCase())
         );
       }
+      if (Type) {
+        results = results.filter((item) => {
+          switch (Type) {
+            case "NOT SHARED":
+              return !(item.quotefollowup[0]?.response === "Confirmed" || item.type === "QUOTE SHARED");
+            case "QUOTE SHARED":
+              return item.type === "QUOTE SHARED";
+            case "CONFIRMED":
+              return item.quotefollowup[0]?.response === "Confirmed";
+            default:
+              return true;
+          }
+        });
+      }
       // results = results.map((item) => ({
       //   ...item,
       //   category: getUniqueCategories()[item.category],
@@ -195,11 +209,19 @@ function Quotetoday() {
     searchNxtfoll,
     searchBookedby,
     searchTotal,
-    searchExecutive
+    searchExecutive,
+    Type
   ]);
 
   const click = (data) => {
-    navigate(`/quotedetails/${data.EnquiryId}`);
+    if (data) {
+      window.location.assign(`/quotedetails/?id=${data.EnquiryId}`, {
+        state: { data: data },
+      });
+    } else {
+      // Handle the case when data is null or undefined
+      // For example, show an error message or perform a different action
+    }
   };
 
   // Pagination logic
@@ -271,7 +293,7 @@ function Quotetoday() {
           </div>
 
           <table>
-            <thead>
+          <thead>
               <tr className="bg ">
                 <th scope="col" className="bor">
                   
@@ -286,7 +308,7 @@ function Quotetoday() {
                     onChange={(e) => setSearchCatagory(e.target.value)}
                   >
                     <option value="">Select</option>
-                    {[...new Set(searchResults?.map((i) => i.enquirydata[0]?.category))].map(
+                    {[...new Set(enquiryflwdata?.map((i) => i.enquirydata[0]?.category))].map(
                       (uniqueCity) => (
                         <option value={uniqueCity} key={uniqueCity}>
                           {uniqueCity}
@@ -344,7 +366,7 @@ function Quotetoday() {
                     onChange={(e) => setSearchCity(e.target.value)}
                   >
                     <option value="">Select</option>
-                    {[...new Set(searchResults?.map((i) => i.enquirydata[0]?.city))].map(
+                    {[...new Set(enquiryflwdata?.map((i) => i.enquirydata[0]?.city))].map(
                       (uniqueCity) => (
                         <option value={uniqueCity} key={uniqueCity}>
                           {uniqueCity}
@@ -417,12 +439,14 @@ function Quotetoday() {
                   />{" "}
                 </th> */}
                 <th scope="col" className="bor">
-                  <select onChange={(e) => setType(e.target.value)}>
+                <select className="vhs-table-input" onChange={(e) => setType(e.target.value)}>
                     <option>Select </option>
+
                     <option value="NOT SHARED">NOT SHARED </option>
                     <option value="QUOTE SHARED">QUOTE SHARED </option>
                     <option value="CONFIRMED">CONFIRMED </option>
-                  </select>{" "}
+                  
+                  </select>
                 </th>
               </tr>
               <tr className="bg">

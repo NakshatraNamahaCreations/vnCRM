@@ -13,7 +13,7 @@ function Servicebill() {
   const [bankdata, setbankdata] = useState([]);
   const [treatmentdata, settreatmentdata] = useState([]);
   const location = useLocation();
-  const { data, } = location.state || null;
+  const { data } = location.state || null;
 
   const apiURL = process.env.REACT_APP_API_URL;
   const imgURL = process.env.REACT_APP_IMAGE_API_URL;
@@ -71,6 +71,7 @@ function Servicebill() {
   };
 
   const date = new Date(data?.creatAt);
+  console.log("data?.creatAt", data?.creatAt);
 
   const options = {
     year: "numeric",
@@ -84,8 +85,13 @@ function Servicebill() {
 
   // Get the last 5 digits
   const last5Digits = decimalValue % 100000;
+
+  const capitalizeFirstLetter = (string) => {
+    if (!string) return string;
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
   return (
-    <div >
+    <div>
       {/* <Header />s */}
 
       <div className="row justify-content-center mt-3">
@@ -106,12 +112,19 @@ function Servicebill() {
                 <h2>GST INVOICE</h2>
                 <p>Original For Recipient</p>
                 <p>
-                  <b>Invoice No: VHS-{last5Digits}  <br />Date :</b> {formattedDate}
+                  <b>
+                    Invoice No: VHS-{last5Digits} <br />
+                    Date :
+                  </b>{" "}
+                  {data?.dateofService}
                 </p>
               </div>
             </div>
 
-            <div className=" col-12 mt-2 " style={{ display: "flex", gap: "10px" }}>
+            <div
+              className=" col-12 mt-2 "
+              style={{ display: "flex", gap: "10px" }}
+            >
               <div className="col-6 b-col">
                 <div className="" style={{ fontWeight: "bold" }}>
                   BILLED BY
@@ -120,11 +133,12 @@ function Servicebill() {
                   Vijay Home Services
                 </div>
                 <p>
-                  #1/1, 2nd Floor, Shamraj building MN Krishnarao Road Mahadevapura Outer Ring Road, Banglore 560048
+                  #1/1, 2nd Floor, Shamraj building MN Krishnarao Road
+                  Mahadevapura Outer Ring Road, Banglore 560048
                 </p>
                 <p>GSTN : 29EIXPK0545M1ZE</p>
               </div>
-              <div className="col-6 b-col" >
+              <div className="col-6 b-col">
                 <div className="" style={{ fontWeight: "bold" }}>
                   BILLED TO
                 </div>
@@ -136,7 +150,6 @@ function Servicebill() {
                   {data?.deliveryAddress?.landmark}
                 </p>
                 <p className="mb-0">{data?.customerData[0]?.mainContact}</p>
-
               </div>
             </div>
 
@@ -157,19 +170,39 @@ function Servicebill() {
                   </thead>
                   <tbody>
                     <tr>
-                      <td scope="row" className="text-center " style={{ border: "1px solid grey" }}>
+                      <td
+                        scope="row"
+                        className="text-center "
+                        style={{ border: "1px solid grey" }}
+                      >
                         {i++}
                       </td>
-                      <td scope="row" className="text-center" style={{ border: "1px solid grey" }}>
+                      <td
+                        scope="row"
+                        className="text-center"
+                        style={{ border: "1px solid grey" }}
+                      >
                         {data.category}
                       </td>
-                      <td scope="row" className="text-center " style={{ border: "1px solid grey" }}>
+                      <td
+                        scope="row"
+                        className="text-center "
+                        style={{ border: "1px solid grey" }}
+                      >
                         {data.desc}
                       </td>
 
-                      <td className="text-center" style={{ border: "1px solid grey" }}>{data?.contractType}</td>
+                      <td
+                        className="text-center"
+                        style={{ border: "1px solid grey" }}
+                      >
+                        {data?.contractType}
+                      </td>
                       {data?.contractType === "AMC" ? (
-                        <td className="text-center" style={{ border: "1px solid grey" }}>
+                        <td
+                          className="text-center"
+                          style={{ border: "1px solid grey" }}
+                        >
                           {data?.dividedDates?.map((item) => (
                             <div>
                               <p className="text-center">
@@ -182,10 +215,14 @@ function Servicebill() {
                               }
                             </p>
                           </div> */}
-
                         </td>
                       ) : (
-                        <td className="text-center" style={{ border: "1px solid grey" }}>{data?.dateofService}</td>
+                        <td
+                          className="text-center"
+                          style={{ border: "1px solid grey" }}
+                        >
+                          {data?.dateofService}
+                        </td>
                       )}
 
                       {/* {data?.contractType === "AMC" ? (
@@ -203,29 +240,33 @@ function Servicebill() {
                       )} */}
 
                       {data?.contractType === "AMC" ? (
-                        <td className="text-center" style={{ border: "1px solid grey" }}>
+                        <td
+                          className="text-center"
+                          style={{ border: "1px solid grey" }}
+                        >
                           {data?.dividedamtCharges?.map((item) => (
                             <div>
-                              <p className="text-end">{((item?.charge) / 105 * 100).toFixed(2)}</p>
+                              <p className="text-end">
+                                {((item?.charge / 105) * 100).toFixed(2)}
+                              </p>
                             </div>
                           ))}
                         </td>
                       ) : (
-                        <td className="text-center" style={{ border: "1px solid grey" }}>{((data.GrandTotal / 105) * 100).toFixed(2)}</td>
+                        <td
+                          className="text-center"
+                          style={{ border: "1px solid grey" }}
+                        >
+                          {((data.GrandTotal / 105) * 100).toFixed(2)}
+                        </td>
                       )}
                     </tr>
                   </tbody>
                 </table>
-
-
-
               </div>
             </div>
 
-
             <div className="row">
-
-
               <div className="col-sm-6 mt-4" style={{ paddingLeft: "25px" }}>
                 <div>
                   <div className="" style={{ fontWeight: "bold" }}>
@@ -284,24 +325,36 @@ function Servicebill() {
               </div>
 
               <div className="col-sm-6">
-
                 <div className="row mt-4">
-
-
-                  <div className="" style={{ textAlign: "end", paddingRight: "50px" }}>
-                    <h6> GST(5%):{(data.GrandTotal - (data.GrandTotal / 105) * 100).toFixed(2)}</h6>
-
-                    <h5 >Total : {data.GrandTotal}</h5>   </div>
+                  <div
+                    className=""
+                    style={{ textAlign: "end", paddingRight: "50px" }}
+                  >
+                    <h6>
+                      {" "}
+                      GST(5%):
+                      {(
+                        data.GrandTotal -
+                        (data.GrandTotal / 105) * 100
+                      ).toFixed(2)}{" "}
+                      Rs
+                    </h6>
+                    <h5>Total : {data.GrandTotal} Rs</h5>{" "}
+                  </div>
                   <div style={{ textAlign: "end", paddingRight: "50px" }}>
-                    <h5> Amount In Words :{" "}
+                    <h5>
+                      {" "}
+                      Amount In Words :{" "}
                       <span style={{ fontWeight: 400 }}>
-                        {numberToWords.toWords(data.serviceCharge) + " Only"}
-                      </span></h5>
+                        {capitalizeFirstLetter(
+                          numberToWords.toWords(data.serviceCharge)
+                        ) + "  rupees only"}
+                      </span>
+                    </h5>
                   </div>
                 </div>
               </div>
             </div>
-
 
             {tcdata.map((item) => (
               <div>
@@ -342,7 +395,10 @@ function Servicebill() {
             {footerimgdata.map((item) => (
               <div className="col-md-12">
                 <img
-                  src={"https://api.vijayhomeservicebengaluru.in/quotationfooterimg/" + item.footerimg}
+                  src={
+                    "https://api.vijayhomeservicebengaluru.in/quotationfooterimg/" +
+                    item.footerimg
+                  }
                   height="auto"
                   width="100%"
                 />

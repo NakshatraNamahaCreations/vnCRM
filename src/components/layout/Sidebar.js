@@ -45,6 +45,13 @@ const Sidebar = ({ children }) => {
     });
     // icon: <FaRegChartBar />,
   }
+  if (admin && admin.enquiryAdd === true) {
+    menuItem.push({
+      path: "/enquiryAdd",
+      name: "Enquiry Add",
+    });
+    // icon: <FaRegChartBar />,
+  }
   if (admin && admin.enquiryFollowup === true) {
     menuItem.push({
       path: "/enquiryfollowup",
@@ -83,6 +90,12 @@ const Sidebar = ({ children }) => {
       // icon: <FaThList />,
     });
   }
+
+  // menuItem.push({
+  //   path: "/callerdesk",
+  //   name: "Callerdesk",
+  //   // icon: <FaThList />,
+  // });
 
   if (admin && admin.runningProjects === true) {
     menuItem.push({
@@ -131,7 +144,7 @@ const Sidebar = ({ children }) => {
   }
 
   return (
-    <div className="row">
+    <div className="">
       <div className="col-md-12">
         <div style={{ width: isOpen ? "180px" : "80px" }} className="sidebar">
           <div className="top_section">
@@ -152,9 +165,9 @@ const Sidebar = ({ children }) => {
           ))}
         </div>
       </div>
-      <div className="col-md-12">
+      {/* <div className="col-md-12">
         <main style={{ width: "-webkit-fill-available" }}>{children}</main>
-      </div>
+      </div> */}
     </div>
   );
 };

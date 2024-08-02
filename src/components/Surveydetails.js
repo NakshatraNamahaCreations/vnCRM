@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Header from "./layout/Header";
 import { useLocation, useNavigate } from "react-router-dom";
-import Surveynav from "./Surveynav";
 import { Link } from "react-router-dom";
 import moment from "moment";
 
@@ -12,7 +11,6 @@ function Createquote() {
   const location = useLocation();
   const { data, sydate } = location.state;
 
-
   const [techniciandata, settechniciandata] = useState([]);
   const [vendordata, setvendordata] = useState([]);
   const apiURL = process.env.REACT_APP_API_URL;
@@ -20,7 +18,6 @@ function Createquote() {
   const [appoDate, setappoDate] = useState(
     data?.appoDate ? data?.appoDate : data?.nxtfoll
   );
-
 
   const [appoTime, setappTime] = useState(
     data.appoTime ? data.appoTime : moment().format("LT")
@@ -51,26 +48,48 @@ function Createquote() {
     gettechnician();
   }, []);
 
+  // const gettechnician = async () => {
+  //   let res = await axios.get(apiURL + "/findwithexexutivefromcrm", {
+  //     city: data.enquirydata[0].city,
+  //     category: data.enquirydata[0].category,
+  //   });
+  //   if (res.status === 200) {
+  //     const TDdata = res.data?.technician;
+  //     const filteredTechnicians = TDdata.filter((technician) => {
+  //       return technician.category.some(
+  //         (cat) => cat.name === data.enquirydata[0].category
+  //       );
+  //     });
+  //     // console.log("filteredTechnicians", filteredTechnicians);
+  //     settechniciandata(
+  //       filteredTechnicians.filter(
+  //         (i) => i.city === data.enquirydata[0].city && i.Type === "executive"
+  //       )
+  //     );
+  //     setvendordata(
+  //       filteredTechnicians.filter(
+  //         (i) => i.city === data.enquirydata[0].city && i.Type === "Vendor"
+  //       )
+  //     );
+  //   }
+  // };
+
   const gettechnician = async () => {
-    let res = await axios.get(apiURL + "/getalltechnician");
-    if (res.status === 200) {
-      const TDdata = res.data?.technician;
-      const filteredTechnicians = TDdata.filter((technician) => {
-        return technician.category.some(
-          (cat) => cat.name === data.enquirydata[0].category
-        );
+    console.log("api hit");
+    try {
+      let res = await axios.get(apiURL + "/findwithexexutivefromcrm", {
+        params: {
+          city: data.enquirydata[0].city,
+          category: data.enquirydata[0].category,
+        },
       });
-      // console.log("filteredTechnicians", filteredTechnicians);
-      settechniciandata(
-        filteredTechnicians.filter(
-          (i) => i.city === data.enquirydata[0].city && i.Type === "executive"
-        )
-      );
-      setvendordata(
-        filteredTechnicians.filter(
-          (i) => i.city === data.enquirydata[0].city && i.Type === "Vendor"
-        )
-      );
+      if (res.status === 200) {
+        console.log("res.data?.technician", res.data?.technician);
+        settechniciandata(res.data?.technician);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      // Handle error here
     }
   };
 
@@ -123,6 +142,7 @@ function Createquote() {
     let res = await axios.get(apiURL + "/getwhatsapptemplate");
     if (res.status === 200) {
       const data = res?.data?.whatsapptemplate;
+      console.log("res?.data?.whatsapptemplate", res?.data?.whatsapptemplate);
       setsreschdule(
         data?.filter((item) => item.templatename === "Survey reschedule")
       );
@@ -133,8 +153,6 @@ function Createquote() {
   useEffect(() => {
     getallslots();
   }, [data]);
-
-
 
   const getallslots = async () => {
     let res = await axios.get(apiURL + "/userapp/getslots");
@@ -147,7 +165,6 @@ function Createquote() {
   let getTemplateDatails = whatsappdata.find(
     (item) => item.templatename === "Survey assign"
   );
-
 
   const Save = async (e) => {
     e.preventDefault();
@@ -179,8 +196,6 @@ function Createquote() {
               `/surveydatatable/${sydate}/${data?.category}`
             );
           }
-
-
         }
       });
     } catch (error) {
@@ -190,6 +205,7 @@ function Createquote() {
   };
 
   const makeApiCall = async (getTemplateDatails, contactNumber, invoiceId) => {
+    console.log("yogeshpv");
     const apiURL =
       "https://wa.chatmybot.in/gateway/waunofficial/v1/api/v2/message";
     const accessToken = "c7475f11-97cb-4d52-9500-f458c1a377f4";
@@ -198,6 +214,7 @@ function Createquote() {
 
     if (!contentTemplate) {
       console.error("Content template is empty. Cannot proceed.");
+      window.location.assign(`/surveydatatable/${sydate}/${data?.category}`);
       return;
     }
     const invoiceLink = contentTemplate
@@ -227,24 +244,22 @@ function Createquote() {
         },
       },
     ];
+
     try {
-      const response = await axios.post(apiURL, requestData, {
-        headers: {
-          "access-token": accessToken,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.post(
+        "https://api.vijayhomeservicebengaluru.in/send-message",
+        {
+          mobile: contactNumber,
+          msg: convertedText,
+        }
+      );
 
       if (response.status === 200) {
-        // setWhatsappTemplate(response.data);
-        window.location.assign(
-          `/surveydatatable/${sydate}/${data?.category}`
-        );
-      } else {
-        console.error("API call unsuccessful. Status code:", response.status);
+        window.location.assign(`/surveydatatable/${sydate}/${data?.category}`);
       }
     } catch (error) {
-      console.error("Error making API call:", error);
+      console.error(error);
+      window.location.assign(`/surveydatatable/${sydate}/${data?.category}`);
     }
   };
   const reschdulewhat = async (
@@ -260,6 +275,7 @@ function Createquote() {
 
     if (!contentTemplate) {
       console.error("Content template is empty. Cannot proceed.");
+      window.location.assign(`/surveydatatable/${sydate}/${data?.category}`);
       return;
     }
     const invoiceLink = contentTemplate
@@ -296,14 +312,14 @@ function Createquote() {
 
       if (response.status === 200) {
         // setWhatsappTemplate(response.data);
-        window.location.assign(
-          `/surveydatatable/${sydate}/${data?.category}`
-        );
+        window.location.assign(`/surveydatatable/${sydate}/${data?.category}`);
       } else {
         console.error("API call unsuccessful. Status code:", response.status);
+        window.location.assign(`/surveydatatable/${sydate}/${data?.category}`);
       }
     } catch (error) {
       console.error("Error making API call:", error);
+      window.location.assign(`/surveydatatable/${sydate}/${data?.category}`);
     }
   };
 
@@ -482,10 +498,10 @@ function Createquote() {
                           <option>--select--</option>
                         )}
                         {serviceSlots?.map((slot, index) => (
-                            <option key={index} value={`${slot.startTime}`}>
-                              {`${slot.startTime} `}
-                            </option>
-                          ))}
+                          <option key={index} value={`${slot.startTime}`}>
+                            {`${slot.startTime} `}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>

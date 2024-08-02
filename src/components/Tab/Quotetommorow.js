@@ -182,6 +182,20 @@ function Quotetomorrow() {
             item.nxtfoll.toLowerCase().includes(searchNxtfoll.toLowerCase())
         );
       }
+      if (Type) {
+        results = results.filter((item) => {
+          switch (Type) {
+            case "NOT SHARED":
+              return !(item.quotefollowup[0]?.response === "Confirmed" || item.type === "QUOTE SHARED");
+            case "QUOTE SHARED":
+              return item.type === "QUOTE SHARED";
+            case "CONFIRMED":
+              return item.quotefollowup[0]?.response === "Confirmed";
+            default:
+              return true;
+          }
+        });
+      }
       // results = results.map((item) => ({
       //   ...item,
       //   category: getUniqueCategories()[item.category],
@@ -205,11 +219,16 @@ function Quotetomorrow() {
     searchNxtfoll,
     searchBookedby,
     searchTotal,
-    searchExecutive
+    searchExecutive,
+    Type
   ]);
 
   const click = (data) => {
-    navigate(`/quotedetails/${data.EnquiryId}`);
+    if (data) {
+      window.location.assign(`/quotedetails/?id=${data.EnquiryId}`, {
+        state: { data: data },
+      });
+    }
   };
 
   // Pagination logic

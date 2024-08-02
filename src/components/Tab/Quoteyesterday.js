@@ -38,13 +38,12 @@ function Quoteyesterday() {
   const [searchBookedby, setsearchBookedby] = useState("");
   const [Type, setType] = useState("");
 
-  console.log("enquiryflwdata--", enquiryflwdata);
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(25);
 
-  // Get today's date in the format 'YYYY-MM-DD'
-  const today = new Date().toISOString().split("T")[0];
+
   useEffect(() => {
     getenquiryadd();
   }, []);
@@ -183,6 +182,20 @@ function Quoteyesterday() {
             item.nxtfoll.toLowerCase().includes(searchNxtfoll.toLowerCase())
         );
       }
+      if (Type) {
+        results = results.filter((item) => {
+          switch (Type) {
+            case "NOT SHARED":
+              return !(item.quotefollowup[0]?.response === "Confirmed" || item.type === "QUOTE SHARED");
+            case "QUOTE SHARED":
+              return item.type === "QUOTE SHARED";
+            case "CONFIRMED":
+              return item.quotefollowup[0]?.response === "Confirmed";
+            default:
+              return true;
+          }
+        });
+      }
       // results = results.map((item) => ({
       //   ...item,
       //   category: getUniqueCategories()[item.category],
@@ -198,7 +211,7 @@ function Quoteyesterday() {
     searchAddress,
     searchReference,
     searchCity,
-
+    Type,
     searchExecutive,
     searchStaff,
     searchResponse,
@@ -296,7 +309,7 @@ function Quoteyesterday() {
                     onChange={(e) => setSearchCatagory(e.target.value)}
                   >
                     <option value="">Select</option>
-                    {[...new Set(searchResults?.map((i) => i.enquirydata[0]?.category))].map(
+                    {[...new Set(enquiryflwdata?.map((i) => i.enquirydata[0]?.category))].map(
                       (uniqueCity) => (
                         <option value={uniqueCity} key={uniqueCity}>
                           {uniqueCity}
@@ -354,7 +367,7 @@ function Quoteyesterday() {
                     onChange={(e) => setSearchCity(e.target.value)}
                   >
                     <option value="">Select</option>
-                    {[...new Set(searchResults?.map((i) => i.enquirydata[0]?.city))].map(
+                    {[...new Set(enquiryflwdata?.map((i) => i.enquirydata[0]?.city))].map(
                       (uniqueCity) => (
                         <option value={uniqueCity} key={uniqueCity}>
                           {uniqueCity}
@@ -427,12 +440,14 @@ function Quoteyesterday() {
                   />{" "}
                 </th> */}
                 <th scope="col" className="bor">
-                  <select onChange={(e) => setType(e.target.value)}>
+                <select className="vhs-table-input" onChange={(e) => setType(e.target.value)}>
                     <option>Select </option>
+
                     <option value="NOT SHARED">NOT SHARED </option>
                     <option value="QUOTE SHARED">QUOTE SHARED </option>
                     <option value="CONFIRMED">CONFIRMED </option>
-                  </select>{" "}
+                  
+                  </select>
                 </th>
               </tr>
               <tr className="bg">

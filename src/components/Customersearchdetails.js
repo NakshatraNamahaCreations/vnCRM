@@ -40,12 +40,14 @@ function Customersearchdetails() {
   const [whatsappTemplate, setWhatsappTemplate] = useState("");
   const [whatsappdata, setwhatsappdata] = useState([]);
   const [customerAddressdata, setcustomerAddressdata] = useState([]);
-  const[complwtsdata,setcomplaintwtsdata]=useState([]);
+  const [complwtsdata, setcomplaintwtsdata] = useState([]);
   const [houseNumber, setHouseNumber] = useState("");
   const [streetName, setStreetName] = useState("");
   const [city, setCity] = useState("");
   const [Address, setAddress] = useState("");
   const [pincode, setPincode] = useState("");
+  const [latitude, setlatitude] = useState("");
+  const [longitude, setlongitude] = useState("");
   const [landmark, setLankmark] = useState("");
   const [selectedSlot, setSelectedSlot] = useState("");
   const [serviceSlots, setServiceSlots] = useState([]);
@@ -63,7 +65,6 @@ function Customersearchdetails() {
   const handleClose2 = () => setShow2(false);
   const handleShow2 = () => setShow2(true);
 
-
   const [selectedAddress, setSelectedAddress] = useState("");
   const [category, setcategory] = useState(editenable.category);
 
@@ -72,8 +73,8 @@ function Customersearchdetails() {
 
   const AddComp = (item) => {
     setcomplaintdata(item);
-    setShow2(true)
-  }
+    setShow2(true);
+  };
   const handleCategoryChange = (e) => {
     setcategory(e.target.value);
   };
@@ -84,7 +85,6 @@ function Customersearchdetails() {
     const rowData = JSON.parse(rowDataString);
     setcustomerdata(rowData);
     // Use rowData in your component
-
   }, [id]);
 
   const handleAddressSelect = (address) => {
@@ -104,7 +104,6 @@ function Customersearchdetails() {
       platNo: item.rbhf,
       userId: customerdata?._id,
     });
-
   };
 
   const handleAddressSelect1 = (item) => {
@@ -226,7 +225,6 @@ function Customersearchdetails() {
 
     dividedDates.push(date);
   }
-  
 
   const communityPercentage = (serviceCharge * oneCommunity.percentage) / 100; //this line
   const remainingAmt = oneCommunity.percentage
@@ -295,8 +293,6 @@ function Customersearchdetails() {
   };
 
   const addtreatmentdetails = async (e) => {
-    e.preventDefault();
-
     if (!contractType || !treatment) {
       alert("Fill all feilds");
     } else {
@@ -317,6 +313,10 @@ function Customersearchdetails() {
               email: customerdata?.email,
               approach: customerdata?.approach,
             },
+
+            latitude: latitude,
+            longitude: longitude,
+
             dividedDates: dividedDates,
             dividedamtDates: dividedamtDates,
             dividedamtCharges: dividedamtCharges,
@@ -335,13 +335,13 @@ function Customersearchdetails() {
             deliveryAddress: !newAdd
               ? selectedAddress
               : {
-                userId: customerdata?._id,
-                address: Address,
-                saveAs: streetName,
-                landmark: landmark,
+                  userId: customerdata?._id,
+                  address: Address,
+                  saveAs: streetName,
+                  landmark: landmark,
 
-                platNo: houseNumber,
-              },
+                  platNo: houseNumber,
+                },
             desc: desc,
             city: customerdata?.city,
             serviceFrequency: serviceFrequency,
@@ -364,6 +364,7 @@ function Customersearchdetails() {
 
         await axios(config).then(function (response) {
           if (response.status === 200) {
+            setShow1(false);
             // Assuming you want the first item from whatsappdata for the API call
             const selectedResponse = whatsappdata[0];
             makeApiCall(selectedResponse, customerdata?.mainContact);
@@ -377,12 +378,11 @@ function Customersearchdetails() {
         // }
       } catch (error) {
         console.error(error.message);
+        setShow1(false);
         alert(" Not Added", error.message);
       }
     }
   };
-
-
 
   const addcomplaintserverice = async (e) => {
     // e.preventDefault();
@@ -407,14 +407,18 @@ function Customersearchdetails() {
               email: customerdata?.email,
               approach: customerdata?.approach,
             },
+            markerCoordinate: {
+              latitude: latitude,
+              longitude: longitude,
+            },
             dividedDates: dividedDates,
             dividedamtDates: dividedamtDates,
             dividedamtCharges: dividedamtCharges,
-            dCategory:complaintdata?.category,
+            dCategory: complaintdata?.category,
             userId: customerdata?._id,
-            category:complaintdata?.category,
+            category: complaintdata?.category,
             contractType: complaintdata?.contractType,
-            service:complaintdata?.service,
+            service: complaintdata?.service,
             GrandTotal: "0",
             serviceID: serviceId,
             slots: selectedSlot,
@@ -435,16 +439,14 @@ function Customersearchdetails() {
             communityId: oneCommunity._id, //this line
             oneCommunity: communityPercentage, //thi line
             BackofficeExecutive: admin.displayname,
-            complaint:"yes",
-            ctechName:complaintdata?.dsrdata[0]?.TechorPMorVendorName
-       
+            complaint: "yes",
+            ctechName: complaintdata?.dsrdata[0]?.TechorPMorVendorName,
           },
         };
 
-       
-
         await axios(config).then(function (response) {
           if (response.status === 200) {
+            setShow1(false);
             // Assuming you want the first item from whatsappdata for the API call
             const selectedResponse = complwtsdata[0];
             complaintwts(selectedResponse, customerdata?.mainContact);
@@ -467,8 +469,6 @@ function Customersearchdetails() {
     try {
       let res = await axios.get(apiURL + `/mybookusingID/${id}`);
       if (res.status === 200) {
-       
-
         settreatmentdata(res.data?.bookings);
       }
     } catch (error) {
@@ -616,11 +616,6 @@ function Customersearchdetails() {
   let i = 1;
 
   const makeApiCall = async (selectedResponse, contactNumber) => {
-    
-    const apiURL =
-      "https://wa.chatmybot.in/gateway/waunofficial/v1/api/v2/message";
-    const accessToken = "c7475f11-97cb-4d52-9500-f458c1a377f4";
-
     const contentTemplate = selectedResponse?.template || "";
 
     if (!contentTemplate) {
@@ -633,7 +628,10 @@ function Customersearchdetails() {
       customerdata?.customerName
     );
     const serviceName = content.replace(/\{Service_name\}/g, treatment);
-    const slotTiming = serviceName.replace(/\{Slot_timing\}/g, "");
+    const slotTiming = serviceName.replace(
+      /\{Slot_timing\}/g,
+      selectedSlot ? selectedSlot : ""
+    );
     const serivePrice = slotTiming.replace(
       /\{Service_amount\}/g,
       serviceCharge
@@ -653,37 +651,24 @@ function Customersearchdetails() {
       .replace(/<strong>(.*?)<\/strong>/g, "<b>$1</b>")
       .replace(/<[^>]*>/g, "");
 
-    const requestData = [
-      {
-        dst: "91" + contactNumber,
-        messageType: "0",
-        textMessage: {
-          content: convertedText,
-        },
-      },
-    ];
     try {
-      const response = await axios.post(apiURL, requestData, {
-        headers: {
-          "access-token": accessToken,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.post(
+        "https://api.vijayhomeservicebengaluru.in/send-message",
+        {
+          mobile: contactNumber,
+          msg: convertedText,
+        }
+      );
 
       if (response.status === 200) {
-        setWhatsappTemplate(response.data);
-
         window.location.reload("");
-      } else {
-        console.error("API call unsuccessful. Status code:", response.status);
       }
     } catch (error) {
-      console.error("Error making API call:", error);
+      console.error(error);
     }
   };
- 
+
   const complaintwts = async (selectedResponse, contactNumber) => {
-    
     const apiURL =
       "https://wa.chatmybot.in/gateway/waunofficial/v1/api/v2/message";
     const accessToken = "c7475f11-97cb-4d52-9500-f458c1a377f4";
@@ -691,10 +676,10 @@ function Customersearchdetails() {
     const contentTemplate = selectedResponse?.template || "";
 
     const invoiceLink = contentTemplate
-    .replace(/\{Customer_name\}/g,  customerdata?.customerName)
-    .replace(/\{Service_name\}/g, complaintdata?.service)
-    .replace(/\{Service_date\}/g, complaintdata?.dateofService)
-   
+      .replace(/\{Customer_name\}/g, customerdata?.customerName)
+      .replace(/\{Service_name\}/g, complaintdata?.service)
+      .replace(/\{Service_date\}/g, complaintdata?.dateofService);
+
     // Replace <p> with line breaks and remove HTML tags
     const convertedText = invoiceLink
       .replace(/<p>/g, "\n")
@@ -1110,25 +1095,48 @@ function Customersearchdetails() {
                         </div>
                       </>
                     )}
-
-                    <div className="col-md-4 mt-2">
-                      <div className="vhs-input-label">Slots</div>
-                      <select
-                        className="col-md-12 vhs-input-value"
-                        onChange={(e) => setSelectedSlot(e.target.value)}
-                        name="material"
-                      >
-                        <option>--select--</option>
-                        {serviceSlots
-                          ?.filter(
-                            (slot) => slot.slotCity === customerdata?.city // Filter based on city match
-                          )
-                          .map((slot, index) => (
-                            <option key={index} value={`${slot.startTime}`}>
-                              {`${slot.startTime} `}
-                            </option>
-                          ))}
-                      </select>
+                    <div className="row mt-2">
+                      <div className="col-md-4 pt-3">
+                        <div className="vhs-input-label">Slots</div>
+                        <select
+                          className="col-md-12 vhs-input-value"
+                          onChange={(e) => setSelectedSlot(e.target.value)}
+                          name="material"
+                        >
+                          <option>--select--</option>
+                          {serviceSlots
+                            ?.filter(
+                              (slot) => slot.slotCity === customerdata?.city // Filter based on city match
+                            )
+                            .map((slot, index) => (
+                              <option key={index} value={`${slot.startTime}`}>
+                                {`${slot.startTime} `}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                      <div className="col-md-4 pt-3">
+                        <div className="vhs-input-label">latitude</div>
+                        <input
+                          type="text"
+                          name="latitude"
+                          className="col-md-12 vhs-input-value"
+                          onChange={(e) => setlatitude(e.target.value)}
+                          defaultValue={editenable.latitude}
+                        />
+                      </div>
+                      <div className="col-md-4 pt-3">
+                        <div className="vhs-input-label">longitude</div>
+                        <textarea
+                          type="text"
+                          name="longitude"
+                          className="col-md-12 vhs-input-value"
+                          onChange={(e) => setlongitude(e.target.value)}
+                          rows={5}
+                          cols={10}
+                          defaultValue={editenable.longitude}
+                        />
+                      </div>
                     </div>
 
                     <div className="col-md-4 pt-3 mt-4 justify-content-center">
@@ -1427,9 +1435,7 @@ function Customersearchdetails() {
                       <td>{item.dateofService}</td>
                     )}
                     <td>
-                      {item.communityId
-                        ? item.dividedCharges
-                        : item.serviceCharge}
+                      {item.communityId ? item.dividedCharges : item.GrandTotal}
                     </td>
 
                     <td>{item.desc}</td>
@@ -1529,11 +1535,18 @@ function Customersearchdetails() {
                       <td> </td>
                       <td>
                         {item.dsrdata[0]?.TechorPMorVendorName} <br />
-                        {moment(item.dsrdata[0]?.endJobTime).format("DD-MM-YYYY ,LT")}{" "}
+                        {moment(item.dsrdata[0]?.endJobTime).format(
+                          "DD-MM-YYYY ,LT"
+                        )}{" "}
                       </td>
                       <td> </td>
                       <td>{item.desc}</td>
-                      <td style={{ color: "darkred" }} onClick={() => AddComp(item)}>Add Complaint</td>
+                      <td
+                        style={{ color: "darkred" }}
+                        onClick={() => AddComp(item)}
+                      >
+                        Add Complaint
+                      </td>
                     </tr>
                   ))}
               </tbody>
@@ -1653,7 +1666,7 @@ function Customersearchdetails() {
                   type="text"
                   className="col-md-12 vhs-input-value"
                   onChange={(e) => setHouseNumber(e.target.value)}
-                // value={rbhf}
+                  // value={rbhf}
                 />
               </div>
             </div>
@@ -1664,7 +1677,7 @@ function Customersearchdetails() {
                   type="text"
                   className="col-md-12 vhs-input-value"
                   onChange={(e) => setStreetName(e.target.value)}
-                // value={cnap}
+                  // value={cnap}
                 />
               </div>
             </div>
@@ -1675,7 +1688,7 @@ function Customersearchdetails() {
                   type="text"
                   className="col-md-12 vhs-input-value"
                   onChange={(e) => setLankmark(e.target.value)}
-                // value={lnf}
+                  // value={lnf}
                 />
               </div>
             </div>
@@ -1687,7 +1700,7 @@ function Customersearchdetails() {
                   type="text"
                   className="col-md-12 vhs-input-value"
                   onChange={(e) => setAddress(e.target.value)}
-                // value={mainarea}
+                  // value={mainarea}
                 />
               </div>
             </div>
@@ -1781,7 +1794,6 @@ function Customersearchdetails() {
         </Modal.Footer>
       </Modal>
 
-
       <Modal
         show={show2}
         onHide={handleClose2}
@@ -1809,12 +1821,9 @@ function Customersearchdetails() {
                   name="material"
                   value={complaintdata?.category}
                 >
-
-
                   <option value={complaintdata?.category}>
                     {complaintdata.category}
                   </option>
-
                 </select>
               </div>
               <div className="col-md-4">
@@ -1828,9 +1837,9 @@ function Customersearchdetails() {
                   onChange={(e) => setcontractType(e.target.value)}
                   value={complaintdata?.contractType}
                 >
-
-                  <option value={complaintdata?.contractType}>{complaintdata?.contractType}</option>
-
+                  <option value={complaintdata?.contractType}>
+                    {complaintdata?.contractType}
+                  </option>
                 </select>
               </div>
 
@@ -1841,22 +1850,19 @@ function Customersearchdetails() {
                 </div>
                 <select
                   className="col-md-12 vhs-input-value"
-
                   onChange={(e) => settreatment(e.target.value)}
                   value={complaintdata?.service}
                 >
                   <option value={complaintdata?.service}>
                     {complaintdata?.service}
                   </option>
-
                 </select>
               </div>
             </div>
             <div className="row mt-2">
               <div className="col-md-4 pt-3">
                 <div className="vhs-input-label">
-                  Service Charge{" "}
-                  <span className="text-danger">*</span>
+                  Service Charge <span className="text-danger">*</span>
                 </div>
                 <input
                   type="number"
@@ -1867,15 +1873,12 @@ function Customersearchdetails() {
                 />
               </div>
               <div className="col-md-4 pt-3">
-                <div className="vhs-input-label">
-                  Date of Service
-                </div>
+                <div className="vhs-input-label">Date of Service</div>
                 <input
-                  type="date" 
+                  type="date"
                   name="qty"
                   className="col-md-12 vhs-input-value"
                   onChange={(e) => setdateofService(e.target.value)}
-                 
                 />
               </div>
               <div className="col-md-4 pt-3">
@@ -1887,16 +1890,15 @@ function Customersearchdetails() {
                   onChange={(e) => setdesc(e.target.value)}
                   rows={5}
                   cols={10}
-
                 />
               </div>
             </div>
           </>
         </Modal.Body>
         <Modal.Footer>
-
-          <Button onClick={addcomplaintserverice} variant="danger">Add complaint</Button>
-
+          <Button onClick={addcomplaintserverice} variant="danger">
+            Add complaint
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>

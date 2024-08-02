@@ -58,7 +58,7 @@ function Quotecall() {
 
   const totalCount = calculateTotalCount(data);
   return (
-    <div>
+    <div className="web">
       <Header />
       <Quotefollowupnav />
 

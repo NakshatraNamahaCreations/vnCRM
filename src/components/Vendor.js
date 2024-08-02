@@ -517,6 +517,8 @@ function Vendor() {
 
       {/* model for edit user data and update password ============================================*/}
       <Modal
+       size="lg"
+       aria-labelledby="example-modal-sizes-title-lg"
         show={show}
         onHide={handleClose}
         backdrop="dynamic"

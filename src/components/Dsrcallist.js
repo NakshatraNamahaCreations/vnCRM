@@ -11,21 +11,22 @@ function Dsrcallist() {
 
   const { date, category } = useParams();
   // console
-  const currentdate = new Date()
-  const formattedDate = moment(currentdate).format("YYYY-MM-DD")
-
+  const currentdate = new Date();
+  const formattedDate = moment(currentdate).format("YYYY-MM-DD");
 
   const comparedate = formattedDate === date;
 
-
   function name() {
     if (formattedDate === date) {
-      return true
+      return true;
     } else {
-      return false
+      return false;
     }
   }
-  const yokesh = name()
+  const yokesh = name();
+  useEffect(() => {
+    getAlldata1();
+  }, []);
 
   const [treatmentData, settreatmentData] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
@@ -78,8 +79,7 @@ function Dsrcallist() {
 
   useEffect(() => {
     getAlldata();
-
-  }, [treatmentData]);
+  }, []);
 
   const getAlldata = async () => {
     try {
@@ -93,6 +93,18 @@ function Dsrcallist() {
     }
   };
 
+  const [manualcrmdata, setmanualcrmdata] = useState([]);
+  const getAlldata1 = async () => {
+    try {
+      const res = await axios.get(apiURL + `/getmanuljobfromcrmdata`);
+
+      if (res.status === 200) {
+        setmanualcrmdata(res.data.data);
+      }
+    } catch (error) {
+      // Handle error
+    }
+  };
 
   useEffect(() => {
     async function filterResults() {
@@ -199,6 +211,16 @@ function Dsrcallist() {
     searchpaymentMode,
     searchTechName,
   ]);
+  let TTnameValue = null;
+  let vCancel = null;
+  const passfunction1 = (sId) => {
+    const filt = manualcrmdata?.filter((i) => i.serviceId == sId?._id);
+
+    TTnameValue = filt[0];
+    vCancel = filt[0]?.vCancel;
+
+    return TTnameValue;
+  };
 
   const passfunction = (sId) => {
     const filt = dsrdata1.filter(
@@ -208,6 +230,7 @@ function Dsrcallist() {
 
     return TTnameValue;
   };
+
   useEffect(() => {
     SERVICESTARTED();
   }, []);
@@ -254,7 +277,6 @@ function Dsrcallist() {
     return filterpaymentmde[0]?.paymentType;
   };
 
-  
   const returndata = (data) => {
     const dateToMatch = new Date(date);
     const matchingData = [];
@@ -262,18 +284,20 @@ function Dsrcallist() {
     let charge = 0;
     data.dividedamtDates.forEach((dateObj, index) => {
       const dividedDate = new Date(dateObj.date);
-      console.log("dividedDate.getDate() === dateToMatch.getDate()",dividedDate.getDate() === dateToMatch.getDate())
+      console.log(
+        "dividedDate.getDate() === dateToMatch.getDate()",
+        dividedDate.getDate() === dateToMatch.getDate()
+      );
       if (dividedDate.getDate() === dateToMatch.getDate()) {
         matchingData.push({
           date: dateObj.date,
-          charge: data.dividedamtCharges[index].charge,
+          charge: data?.dividedamtCharges[index]?.charge,
         });
-      }else{
-
+      } else {
       }
     });
 
-    return matchingData[0]?.charge ?matchingData[0]?.charge :0;
+    return matchingData[0]?.charge ? matchingData[0]?.charge : 0;
   };
 
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -297,8 +321,8 @@ function Dsrcallist() {
           return item?.dsrdata[0]?.startJobTime; // Filter for "Service Started"
         case "SCOMpleted":
           return item?.dsrdata[0]?.endJobTime; // Filter for "Service Completed"
-          case "DELAY":
-            return item?.dsrdata[0]?.endJobTime; // Filter for "Service delay"
+        case "DELAY":
+          return item?.dsrdata[0]?.endJobTime; // Filter for "Service delay"
         case "ASSIGNTECH":
           return (
             item?.dsrdata[0]?.jobComplete !== "YES" &&
@@ -317,26 +341,24 @@ function Dsrcallist() {
   const SERVICEdelay = (selectedData) => {
     // Check if selectedData is defined
     if (!yokesh == true) {
-
       return;
     }
 
-    const givenDate = moment(date, 'YYYY-MM-DD');
+    const givenDate = moment(date, "YYYY-MM-DD");
 
     // Get the current date
     const currentDate = moment();
 
-    const isPast = givenDate.isBefore(currentDate, 'day');
-
+    const isPast = givenDate.isBefore(currentDate, "day");
 
     if (selectedData?.dsrdata[0]?.startJobTime) {
-      return
+      return;
     } else {
       const selectedSlotText = selectedData?.selectedSlotText;
 
       if (!selectedSlotText) {
         // Handle the case where the time range is not available
-        console.log('Time range not found for the selected service.');
+        console.log("Time range not found for the selected service.");
         return false; // or handle it accordingly
       }
 
@@ -344,10 +366,10 @@ function Dsrcallist() {
       const currentMoment = moment();
 
       // Extract start and end times from the selected slot text
-      const [startTime, endTime] = selectedSlotText?.split(' - ');
+      const [startTime, endTime] = selectedSlotText?.split(" - ");
 
       // Parse the start time using moment
-      const slotStartTime = moment(startTime, 'hA');
+      const slotStartTime = moment(startTime, "hA");
 
       // Compare current time with the selected time slot
       const isPast = currentMoment.isAfter(slotStartTime);
@@ -355,11 +377,7 @@ function Dsrcallist() {
       // Return true if the selected slot is past the current time, otherwise false
       return isPast;
     }
-
   };
-
-
-
 
   // const openNewTab = () => {
   //   const url = `/dsrdetails?data=${encodeURIComponent(selectedData)}&data1=${encodeURIComponent(date)}&TTname=${encodeURIComponent(passfunction(selectedData))}`;
@@ -368,7 +386,6 @@ function Dsrcallist() {
   //     newTab.focus();
   //   }
   // };
-
 
   return (
     <div className="web">
@@ -633,17 +650,16 @@ function Dsrcallist() {
                         SERVICECOMPLETEDBYOP(selectedData) === "YES"
                           ? "#b660ff87"
                           : SERVICECOMPLETED(selectedData)
-                            ? "#4caf50ba"
-                            : SERVICECANCLE(selectedData) === "CANCEL"
-                              ? "#f38981"
-
-                              : SERVICEdelay(selectedData)
-                                ? "#21e0f38c"
-                                : SERVICESTARTED(selectedData)
-                                  ? "#ffeb3b70"
-                                  : passfunction(selectedData)
-                                    ? "darkgrey"
-                                    : "",
+                          ? "#4caf50ba"
+                          : SERVICECANCLE(selectedData) === "CANCEL"
+                          ? "#f38981"
+                          : SERVICEdelay(selectedData)
+                          ? "#21e0f38c"
+                          : SERVICESTARTED(selectedData)
+                          ? "#ffeb3b70"
+                          : passfunction(selectedData)
+                          ? "darkgrey"
+                          : "",
                     }}
                   >
                     <Link
@@ -657,7 +673,9 @@ function Dsrcallist() {
                     >
                       <td>{index + 1}</td>
                       {/* <td>{selectedData.category}</td> */}
-                      <td>{date} {SERVICEdelay(selectedData)}</td>
+                      <td>
+                        {date} {SERVICEdelay(selectedData)}
+                      </td>
 
                       <td>{selectedData?.selectedSlotText}</td>
 
@@ -687,8 +705,25 @@ function Dsrcallist() {
                             {selectedData?.dsrdata[0]?.TechorPMorVendorName}
                           </p>
                         )} */}
-
-                        {passfunction(selectedData)}
+                        {passfunction(selectedData) ? (
+                          passfunction(selectedData)
+                        ) : passfunction1(selectedData)
+                            ?.TechorPMorVendorName ? (
+                          <p
+                            style={{
+                              background:
+                                passfunction1(selectedData)?.vCancel ===
+                                "cancel"
+                                  ? "red"
+                                  : "orange",
+                            }}
+                          >
+                            M ={" "}
+                            {passfunction1(selectedData)?.TechorPMorVendorName}
+                          </p>
+                        ) : (
+                          ""
+                        )}
 
                         {selectedData?.dsrdata[0]?.Tcanceldate && (
                           <>
@@ -707,7 +742,6 @@ function Dsrcallist() {
                             </p>
                           </>
                         )}
-
                         {selectedData?.dsrdata[0]?.rescheduledate && (
                           <>
                             <p
@@ -733,17 +767,15 @@ function Dsrcallist() {
 
                       <td>{selectedData?.service}</td>
 
-                    
-
-                        <td>
-                          {selectedData?.contractType === "AMC"
+                      <td>
+                        {selectedData?.contractType === "AMC"
+                          ? returndata(selectedData)
                             ? returndata(selectedData)
-                              ? returndata(selectedData)
-                              : "0"
-                            : selectedData.GrandTotal}
-                        </td>
-                    
-                      {selectedData?.type === "userapp" ? (
+                            : "0"
+                          : selectedData.GrandTotal}
+                      </td>
+
+                      {selectedData.paymentMode ? (
                         <td>{selectedData.paymentMode}</td>
                       ) : (
                         <td>{SERVICEMode(selectedData)}</td>

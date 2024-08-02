@@ -59,7 +59,7 @@ function Quotefollowupnav() {
               Not interested
             </NavLink>
           </li>
-          <li>
+          {/* <li>
             <NavLink to="/quotesend" activeClassName="active">
               Send Template
             </NavLink>
@@ -68,7 +68,7 @@ function Quotefollowupnav() {
             <NavLink to="/surveycancel" activeClassName="active">
               Todays Scheduled Templates
             </NavLink>
-          </li>
+          </li> */}
         </ul>
       </div>
     </div>

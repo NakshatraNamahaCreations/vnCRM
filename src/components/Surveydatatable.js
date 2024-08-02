@@ -9,6 +9,7 @@ import Modal from "react-bootstrap/Modal";
 import moment from "moment";
 
 function Surveydatatable() {
+  const admin = JSON.parse(sessionStorage.getItem("admin"));
   const [filteredData, setFilteredData] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [searchCatagory, setSearchCatagory] = useState("");
@@ -62,20 +63,17 @@ function Surveydatatable() {
     getenquiry();
   }, []);
 
-
   const getenquiry = async () => {
     try {
-      const res = await axios.post(apiURL + "/getsurveyaggredata", {
+      const res = await axios.post(apiURL + "/getsurveynewaggredata", {
         category: category,
         date: date,
+        city: admin.city,
       });
 
       if (res.status === 200) {
         const fd = res.data?.enquiryfollowup;
-
-        // const filteredData = fd.filter(
-        //   (entry) => entry.category === category && entry.nxtfoll === date
-        // );
+        console.log(" res.data?.enquiryfollowup", res.data?.enquiryfollowup);
 
         setFilteredData(fd);
         setSearchResults(fd);
@@ -101,22 +99,17 @@ function Surveydatatable() {
   // Parse the JSON string back into an object
   var adminObject = JSON.parse(adminData);
 
-
   const [srcancelwht, setscancel] = useState([]);
 
   useEffect(() => {
     getwhatsapptemplate();
   }, []);
 
-
   const getwhatsapptemplate = async () => {
     let res = await axios.get(apiURL + "/getwhatsapptemplate");
     if (res.status === 200) {
       const data = res?.data?.whatsapptemplate;
-      setscancel(
-        data?.filter((item) => item.templatename === "Survey cancel")
-      );
-     
+      setscancel(data?.filter((item) => item.templatename === "Survey cancel"));
     }
   };
 
@@ -142,7 +135,6 @@ function Surveydatatable() {
         };
         const response = await axios(config);
         if (response.status === 200) {
-         
           makeApiCall(srcancelwht[0], showPopup?.enquirydata[0]?.mobile);
         }
       } catch (error) {
@@ -303,7 +295,7 @@ function Surveydatatable() {
     searchAppoDateTime,
     searchNote,
     searchTechnician,
-    searchType
+    searchType,
   ]);
 
   let i = 1;
@@ -325,7 +317,6 @@ function Surveydatatable() {
     setCurrentPage(selectedPage);
   };
 
-
   const makeApiCall = async (getTemplateDatails, contactNumber, invoiceId) => {
     const apiURL =
       "https://wa.chatmybot.in/gateway/waunofficial/v1/api/v2/message";
@@ -338,13 +329,12 @@ function Surveydatatable() {
       return;
     }
 
-    const googleform="https://docs.google.com/forms/d/e/1FAIpQLSd5Dk_Ie_NZjni1alGU5I8nkEpJ_Qb4_eQsSnfBSRYve6eS5g/viewform"
+    const googleform =
+      "https://docs.google.com/forms/d/e/1FAIpQLSd5Dk_Ie_NZjni1alGU5I8nkEpJ_Qb4_eQsSnfBSRYve6eS5g/viewform";
     const invoiceLink = contentTemplate
       .replace(/\{Customer_name\}/g, showPopup?.enquirydata[0].name)
       .replace(/\{survey_date\}/g, showPopup?.nxtfoll)
-      .replace(/\{google Form\}/g, googleform)
- 
-  
+      .replace(/\{google Form\}/g, googleform);
 
     // Replace <p> with line breaks and remove HTML tags
     const convertedText = invoiceLink
@@ -373,7 +363,6 @@ function Surveydatatable() {
       });
 
       if (response.status === 200) {
-       
         window.location.reload(`surveydatatable/${date}/${category}`);
       } else {
         console.error("API call unsuccessful. Status code:", response.status);
@@ -518,7 +507,7 @@ function Surveydatatable() {
                   </select>{" "}
                 </th>
                 <th className="bor">
-                <input
+                  <input
                     className="vhs-table-input"
                     value={searchExecutive}
                     onChange={(e) => setSearchExecutive(e.target.value)}
@@ -551,19 +540,19 @@ function Surveydatatable() {
                 <th className="bor"></th>
                 <th className="bor"></th>
                 <th className="bor">
-                <select
-                   value={searchType}
-                   onChange={(e) => setSearchType(e.target.value)}
-                  className="vhs-table-input"
-                >
-                  <option>Select</option>
-                  <option value="NOT ASSIGNED">NOT ASSIGNED</option>
-                  <option value="QUOTE SHARED">QUOTE SHARED</option>
-                  <option value="ASSIGNED FOR SURVEY">ASSIGNED FOR SURVEY</option>
-                  <option value="QUOTE GENERATED">QUOTE GENERATED</option>
-
-
-                </select>{" "}
+                  <select
+                    value={searchType}
+                    onChange={(e) => setSearchType(e.target.value)}
+                    className="vhs-table-input"
+                  >
+                    <option>Select</option>
+                    <option value="NOT ASSIGNED">NOT ASSIGNED</option>
+                    <option value="QUOTE SHARED">QUOTE SHARED</option>
+                    <option value="ASSIGNED FOR SURVEY">
+                      ASSIGNED FOR SURVEY
+                    </option>
+                    <option value="QUOTE GENERATED">QUOTE GENERATED</option>
+                  </select>{" "}
                 </th>
 
                 <th className="bor"></th>
@@ -602,7 +591,9 @@ function Surveydatatable() {
                   className="trnew"
                   style={{
                     backgroundColor:
-                      item.treatmentData.length > 0
+                      item.treatmentData &&
+                      item.treatmentData.length > 0 &&
+                      item.treatmentData[0].length > 0
                         ? "#dde9fd"
                         : item.technicianname
                         ? "#ffb9798f"
@@ -611,7 +602,7 @@ function Surveydatatable() {
                 >
                   <Link
                     to="/surveydetails"
-                    state={{ data: item,sydate:date }}
+                    state={{ data: item, sydate: date }}
                     style={{
                       display: "contents",
                       border: "1px solid gray ",
@@ -646,12 +637,15 @@ function Surveydatatable() {
                     <td>{item.enquirydata[0]?.intrestedfor}</td>
 
                     <td>
-                      {item.treatmentData.length > 0
+                      {item.treatmentData &&
+                      item.treatmentData.length > 0 &&
+                      item.treatmentData[0].length > 0
                         ? "QUOTE GENERATED"
                         : item.technicianname
                         ? "ASSIGNED FOR SURVEY"
                         : "NOT ASSIGNED"}
                     </td>
+
                     <td>
                       {item.reasonForCancel} <br />
                       {item.adminname} <br />
